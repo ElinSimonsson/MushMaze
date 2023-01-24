@@ -14,6 +14,14 @@
 		3F136768297FE6F6005B8666 /* MushMazeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F136767297FE6F6005B8666 /* MushMazeTests.swift */; };
 		3F136772297FE6F6005B8666 /* MushMazeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F136771297FE6F6005B8666 /* MushMazeUITests.swift */; };
 		3F136774297FE6F6005B8666 /* MushMazeUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F136773297FE6F6005B8666 /* MushMazeUITestsLaunchTests.swift */; };
+		3F136781297FE916005B8666 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F136780297FE916005B8666 /* LocationManager.swift */; };
+		3F136787297FF064005B8666 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F136786297FF064005B8666 /* Place.swift */; };
+		3F136789297FF0CC005B8666 /* Places.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F136788297FF0CC005B8666 /* Places.swift */; };
+		3F13678B29801094005B8666 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F13678A29801094005B8666 /* MapView.swift */; };
+		3F13678D29801616005B8666 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F13678C29801616005B8666 /* GoogleService-Info.plist */; };
+		3F136790298016D6005B8666 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F13678F298016D6005B8666 /* FirebaseFirestore */; };
+		3F136792298016D6005B8666 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3F136791298016D6005B8666 /* FirebaseFirestoreSwift */; };
+		3F136794298016D6005B8666 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 3F136793298016D6005B8666 /* FirebaseFunctions */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +52,11 @@
 		3F13676D297FE6F6005B8666 /* MushMazeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MushMazeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F136771297FE6F6005B8666 /* MushMazeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MushMazeUITests.swift; sourceTree = "<group>"; };
 		3F136773297FE6F6005B8666 /* MushMazeUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MushMazeUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		3F136780297FE916005B8666 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		3F136786297FF064005B8666 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
+		3F136788297FF0CC005B8666 /* Places.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Places.swift; sourceTree = "<group>"; };
+		3F13678A29801094005B8666 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		3F13678C29801616005B8666 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +64,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F136794298016D6005B8666 /* FirebaseFunctions in Frameworks */,
+				3F136790298016D6005B8666 /* FirebaseFirestore in Frameworks */,
+				3F136792298016D6005B8666 /* FirebaseFirestoreSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,7 +113,12 @@
 				3F136756297FE6F3005B8666 /* MushMazeApp.swift */,
 				3F136758297FE6F3005B8666 /* ContentView.swift */,
 				3F13675A297FE6F5005B8666 /* Assets.xcassets */,
+				3F13678C29801616005B8666 /* GoogleService-Info.plist */,
 				3F13675C297FE6F5005B8666 /* Preview Content */,
+				3F136780297FE916005B8666 /* LocationManager.swift */,
+				3F136786297FF064005B8666 /* Place.swift */,
+				3F136788297FF0CC005B8666 /* Places.swift */,
+				3F13678A29801094005B8666 /* MapView.swift */,
 			);
 			path = MushMaze;
 			sourceTree = "<group>";
@@ -143,6 +164,11 @@
 			dependencies = (
 			);
 			name = MushMaze;
+			packageProductDependencies = (
+				3F13678F298016D6005B8666 /* FirebaseFirestore */,
+				3F136791298016D6005B8666 /* FirebaseFirestoreSwift */,
+				3F136793298016D6005B8666 /* FirebaseFunctions */,
+			);
 			productName = MushMaze;
 			productReference = 3F136753297FE6F3005B8666 /* MushMaze.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +241,9 @@
 				Base,
 			);
 			mainGroup = 3F13674A297FE6F3005B8666;
+			packageReferences = (
+				3F13678E298016D6005B8666 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 3F136754297FE6F3005B8666 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -232,6 +261,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F13675E297FE6F5005B8666 /* Preview Assets.xcassets in Resources */,
+				3F13678D29801616005B8666 /* GoogleService-Info.plist in Resources */,
 				3F13675B297FE6F5005B8666 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -257,8 +287,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F136789297FF0CC005B8666 /* Places.swift in Sources */,
+				3F13678B29801094005B8666 /* MapView.swift in Sources */,
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
 				3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */,
+				3F136781297FE916005B8666 /* LocationManager.swift in Sources */,
+				3F136787297FF064005B8666 /* Place.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -420,6 +454,7 @@
 				DEVELOPMENT_TEAM = W5BK5DHQMV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "the app needs to access your location, without permission the app won't work";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -449,6 +484,7 @@
 				DEVELOPMENT_TEAM = W5BK5DHQMV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "the app needs to access your location, without permission the app won't work";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -583,6 +619,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3F13678E298016D6005B8666 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3F13678F298016D6005B8666 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F13678E298016D6005B8666 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		3F136791298016D6005B8666 /* FirebaseFirestoreSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F13678E298016D6005B8666 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestoreSwift;
+		};
+		3F136793298016D6005B8666 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F13678E298016D6005B8666 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3F13674B297FE6F3005B8666 /* Project object */;
 }
