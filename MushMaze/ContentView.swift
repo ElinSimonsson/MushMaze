@@ -18,11 +18,11 @@ struct ContentView: View {
     }
     
     var body: some View {
-        if !signedIn {
+        //if !signedIn {
             SigningInView(signedIn: $signedIn)
-        } else {
-            MapView(locationManager: locationManager)
-        }
+        //} else {
+          //  MapView(locationManager: locationManager)
+        //}
     }
 }
 

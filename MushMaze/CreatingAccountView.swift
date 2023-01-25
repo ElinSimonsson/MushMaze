@@ -18,8 +18,12 @@ struct CreatingAccountView: View {
     @State var emailAddress = ""
     @State var password = ""
     @State var repeatPassword = ""
-    @State var passwordsNotIdentical = false
+    @State var showError = false
     @Binding var signedIn : Bool
+    @State var fullNameIsMissing = false
+    @State var emailAddressIsMissing = false
+    @State var passwordIsMissing = false
+    @State var passwordsDoNotMatch = false
     
     var body: some View {
         VStack {
@@ -45,43 +49,63 @@ struct CreatingAccountView: View {
                 .background(lightGreyColor)
                 .cornerRadius(5.0)
                 .padding(.bottom, 20)
+                .alert(isPresented: $fullNameIsMissing) {
+                    Alert(title: Text("Full Name Missing"), message: Text("Please enter your full name"), dismissButton: .default(Text("OK")))
+                }
+
             TextField("Email Address", text: $emailAddress)
                 .padding()
                 .background(lightGreyColor)
                 .cornerRadius(5.0)
                 .padding(.bottom, 20)
+                .alert(isPresented: $emailAddressIsMissing) {
+                    Alert(title: Text ("Email Missing"), message: Text("Please enter your email"), dismissButton: .default(Text("OK")))
+                }
             
             SecureField("Password", text: $password)
                 .padding()
                 .background(lightGreyColor)
                 .cornerRadius(5.0)
                 .padding(.bottom, 20)
+                .alert(isPresented: $passwordIsMissing) { // this alert make sure that BOTH of password field are filled
+                    Alert(title: Text("Password Missing"), message: Text("Please make sure to fill in both password fields"),
+                          dismissButton: .default(Text("Ok")))
+                }
+            
             SecureField("Repeat Password", text: $repeatPassword)
                 .padding()
                 .background(lightGreyColor)
                 .cornerRadius(5.0)
                 .padding(.bottom, 100)
+                .alert(isPresented: $passwordsDoNotMatch) { // since the previous alert already checks if this secureField isn´t filled, this one checks if the passwords dont match
+                    Alert(title: Text("Password do not match"), message: Text("The passwords entered do not match. Please re-enter your password and confirm it again to proceed"),
+                          dismissButton: .default(Text("Ok")))
+                }
             
             Button(action: {
-                print("skapa konto")
                 createAccount()
             }) {
                 CreateAccountButtonContent()
             }
             
         }
-        .alert(isPresented: $passwordsNotIdentical) {
-                    Alert(title: Text("Error"), message: Text("Passwords are not identical"), dismissButton: .default(Text("OK")))
-                }
         .padding()
     }
     
     func createAccount() {
-        let email = $emailAddress.wrappedValue
-        let password = $password.wrappedValue
+        let userEmail = $emailAddress.wrappedValue
+        let userPassword = $password.wrappedValue
         
-        if password == repeatPassword && fullName != "" {
-            Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+        if fullName == "" {
+            fullNameIsMissing = true
+        } else if emailAddress == "" {
+            emailAddressIsMissing = true
+        } else if password == "" || repeatPassword == "" {
+            passwordIsMissing = true
+        } else if password != repeatPassword {
+            passwordsDoNotMatch = true
+        } else {
+            Auth.auth().createUser(withEmail: userEmail, password: userPassword) { authResult, error in
                 if let error = error {
                     print("error signing up \(error.localizedDescription)")
                 } else {
@@ -89,10 +113,6 @@ struct CreatingAccountView: View {
                     saveUserDataToFirestore()
                 }
             }
-        } else if fullName == "" {
-            
-        } else {
-            passwordsNotIdentical = true
         }
     }
     
@@ -109,6 +129,17 @@ struct CreatingAccountView: View {
         } catch {
             print("Error saving to Firebase")
         }
+    }
+}
+
+struct ErrorText : View {
+    var message : String
+    
+    var body: some View {
+        Text(message)
+            .font(.title3)
+            .foregroundColor(.red)
+            .fontWeight(.semibold)
     }
 }
 
