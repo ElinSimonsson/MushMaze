@@ -14,7 +14,7 @@ class Places : ObservableObject {
    private var db = Firestore.firestore()
     
 
-    func addPlace (placeName: String, latitude : Double, longitude : Double) {
+    func addPlace (latitude : Double, longitude : Double) {
         //let place = Place(name: placeName, latitude: latitude, longitude: longitude)
         let place = Place(latitude: latitude, longitude: longitude)
         
