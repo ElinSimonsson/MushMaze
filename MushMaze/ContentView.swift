@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     let locationManager = LocationManager()
+    @State var signedIn = false
    // @StateObject var places = Places()
     
     
@@ -17,7 +18,11 @@ struct ContentView: View {
     }
     
     var body: some View {
-        MapView(locationManager: locationManager)
+        if !signedIn {
+            SigningInView(signedIn: $signedIn)
+        } else {
+            MapView(locationManager: locationManager)
+        }
     }
 }
 

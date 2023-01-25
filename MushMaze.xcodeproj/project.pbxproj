@@ -22,6 +22,10 @@
 		3F136790298016D6005B8666 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F13678F298016D6005B8666 /* FirebaseFirestore */; };
 		3F136792298016D6005B8666 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3F136791298016D6005B8666 /* FirebaseFirestoreSwift */; };
 		3F136794298016D6005B8666 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 3F136793298016D6005B8666 /* FirebaseFunctions */; };
+		3F80B7722981468F00C39181 /* SigningInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80B7712981468F00C39181 /* SigningInView.swift */; };
+		3F80B7742981617E00C39181 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80B7732981617E00C39181 /* User.swift */; };
+		3F80E35D2981220D002877FD /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3F80E35C2981220D002877FD /* FirebaseAuth */; };
+		3F80E35F29812359002877FD /* CreatingAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80E35E29812359002877FD /* CreatingAccountView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +61,9 @@
 		3F136788297FF0CC005B8666 /* Places.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Places.swift; sourceTree = "<group>"; };
 		3F13678A29801094005B8666 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		3F13678C29801616005B8666 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		3F80B7712981468F00C39181 /* SigningInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigningInView.swift; sourceTree = "<group>"; };
+		3F80B7732981617E00C39181 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		3F80E35E29812359002877FD /* CreatingAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingAccountView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +74,7 @@
 				3F136794298016D6005B8666 /* FirebaseFunctions in Frameworks */,
 				3F136790298016D6005B8666 /* FirebaseFirestore in Frameworks */,
 				3F136792298016D6005B8666 /* FirebaseFirestoreSwift in Frameworks */,
+				3F80E35D2981220D002877FD /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,6 +102,7 @@
 				3F136766297FE6F6005B8666 /* MushMazeTests */,
 				3F136770297FE6F6005B8666 /* MushMazeUITests */,
 				3F136754297FE6F3005B8666 /* Products */,
+				3F80E35B2981220D002877FD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -119,6 +128,9 @@
 				3F136786297FF064005B8666 /* Place.swift */,
 				3F136788297FF0CC005B8666 /* Places.swift */,
 				3F13678A29801094005B8666 /* MapView.swift */,
+				3F80E35E29812359002877FD /* CreatingAccountView.swift */,
+				3F80B7712981468F00C39181 /* SigningInView.swift */,
+				3F80B7732981617E00C39181 /* User.swift */,
 			);
 			path = MushMaze;
 			sourceTree = "<group>";
@@ -148,6 +160,13 @@
 			path = MushMazeUITests;
 			sourceTree = "<group>";
 		};
+		3F80E35B2981220D002877FD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -168,6 +187,7 @@
 				3F13678F298016D6005B8666 /* FirebaseFirestore */,
 				3F136791298016D6005B8666 /* FirebaseFirestoreSwift */,
 				3F136793298016D6005B8666 /* FirebaseFunctions */,
+				3F80E35C2981220D002877FD /* FirebaseAuth */,
 			);
 			productName = MushMaze;
 			productReference = 3F136753297FE6F3005B8666 /* MushMaze.app */;
@@ -288,11 +308,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F136789297FF0CC005B8666 /* Places.swift in Sources */,
+				3F80E35F29812359002877FD /* CreatingAccountView.swift in Sources */,
 				3F13678B29801094005B8666 /* MapView.swift in Sources */,
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
 				3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */,
+				3F80B7742981617E00C39181 /* User.swift in Sources */,
 				3F136781297FE916005B8666 /* LocationManager.swift in Sources */,
 				3F136787297FF064005B8666 /* Place.swift in Sources */,
+				3F80B7722981468F00C39181 /* SigningInView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -646,6 +669,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3F13678E298016D6005B8666 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFunctions;
+		};
+		3F80E35C2981220D002877FD /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F13678E298016D6005B8666 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
