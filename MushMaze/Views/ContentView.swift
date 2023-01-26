@@ -10,19 +10,21 @@ import SwiftUI
 struct ContentView: View {
     let locationManager = LocationManager()
     @State var signedIn = false
-   // @StateObject var places = Places()
-    
+    @State var signedOut = false
     
     init() {
         locationManager.startLocationUpdate()
     }
     
     var body: some View {
-        //if !signedIn {
+        
+        //AddPlaceView()
+        
+        if !signedOut && signedIn { // måste skicka med signedOut till signingInView för att ändra signedout till false när anvädmaren har loggat in
+            MapView(locationManager: locationManager, signedOut: $signedOut)
+        } else {
             SigningInView(signedIn: $signedIn)
-        //} else {
-          //  MapView(locationManager: locationManager)
-        //}
+        }
     }
 }
 

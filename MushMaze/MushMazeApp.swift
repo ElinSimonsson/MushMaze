@@ -8,8 +8,10 @@
 import SwiftUI
 import Firebase
 
+
 @main
 struct MushMazeApp: App {
+    
     
     init() {
         FirebaseApp.configure()

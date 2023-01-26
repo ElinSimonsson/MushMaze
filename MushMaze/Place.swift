@@ -12,6 +12,8 @@ import FirebaseFirestoreSwift
 struct Place : Identifiable, Codable {
     @DocumentID var id : String?
     var name : String? // optional - temporarily. will change later
+    var description : String?
+    var mushrooms : [String]?
     var latitude : Double
     var longitude : Double
     var coordinate : CLLocationCoordinate2D {

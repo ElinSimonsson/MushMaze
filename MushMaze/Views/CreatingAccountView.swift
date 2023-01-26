@@ -118,12 +118,24 @@ struct CreatingAccountView: View {
     
     func saveUserDataToFirestore () {
         
+//        guard let currentUser = Auth.auth().currentUser else {return}
+//
+//        let user = User(fullName: $fullName.wrappedValue, userId: currentUser.uid)
+//        do {
+//            _ = try
+//                db.collection("usersInformation").addDocument(from: user)
+//            print("successed to save")
+//            signedIn = true
+//        } catch {
+//            print("Error saving to Firebase")
+//        }
+        
         guard let currentUser = Auth.auth().currentUser else {return}
         
-        let user = User(fullName: $fullName.wrappedValue, userId: currentUser.uid)
+        let user = User(fullName: $fullName.wrappedValue, emailAddress: $emailAddress.wrappedValue, userId: currentUser.uid)
         do {
             _ = try
-                db.collection("usersInformation").addDocument(from: user)
+            db.collection("users").document(currentUser.uid).setData(from: user)
             print("successed to save")
             signedIn = true
         } catch {
