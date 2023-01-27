@@ -17,7 +17,7 @@ struct ProfileView: View {
     @Environment(\.presentationMode) var presentationMode
     @State var fullName = ""
     @State var email = ""
-    @State var imageURL = ""
+    @State var imageURL = "https://firebasestorage.googleapis.com:443/v0/b/mushmaze-c072e.appspot.com/o/8gNWnLL8SAgyM1ckuhNjiPzjl9G3?alt=media&token=8d311712-5d02-4393-a1da-6d00c3fb8be5"
     
     var body: some View {
         VStack {
@@ -80,7 +80,7 @@ struct ProfileView: View {
 //                print("Document data: \(dataDescription)")
                 fullName = document.get("fullName") as? String ?? ""
                 email = document.get("emailAddress") as? String ?? ""
-                imageURL = document.get("imageURL") as? String ?? ""
+               // imageURL = document.get("imageURL") as? String ?? ""
                 
             } else {
                 print("Document does not exist")

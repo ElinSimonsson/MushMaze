@@ -14,6 +14,7 @@ struct Place : Identifiable, Codable {
     var name : String? // optional - temporarily. will change later
     var description : String?
     var mushrooms : [String]?
+    var imageURL : String?
     var latitude : Double
     var longitude : Double
     var coordinate : CLLocationCoordinate2D {

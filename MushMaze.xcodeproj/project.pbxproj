@@ -29,6 +29,8 @@
 		3F8D357E2982767300DCBCBF /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D357D2982767300DCBCBF /* ProfileView.swift */; };
 		3F8D35812982A2B600DCBCBF /* AddPlaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D35802982A2B600DCBCBF /* AddPlaceView.swift */; };
 		3F8D35832982C61900DCBCBF /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 3F8D35822982C61900DCBCBF /* FirebaseStorage */; };
+		3F8D35892983CA8700DCBCBF /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D35882983CA8600DCBCBF /* ImagePicker.swift */; };
+		3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D358A2983CB4800DCBCBF /* ImageMod.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +71,8 @@
 		3F80E35E29812359002877FD /* CreatingAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingAccountView.swift; sourceTree = "<group>"; };
 		3F8D357D2982767300DCBCBF /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		3F8D35802982A2B600DCBCBF /* AddPlaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlaceView.swift; sourceTree = "<group>"; };
+		3F8D35882983CA8600DCBCBF /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		3F8D358A2983CB4800DCBCBF /* ImageMod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMod.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +138,8 @@
 				3F136786297FF064005B8666 /* Place.swift */,
 				3F136788297FF0CC005B8666 /* Places.swift */,
 				3F80B7732981617E00C39181 /* User.swift */,
+				3F8D35882983CA8600DCBCBF /* ImagePicker.swift */,
+				3F8D358A2983CB4800DCBCBF /* ImageMod.swift */,
 			);
 			path = MushMaze;
 			sourceTree = "<group>";
@@ -326,9 +332,11 @@
 			files = (
 				3F136789297FF0CC005B8666 /* Places.swift in Sources */,
 				3F80E35F29812359002877FD /* CreatingAccountView.swift in Sources */,
+				3F8D35892983CA8700DCBCBF /* ImagePicker.swift in Sources */,
 				3F8D357E2982767300DCBCBF /* ProfileView.swift in Sources */,
 				3F13678B29801094005B8666 /* MapView.swift in Sources */,
 				3F8D35812982A2B600DCBCBF /* AddPlaceView.swift in Sources */,
+				3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */,
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
 				3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */,
 				3F80B7742981617E00C39181 /* User.swift in Sources */,
@@ -493,9 +501,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MushMaze/Preview Content\"";
-				DEVELOPMENT_TEAM = W5BK5DHQMV;
+				DEVELOPMENT_TEAM = YCHX4WNLM7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need the camera permission";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "the app needs to access your location, without permission the app won't work";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -523,9 +532,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MushMaze/Preview Content\"";
-				DEVELOPMENT_TEAM = W5BK5DHQMV;
+				DEVELOPMENT_TEAM = YCHX4WNLM7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need the camera permission";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "the app needs to access your location, without permission the app won't work";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

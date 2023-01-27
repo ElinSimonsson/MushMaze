@@ -18,13 +18,13 @@ struct ContentView: View {
     
     var body: some View {
         
-        //AddPlaceView()
+        AddPlaceView()
         
-        if !signedOut && signedIn { // måste skicka med signedOut till signingInView för att ändra signedout till false när anvädmaren har loggat in
-            MapView(locationManager: locationManager, signedOut: $signedOut)
-        } else {
-            SigningInView(signedIn: $signedIn)
-        }
+//        if !signedOut && signedIn { // måste skicka med signedOut till signingInView för att ändra signedout till false när anvädmaren har loggat in
+//            MapView(locationManager: locationManager, signedOut: $signedOut)
+//        } else {
+//            SigningInView(signedIn: $signedIn)
+//        } 
     }
 }
 

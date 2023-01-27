@@ -81,7 +81,7 @@ struct MapView: View {
                                     .font(.system(size: 30))
                             }
                             .fullScreenCover(isPresented: $showAddPlaceView, content: {
-                                AddPlaceView(coordinate: coordinate)
+                                AddPlaceView() // skicka med coordinate
                             })
                             .frame(width: 50, height: 50)
                             .background(Color(darkTurquoise))
