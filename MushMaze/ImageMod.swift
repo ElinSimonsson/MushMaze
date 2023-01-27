@@ -14,8 +14,10 @@ extension Image {
         self
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .frame(width: 200, height: 150)
+            .frame(width: 300, height: 150)
             .cornerRadius(10)
+            .padding(.top, 40)
+            .padding(.bottom, 40)
             
     }
     

@@ -28,82 +28,99 @@ struct AddPlaceView: View {
     @State var openCameraRoll = false
     @State var selectedImage : UIImage? = nil
     @State var showingAlert = false
-    
+    @State var textIsCleared = false
     
     var body: some View {
-        VStack {
-            //ZStack(alignment: .bottomTrailing) {
-            Button(action: {
-                showingAlert = true
-                
-            }, label: {
-                    if let image = selectedImage {
-                    Image(uiImage: image)
-                        .imageMod()
-                } else {
-                    Image(systemName: "person")
-                        .imageMod()
-                }
-            }).alert(isPresented: $showingAlert) {
-                Alert(title: Text("Select"),
-                      primaryButton: .default(Text("Camera")) {
-                    sourceType = .camera
-                    changeProfileImage = true
-                    openCameraRoll = true
-                    print("camera pressed \(sourceType)")
-                }, secondaryButton: .default(Text("Photo")) {
-                    sourceType = .photoLibrary
-                    changeProfileImage = true
-                    openCameraRoll = true
-                    print("photo pressed \(sourceType)")
-                })
-            }
-            
-            Spacer()
-            PlaceTextField(placeName: $placeName, lightGreyColor: lightGreyColor)
-            PlaceDescriptionField(description: $description, lightGreyColor: lightGreyColor)
-            List {
-                MushroomSpeciesTitle()
-                ForEach(mushrooms, id: \.self) { mushroom in
-                    Text("* \(mushroom)")
-                }
-                if isAddingNewMushroom {
-                    HStack {
-                        TextField("Mushroom speices you founded", text: $newMushroomName, onCommit: {
-                            mushrooms.append(newMushroomName)
+        ScrollView {
+            VStack {
+                HStack {
+                   Button(action: {
+                       presentationMode.wrappedValue.dismiss()
+                   }) {
+                       Text("< Back")
+                   }
+                   Spacer()
+                    Button(action: {
+                        //presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("Save")
+                    }
+               }
+                ZStack(alignment: .bottomTrailing) {
+                    Button(action: {
+                        showingAlert = true
+                        
+                    }, label: {
+                        if let image = selectedImage {
+                            Image(uiImage: image)
+                                .imageMod()
                             
-                            self.isAddingNewMushroom = false
-                        })
-                        .onAppear() {
-                            self.newMushroomName = ""
+                        } else {
+                            Image(systemName: "photo")
+                                .imageMod()
+                                .foregroundColor(.gray)
                         }
+                    }).alert(isPresented: $showingAlert) {
+                        Alert(title: Text("Select"),
+                              primaryButton: .default(Text("Camera")) {
+                            sourceType = .camera
+                            changeProfileImage = true
+                            openCameraRoll = true
+                            print("camera pressed \(sourceType)")
+                        }, secondaryButton: .default(Text("Photo")) {
+                            sourceType = .photoLibrary
+                            changeProfileImage = true
+                            openCameraRoll = true
+                            print("photo pressed \(sourceType)")
+                        })
                     }
                 }
-            }
-            .frame(height: 200)
-            .scrollContentBackground(.hidden)
-            Button(action: {
-                //savePlaceToFirestore()
-                uploadPhoto()
                 
-            }) {
-                SaveButtonContent()
+                Spacer()
+                PlaceTextField(placeName: $placeName, lightGreyColor: lightGreyColor)
+                PlaceDescriptionField(description: $description, lightGreyColor: lightGreyColor)
+                    .onTapGesture {
+                        clearText()
+                    }
+               
+                    MushroomSpeciesTitle()
+     
+                    ForEach(mushrooms, id: \.self) { mushroom in
+                        HStack {
+                            Text("* \(mushroom)")
+                                .padding(.bottom, 10)
+                            Spacer()
+                        }
+                    }
+                    if isAddingNewMushroom {
+                        HStack {
+                            TextField("Mushroom speices you founded", text: $newMushroomName, onCommit: {
+                                mushrooms.append(newMushroomName)
+                                self.isAddingNewMushroom = false
+                            })
+                            .onAppear() {
+                                self.newMushroomName = ""
+                            }
+                        }
+                    }
             }
         }
-        .sheet(isPresented: $openCameraRoll) {
+        .fullScreenCover(isPresented: $openCameraRoll) {
             ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
-        }
-        .onAppear() {
-            
         }
         .padding()
         .onTapGesture {
             isAddingNewMushroom = true
         }
-        
     }
     
-    
+    func clearText () {
+        if !textIsCleared {
+            description = ""
+            print("funktionen clearText körs")
+            textIsCleared = true
+        }
+    }
     
     func savePlaceToFirestore() {
         places.addPlaceWithMushrooms(latitude: coordinate.latitude,
@@ -115,13 +132,9 @@ struct AddPlaceView: View {
     }
     
     func uploadPhoto() {
-        
         let fileName = "\(UUID().uuidString).jpg"
-        
         let ref = Storage.storage().reference(withPath: fileName)
-
         guard let imageData = selectedImage?.jpegData(compressionQuality: 0.5) else {return}
-
         ref.putData(imageData ,metadata: nil) { metadata, err in
             if let err = err {
                 print("failed to push image to Storage\(err)")
@@ -143,9 +156,13 @@ struct AddPlaceView: View {
 
 struct MushroomSpeciesTitle : View {
     var body : some View {
-        Text("Mushrooms found here:")
-            .font(.headline)
-            .fontWeight(.semibold)
+        HStack {
+            Text("Mushrooms found here:")
+                .font(.headline)
+                .fontWeight(.semibold)
+                .padding(.bottom)
+            Spacer()
+        }
     }
 }
 
@@ -175,19 +192,6 @@ struct PlaceDescriptionField : View {
             .cornerRadius(5.0)
             .padding(.bottom, 20)
 
-    }
-}
-
-struct SaveButtonContent : View {
-  let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
-    var body: some View {
-        Text("Save")
-            .font(.title3)
-            .foregroundColor(.black)
-            .padding()
-            .frame(width: 220, height: 60)
-            .background(Color(darkTurquoise))
-            .cornerRadius(15.0)
     }
 }
 

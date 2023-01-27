@@ -28,7 +28,7 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
-        //leave alone for right now
+       
     }
     
     final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -44,11 +44,7 @@ struct ImagePicker: UIViewControllerRepresentable {
      
             if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 parent.selectedImage = image
-                print("image är inte nil")
-            } else {
-                print("image är nil")
             }
-     
             parent.presentationMode.wrappedValue.dismiss()
         }
     }

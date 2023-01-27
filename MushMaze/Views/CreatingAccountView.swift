@@ -32,8 +32,6 @@ struct CreatingAccountView: View {
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("< Back")
-                    .padding(.leading, 1)
-                    .font(.title2)
             }
             Spacer()
         }
