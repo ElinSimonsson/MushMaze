@@ -11,6 +11,7 @@ import Firebase
 
 @main
 struct MushMazeApp: App {
+    @StateObject var places = Places()
     
     
     init() {
@@ -20,6 +21,7 @@ struct MushMazeApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(places)
         }
     }
 }

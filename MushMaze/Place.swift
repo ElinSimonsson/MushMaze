@@ -9,14 +9,16 @@ import Foundation
 import CoreLocation
 import FirebaseFirestoreSwift
 
-struct Place : Identifiable, Codable {
+struct Place : Identifiable, Codable, Equatable {
     @DocumentID var id : String?
-    var name : String? // optional - temporarily. will change later
+    var name : String
     var description : String?
     var mushrooms : [String]?
-    var imageURL : String?
+    var imageURL : String
     var latitude : Double
     var longitude : Double
+    var distance : Double?
+    var isSelected : Bool
     var coordinate : CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }

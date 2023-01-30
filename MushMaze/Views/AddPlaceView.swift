@@ -13,11 +13,11 @@ import FirebaseStorage
 
 struct AddPlaceView: View {
     @Environment(\.presentationMode) var presentationMode
-    //var coordinate : CLLocationCoordinate2D
-    var coordinate = CLLocationCoordinate2D(latitude: 37.33047116, longitude: -122.02885783) // tillfälligt
+    var coordinate : CLLocationCoordinate2D
     let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
     let db = Firestore.firestore()
     let places = Places()
+    
     @State var placeName = ""
     @State var description = "brief description of the location"
     @State var isAddingNewMushroom = true
@@ -29,27 +29,27 @@ struct AddPlaceView: View {
     @State var selectedImage : UIImage? = nil
     @State var showingAlert = false
     @State var textIsCleared = false
+    @State var isSaving = false
     
     var body: some View {
-        ScrollView {
-            VStack {
-                HStack {
-                   Button(action: {
-                       presentationMode.wrappedValue.dismiss()
-                   }) {
-                       Text("< Back")
-                   }
-                   Spacer()
-                    Button(action: {
-                        //presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Text("Save")
+        ZStack {
+            ScrollView {
+                VStack {
+                    HStack {
+                        Button(action: {
+                            presentationMode.wrappedValue.dismiss()
+                        }) {
+                            Text("< Back")
+                        }
+                        Spacer()
+                        Button(action: {
+                            uploadPhotoAndSaveToFirestore()
+                        }) {
+                            Text("Save")
+                        }
                     }
-               }
-                ZStack(alignment: .bottomTrailing) {
                     Button(action: {
                         showingAlert = true
-                        
                     }, label: {
                         if let image = selectedImage {
                             Image(uiImage: image)
@@ -61,7 +61,7 @@ struct AddPlaceView: View {
                                 .foregroundColor(.gray)
                         }
                     }).alert(isPresented: $showingAlert) {
-                        Alert(title: Text("Select"),
+                        Alert(title: Text("Choose Source"),
                               primaryButton: .default(Text("Camera")) {
                             sourceType = .camera
                             changeProfileImage = true
@@ -74,17 +74,13 @@ struct AddPlaceView: View {
                             print("photo pressed \(sourceType)")
                         })
                     }
-                }
-                
-                Spacer()
-                PlaceTextField(placeName: $placeName, lightGreyColor: lightGreyColor)
-                PlaceDescriptionField(description: $description, lightGreyColor: lightGreyColor)
-                    .onTapGesture {
-                        clearText()
-                    }
-               
-                    MushroomSpeciesTitle()
-     
+                    PlaceTextField(placeName: $placeName, lightGreyColor: lightGreyColor)
+                    PlaceDescriptionField(description: $description, lightGreyColor: lightGreyColor)
+                        .onTapGesture {
+                            clearText()
+                        }
+                    MushroomSpeciesSubTitle()
+                    
                     ForEach(mushrooms, id: \.self) { mushroom in
                         HStack {
                             Text("* \(mushroom)")
@@ -94,7 +90,7 @@ struct AddPlaceView: View {
                     }
                     if isAddingNewMushroom {
                         HStack {
-                            TextField("Mushroom speices you founded", text: $newMushroomName, onCommit: {
+                            TextField("Add mushroom species", text: $newMushroomName, onCommit: {
                                 mushrooms.append(newMushroomName)
                                 self.isAddingNewMushroom = false
                             })
@@ -103,15 +99,20 @@ struct AddPlaceView: View {
                             }
                         }
                     }
+                }
+            }
+            .fullScreenCover(isPresented: $openCameraRoll) {
+                ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
+            }
+            .padding()
+            .onTapGesture {
+                isAddingNewMushroom = true
+            }
+            if isSaving {
+                FirestoreSavingCircularProgressIndicator()
             }
         }
-        .fullScreenCover(isPresented: $openCameraRoll) {
-            ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
-        }
-        .padding()
-        .onTapGesture {
-            isAddingNewMushroom = true
-        }
+        
     }
     
     func clearText () {
@@ -122,16 +123,17 @@ struct AddPlaceView: View {
         }
     }
     
-    func savePlaceToFirestore() {
+    func savePlaceToFirestore(imageURL : String) {
         places.addPlaceWithMushrooms(latitude: coordinate.latitude,
                                      longitude: coordinate.longitude,
                                      name: $placeName.wrappedValue,
                                      description: $description.wrappedValue,
-                                     mushrooms: mushrooms)
-        presentationMode.wrappedValue.dismiss()
+                                     mushrooms: mushrooms,
+                                     imageURL: imageURL)
     }
     
-    func uploadPhoto() {
+    func uploadPhotoAndSaveToFirestore() {
+        isSaving = true
         let fileName = "\(UUID().uuidString).jpg"
         let ref = Storage.storage().reference(withPath: fileName)
         guard let imageData = selectedImage?.jpegData(compressionQuality: 0.5) else {return}
@@ -140,21 +142,42 @@ struct AddPlaceView: View {
                 print("failed to push image to Storage\(err)")
                 return
             }
-
+            
             ref.downloadURL { url, err in
                 if let err = err {
                     print("failed to retrieve downloadURL \(err)")
                     return
                 } else {
                     print("successfully stored image with url : \(url?.absoluteString ?? "")")
+                    guard let imageURL = url?.absoluteString else {return}
+                    savePlaceToFirestore(imageURL: imageURL)
+                    isSaving = false
+                    presentationMode.wrappedValue.dismiss()
                 }
             }
-
         }
     }
 }
 
-struct MushroomSpeciesTitle : View {
+struct FirestoreSavingCircularProgressIndicator : View {
+    var body: some View {
+        VStack {
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle())
+                .scaleEffect(3)
+                .frame(width: 50, height: 50)
+            Text("Saving...")
+                .padding(.top, 25)
+        }
+        .frame(width: 150, height: 150)
+        .padding()
+        .background(Color.white)
+        .cornerRadius(10)
+        .shadow(radius: 10)
+    }
+}
+
+struct MushroomSpeciesSubTitle : View {
     var body : some View {
         HStack {
             Text("Mushrooms found here:")
@@ -191,7 +214,7 @@ struct PlaceDescriptionField : View {
             .background(lightGreyColor)
             .cornerRadius(5.0)
             .padding(.bottom, 20)
-
+        
     }
 }
 
