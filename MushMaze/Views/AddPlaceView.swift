@@ -30,6 +30,9 @@ struct AddPlaceView: View {
     @State var showingAlert = false
     @State var textIsCleared = false
     @State var isSaving = false
+    @State var placeNameIsMissing = false
+    @State var mushroomsAreMissing = false
+    @State var imageIsNil = false
     
     var body: some View {
         ZStack {
@@ -46,6 +49,9 @@ struct AddPlaceView: View {
                             uploadPhotoAndSaveToFirestore()
                         }) {
                             Text("Save")
+                        }
+                        .alert(isPresented: $imageIsNil) {
+                            Alert(title: Text("Image is missing"), dismissButton: .default(Text("Ok")))
                         }
                     }
                     Button(action: {
@@ -74,7 +80,7 @@ struct AddPlaceView: View {
                             print("photo pressed \(sourceType)")
                         })
                     }
-                    PlaceTextField(placeName: $placeName, lightGreyColor: lightGreyColor)
+                    PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing, lightGreyColor: lightGreyColor)
                     PlaceDescriptionField(description: $description, lightGreyColor: lightGreyColor)
                         .onTapGesture {
                             clearText()
@@ -90,13 +96,22 @@ struct AddPlaceView: View {
                     }
                     if isAddingNewMushroom {
                         HStack {
-                            TextField("Add mushroom species", text: $newMushroomName, onCommit: {
-                                mushrooms.append(newMushroomName)
-                                self.isAddingNewMushroom = false
-                            })
-                            .onAppear() {
-                                self.newMushroomName = ""
+                            ZStack {
+                                TextField("Add mushroom species", text: $newMushroomName, onCommit: {
+                                    mushrooms.append(newMushroomName)
+                                    self.isAddingNewMushroom = false
+                                })
+                                .onAppear() {
+                                    self.newMushroomName = ""
+                                }
+                                if mushroomsAreMissing {
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(Color.red, lineWidth: 1)
+                                        .frame(width: UIScreen.main.bounds.width - 30, height: 50)
+                                        
+                                }
                             }
+                            
                         }
                     }
                 }
@@ -133,26 +148,33 @@ struct AddPlaceView: View {
     }
     
     func uploadPhotoAndSaveToFirestore() {
-        isSaving = true
-        let fileName = "\(UUID().uuidString).jpg"
-        let ref = Storage.storage().reference(withPath: fileName)
-        guard let imageData = selectedImage?.jpegData(compressionQuality: 0.5) else {return}
-        ref.putData(imageData ,metadata: nil) { metadata, err in
-            if let err = err {
-                print("failed to push image to Storage\(err)")
-                return
-            }
-            
-            ref.downloadURL { url, err in
+        if selectedImage == nil {
+            imageIsNil = true
+        }
+        else if placeName == "" && mushrooms.count == 0 {
+            placeNameIsMissing = true
+            mushroomsAreMissing = true
+        } else {
+            isSaving = true
+            let fileName = "\(UUID().uuidString).jpg"
+            let ref = Storage.storage().reference(withPath: fileName)
+            guard let imageData = selectedImage?.jpegData(compressionQuality: 0.5) else {return}
+            ref.putData(imageData ,metadata: nil) { metadata, err in
                 if let err = err {
-                    print("failed to retrieve downloadURL \(err)")
+                    print("failed to push image to Storage\(err)")
                     return
-                } else {
-                    print("successfully stored image with url : \(url?.absoluteString ?? "")")
-                    guard let imageURL = url?.absoluteString else {return}
-                    savePlaceToFirestore(imageURL: imageURL)
-                    isSaving = false
-                    presentationMode.wrappedValue.dismiss()
+                }
+                ref.downloadURL { url, err in
+                    if let err = err {
+                        print("failed to retrieve downloadURL \(err)")
+                        return
+                    } else {
+                        print("successfully stored image with url : \(url?.absoluteString ?? "")")
+                        guard let imageURL = url?.absoluteString else {return}
+                        savePlaceToFirestore(imageURL: imageURL)
+                        isSaving = false
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }
@@ -191,14 +213,30 @@ struct MushroomSpeciesSubTitle : View {
 
 struct PlaceTextField : View {
     @Binding var placeName : String
+    @Binding var placeNameMissing : Bool
     let lightGreyColor : Color
     
     var body: some View {
-        TextField("Place Name", text: $placeName)
-            .padding()
-            .background(lightGreyColor)
-            .cornerRadius(5.0)
-            .padding(.bottom, 20)
+        
+        ZStack {
+            TextField("Password", text: $placeName)
+                .padding()
+                .background(lightGreyColor)
+                .cornerRadius(5.0)
+                .padding(.bottom, 20)
+            if placeNameMissing {
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(Color.red, lineWidth: 1)
+                    .frame(width: UIScreen.main.bounds.width - 30, height: 50)
+                    .padding(.bottom, 20)
+            }
+        }
+        
+//        TextField("Place Name", text: $placeName)
+//            .padding()
+//            .background(lightGreyColor)
+//            .cornerRadius(5.0)
+//            .padding(.bottom, 20)
     }
 }
 

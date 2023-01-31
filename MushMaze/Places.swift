@@ -56,6 +56,7 @@ class Places : ObservableObject {
             if let error = error {
                 print("error getting document \(error.localizedDescription)")
             } else {
+                self.places.removeAll()
                 for document in snapshot.documents {
                     let result = Result {
                         try document.data(as: Place.self)
@@ -79,9 +80,9 @@ class Places : ObservableObject {
     }
     
     func updateIsSelected (place: Place, with isSelected : Bool) {
-//        for i in 0..<places.count {
-//                places[i].isSelected = false
-//            }
+        for i in 0..<places.count {
+                places[i].isSelected = false
+            }
         
         if let index = places.firstIndex(of: place) {
             places[index].isSelected = true

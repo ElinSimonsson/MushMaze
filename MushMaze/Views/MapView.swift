@@ -54,7 +54,7 @@ struct MapView: View {
                                         places.setAllIsSelectedFalse()
                                         places.updateIsSelected(place: place, with: true)
                                     }
-                                
+                                // if isSelected == place doesn´t work, this view disappears if calculateDistance is executed
                                 if let isSelected = place.isSelected {
                                     if isSelected {
                                         MapAnnotationDetailView(place: place, closure: calculateDistance)
@@ -77,7 +77,7 @@ struct MapView: View {
                                     switch value {
                                     case .second(true, let drag):
                                         longPressLocation = drag?.location ?? .zero
-                                        //addPlaceByTap(at: longPressLocation, for: proxy.size)
+                                       coordinate = addPlaceByTap(at: longPressLocation, for: proxy.size)
                                         
                                     default:
                                         break
@@ -114,7 +114,6 @@ struct MapView: View {
                 }
                 .padding()
             }
-            
         }
     }
     
@@ -144,9 +143,7 @@ struct MapView: View {
     }
     
     func calculateDistance () {
-        print("funktionen utanför calcutate körs, inne")
         if let location = locationManager.location {
-            print("location inne i funktion")
             let currentLatitude = location.latitude
             let currentLongitude = location.longitude
             
@@ -160,33 +157,58 @@ struct MapView: View {
     }
 }
 
+struct plusButtonContent : View {
+    var body: some View {
+        Image(systemName: "plus")
+            .foregroundColor(.white)
+            .font(.system(size: 30))
+    }
+}
+
 struct MapAnnotationDetailView : View {
     var place : Place
     var closure : () -> Void
+    @State var showThisView = true
     
     var body: some View {
-        VStack {
-            HStack {
+        if showThisView {
+            VStack {
                 Spacer()
-                Button(action: {
-                    closure()
-                }) {
-                    Image(systemName: "arrow.clockwise")
-                        .resizable()
-                        .frame(width: 30, height: 30)
+                Text("\(place.name)")
+                    .fontWeight(.bold)
+                if let distance = place.distance {
+                    if distance > 1000 {
+                        Text("distance: \(Int(distance / 1000 + 0.5)) km")
+                    } else {
+                        Text("distance: \(Int(distance + 0.5)) m")
+                    }
+                    Spacer()
+                }
+                Text("Mushrooms founded here:")
+                    .fontWeight(.bold)
+                    .font(.subheadline)
+                if let mushrooms = place.mushrooms {
+                    if mushrooms.count > 1 {
+                        ForEach (mushrooms[0...1], id: \.self) { mushroom in
+                            Text("* \(mushroom)")
+                        }
+                    } else {
+                        ForEach (mushrooms, id: \.self) { mushroom in
+                            Text("* \(mushroom)")
+                        }
+                    }
+                    Spacer()
                 }
             }
-            Spacer()
-            Text("\(place.name)")
-                .fontWeight(.bold)
-            Text("distance: \(place.distance ?? 0.0)")
-            Spacer()
+            .frame(width: 200, height: 200)
+            .background(Color.white)
+            .cornerRadius(10)
+            .shadow(radius: 10)
+            .offset(x: 0, y: -120)
+            .onTapGesture() {
+                self.showThisView.toggle()
+            }
         }
-        .frame(width: 200, height: 200)
-        .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 10)
-        .offset(x: 0, y: -70)
     }
 }
 
@@ -211,7 +233,6 @@ struct SmallUserImage : View {
             .clipped()
             .cornerRadius(150)
             .padding(.trailing, 5)
-        
     }
 }
 

@@ -15,6 +15,8 @@ struct SigningInView: View {
     @State var password = ""
     @State var showCreatingAccountView = false
     @State var isSecured = true
+    @State var emailIsMissing = false
+    @State var passwordIsMissing = false
     
     var body: some View {
         VStack {
@@ -23,13 +25,15 @@ struct SigningInView: View {
             Spacer()
             UserImage()
             
-            EmailTextField(email: $email, lightGreyColor: lightGreyColor)
+            EmailTextField(email: $email, emailMissing: $emailIsMissing, lightGreyColor: lightGreyColor)
             
             ZStack {
                 PasswordFieldView(password: $password,
+                                  passwordMissing: $passwordIsMissing,
                                   isSecured: isSecured,
                                   action: logIn,
                                   lightGreyColor: lightGreyColor)
+                
                 HStack {
                     Spacer()
                     Button(action: {
@@ -62,16 +66,26 @@ struct SigningInView: View {
     }
     
     func logIn () {
+        if email == "" && password == "" {
+            emailIsMissing = true
+            passwordIsMissing = true
+        } else if email == "" {
+            emailIsMissing = true
+        } else if password == "" {
+            passwordIsMissing = true
+        } else {
+        
         let email = $email.wrappedValue
         let password = $password.wrappedValue
         
-        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-            if let error = error {
-                print("error signing in \(error)")
-            } else {
-                print("signed in \(authResult?.user.uid)")
-                signedIn = true
-                
+            Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+                if let error = error {
+                    print("error signing in \(error)")
+                } else {
+                    print("signed in \(authResult?.user.uid)")
+                    signedIn = true
+                    
+                }
             }
         }
         
@@ -86,40 +100,66 @@ struct SigningInView: View {
 
 struct EmailTextField : View {
     @Binding var email : String
+    @Binding var emailMissing : Bool
     let lightGreyColor : Color
     
     var body: some View {
-        TextField("Email Address", text: $email)
-            .padding()
-            .background(lightGreyColor)
-            .cornerRadius(5.0)
-            .padding(.bottom, 20)
+        ZStack {
+            TextField("Email Address", text: $email)
+                .padding()
+                .background(lightGreyColor)
+                .cornerRadius(5.0)
+                .padding(.bottom, 20)
+            if emailMissing {
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(Color.red, lineWidth: 1)
+                    .frame(width: UIScreen.main.bounds.width - 40, height: 50)
+                    .padding(.bottom, 20)
+            }
+        }
     }
 }
 
 struct PasswordFieldView: View {
     @Binding var password: String
-    var isSecured: Bool
+    @Binding var passwordMissing : Bool
+    var isSecured : Bool
     var action: () -> Void
     var lightGreyColor : Color
     
     var body: some View {
         if isSecured {
-            SecureField("Password", text: $password) {
-                self.action()
+            ZStack {
+                SecureField("Password", text: $password) {
+                    self.action()
+                }
+                    .padding()
+                    .background(lightGreyColor)
+                    .cornerRadius(5.0)
+                    .padding(.bottom, 20)
+                if passwordMissing {
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(Color.red, lineWidth: 1)
+                        .frame(width: UIScreen.main.bounds.width - 40, height: 50)
+                        .padding(.bottom, 20)
+                }
             }
-            .padding()
-            .background(lightGreyColor)
-            .cornerRadius(5.0)
-            .padding(.bottom, 20)
         } else {
-            TextField("Password", text: $password) {
-                self.action()
+            ZStack {
+                TextField("Password", text: $password) {
+                    self.action()
+                }
+                    .padding()
+                    .background(lightGreyColor)
+                    .cornerRadius(5.0)
+                    .padding(.bottom, 20)
+                if passwordMissing {
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(Color.red, lineWidth: 1)
+                        .frame(width: UIScreen.main.bounds.width - 40, height: 50)
+                        .padding(.bottom, 20)
+                }
             }
-            .padding()
-            .background(lightGreyColor)
-            .cornerRadius(5.0)
-            .padding(.bottom, 20)
         }
     }
 }
@@ -128,10 +168,12 @@ struct PasswordFieldView: View {
 struct EyeImageButton : View {
     @Binding var isSecured : Bool
     var body: some View {
-        Image(systemName: isSecured ? "eye.slash.fill" : "eye.fill")
-            .foregroundColor(.black)
-            .font(.system(size: 22))
-            .padding(.bottom, 14)
+        
+            Image(systemName: isSecured ? "eye.slash.fill" : "eye.fill")
+                .foregroundColor(.black)
+                .font(.system(size: 22))
+                .padding(.bottom, 14)
+        
     }
 }
 
