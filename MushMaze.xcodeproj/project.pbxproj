@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		3F0DC4B72989503700C0BCBC /* ListOfPlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0DC4B62989503700C0BCBC /* ListOfPlacesView.swift */; };
 		3F0DC4B92989618600C0BCBC /* PlaceDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0DC4B82989618600C0BCBC /* PlaceDetailsView.swift */; };
-		3F0DC4BB2989670A00C0BCBC /* TabbedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0DC4BA2989670A00C0BCBC /* TabbedView.swift */; };
+		3F0DC4BB2989670A00C0BCBC /* DestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0DC4BA2989670A00C0BCBC /* DestinationView.swift */; };
 		3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F136756297FE6F3005B8666 /* MushMazeApp.swift */; };
 		3F136759297FE6F3005B8666 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F136758297FE6F3005B8666 /* ContentView.swift */; };
 		3F13675B297FE6F5005B8666 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3F13675A297FE6F5005B8666 /* Assets.xcassets */; };
@@ -56,7 +56,7 @@
 /* Begin PBXFileReference section */
 		3F0DC4B62989503700C0BCBC /* ListOfPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListOfPlacesView.swift; sourceTree = "<group>"; };
 		3F0DC4B82989618600C0BCBC /* PlaceDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailsView.swift; sourceTree = "<group>"; };
-		3F0DC4BA2989670A00C0BCBC /* TabbedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabbedView.swift; sourceTree = "<group>"; };
+		3F0DC4BA2989670A00C0BCBC /* DestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationView.swift; sourceTree = "<group>"; };
 		3F136753297FE6F3005B8666 /* MushMaze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MushMaze.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F136756297FE6F3005B8666 /* MushMazeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MushMazeApp.swift; sourceTree = "<group>"; };
 		3F136758297FE6F3005B8666 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -193,7 +193,7 @@
 				3F8D35802982A2B600DCBCBF /* AddPlaceView.swift */,
 				3F0DC4B62989503700C0BCBC /* ListOfPlacesView.swift */,
 				3F0DC4B82989618600C0BCBC /* PlaceDetailsView.swift */,
-				3F0DC4BA2989670A00C0BCBC /* TabbedView.swift */,
+				3F0DC4BA2989670A00C0BCBC /* DestinationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -347,7 +347,7 @@
 				3F8D35812982A2B600DCBCBF /* AddPlaceView.swift in Sources */,
 				3F0DC4B92989618600C0BCBC /* PlaceDetailsView.swift in Sources */,
 				3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */,
-				3F0DC4BB2989670A00C0BCBC /* TabbedView.swift in Sources */,
+				3F0DC4BB2989670A00C0BCBC /* DestinationView.swift in Sources */,
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
 				3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */,
 				3F80B7742981617E00C39181 /* User.swift in Sources */,

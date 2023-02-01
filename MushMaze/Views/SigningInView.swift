@@ -9,8 +9,10 @@ import SwiftUI
 import FirebaseAuth
 
 struct SigningInView: View {
+    //let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
+    
     @Binding var signedIn : Bool
-    let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
+    @Binding var signedOut : Bool
     @State var email = ""
     @State var password = ""
     @State var showCreatingAccountView = false
@@ -24,32 +26,18 @@ struct SigningInView: View {
             WelcomeText()
             Spacer()
             UserImage()
-            
-            EmailTextField(email: $email, emailMissing: $emailIsMissing, lightGreyColor: lightGreyColor)
-            
-            ZStack {
-                PasswordFieldView(password: $password,
+            EmailTextField(email: $email, emailMissing: $emailIsMissing)
+            PasswordFieldView(password: $password,
                                   passwordMissing: $passwordIsMissing,
-                                  isSecured: isSecured,
-                                  action: logIn,
-                                  lightGreyColor: lightGreyColor)
-                
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        self.isSecured.toggle()
-                    }) {
-                        EyeImageButton(isSecured: $isSecured)
-                    }
-                }
-            }
+                                  isSecured: $isSecured,
+                                  action: logIn)
             Button(action: {
                 showCreatingAccountView = true
             }) {
                 Text("Not registered yet? Sign up here")
             }
             .fullScreenCover(isPresented: $showCreatingAccountView, content: {
-                CreatingAccountView(signedIn: self.$signedIn)
+                CreatingAccountView(signedIn: $signedIn, signedOut: $signedOut)
             })
             Spacer()
             Button(action: {
@@ -82,9 +70,10 @@ struct SigningInView: View {
                 if let error = error {
                     print("error signing in \(error)")
                 } else {
-                    print("signed in \(authResult?.user.uid)")
                     signedIn = true
-                    
+                    signedOut = false
+                    // if the user have logged out, and then logged in again - we need to change the signedOut
+                    // to false to show TappedView
                 }
             }
         }
@@ -101,15 +90,15 @@ struct SigningInView: View {
 struct EmailTextField : View {
     @Binding var email : String
     @Binding var emailMissing : Bool
-    let lightGreyColor : Color
     
     var body: some View {
         ZStack {
             TextField("Email Address", text: $email)
                 .padding()
-                .background(lightGreyColor)
+                .background(Color(.systemGray6))
                 .cornerRadius(5.0)
                 .padding(.bottom, 20)
+                .autocorrectionDisabled(true)
             if emailMissing {
                 RoundedRectangle(cornerRadius: 5)
                     .stroke(Color.red, lineWidth: 1)
@@ -123,20 +112,27 @@ struct EmailTextField : View {
 struct PasswordFieldView: View {
     @Binding var password: String
     @Binding var passwordMissing : Bool
-    var isSecured : Bool
+    @Binding var isSecured : Bool
     var action: () -> Void
-    var lightGreyColor : Color
     
     var body: some View {
         if isSecured {
             ZStack {
-                SecureField("Password", text: $password) {
-                    self.action()
+                HStack {
+                    SecureField("Password", text: $password) {
+                        self.action()
+                    }
+                    Button(action: {
+                        self.isSecured.toggle()
+                    }) {
+                        EyeImageButton(isSecured: $isSecured)
+                    }
                 }
-                    .padding()
-                    .background(lightGreyColor)
-                    .cornerRadius(5.0)
-                    .padding(.bottom, 20)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(5.0)
+                .padding(.bottom, 20)
+                .autocorrectionDisabled(true)
                 if passwordMissing {
                     RoundedRectangle(cornerRadius: 5)
                         .stroke(Color.red, lineWidth: 1)
@@ -146,13 +142,21 @@ struct PasswordFieldView: View {
             }
         } else {
             ZStack {
-                TextField("Password", text: $password) {
-                    self.action()
+                HStack {
+                    TextField("Password", text: $password) {
+                        self.action()
+                    }
+                    Button(action: {
+                        self.isSecured.toggle()
+                    }) {
+                        EyeImageButton(isSecured: $isSecured)
+                    }
                 }
-                    .padding()
-                    .background(lightGreyColor)
-                    .cornerRadius(5.0)
-                    .padding(.bottom, 20)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(5.0)
+                .padding(.bottom, 20)
+                .autocorrectionDisabled(true)
                 if passwordMissing {
                     RoundedRectangle(cornerRadius: 5)
                         .stroke(Color.red, lineWidth: 1)
@@ -165,15 +169,15 @@ struct PasswordFieldView: View {
 }
 
 
+
+
 struct EyeImageButton : View {
     @Binding var isSecured : Bool
     var body: some View {
         
             Image(systemName: isSecured ? "eye.slash.fill" : "eye.fill")
-                .foregroundColor(.black)
+                .foregroundColor(.gray)
                 .font(.system(size: 22))
-                .padding(.bottom, 14)
-        
     }
 }
 
@@ -195,7 +199,6 @@ struct UserImage : View {
             .clipped()
             .cornerRadius(150)
             .padding(.bottom, 75)
-        
     }
 }
 

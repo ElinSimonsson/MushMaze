@@ -19,6 +19,7 @@ struct Place : Identifiable, Codable, Equatable {
     var longitude : Double
     var distance : Double?
     var isSelected : Bool
+    var favorite : Bool
     var coordinate : CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }

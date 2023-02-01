@@ -21,13 +21,12 @@ struct ProfileView: View {
     
     var body: some View {
         VStack {
-            
             HStack{
                 Button(action: {
+                   
                     presentationMode.wrappedValue.dismiss()
                 }) {
-                    Text("< Back")
-                    
+                    Image(systemName: "arrow.left")
                 }
                 Spacer()
                 Button(action: {

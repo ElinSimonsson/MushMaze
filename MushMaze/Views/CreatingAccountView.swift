@@ -10,19 +10,21 @@ import Firebase
 import FirebaseAuth
 
 struct CreatingAccountView: View {
-    
     let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
     let db = Firestore.firestore()
+    
     @Environment(\.presentationMode) var presentationMode
+    @Binding var signedIn : Bool
+    @Binding var signedOut : Bool
     @State var fullName = ""
     @State var emailAddress = ""
     @State var password = ""
     @State var repeatPassword = ""
     @State var showError = false
-    @Binding var signedIn : Bool
-    @State var fullNameIsMissing = false
-    @State var emailAddressIsMissing = false
-    @State var passwordIsMissing = false
+    @State var showErrorFullName = false
+    @State var showErrorEmailAddress = false
+    @State var showErrorPassword = false
+    @State var showErrorRepeatPassword = false
     @State var passwordsDoNotMatch = false
     
     var body: some View {
@@ -42,49 +44,18 @@ struct CreatingAccountView: View {
                 .padding(.top, 70)
             Spacer()
             
-            TextField("Full Name", text: $fullName)
-                .padding()
-                .background(lightGreyColor)
-                .cornerRadius(5.0)
-                .padding(.bottom, 20)
-                .alert(isPresented: $fullNameIsMissing) {
-                    Alert(title: Text("Full Name Missing"), message: Text("Please enter your full name"), dismissButton: .default(Text("OK")))
-                }
-
-            TextField("Email Address", text: $emailAddress)
-                .padding()
-                .background(lightGreyColor)
-                .cornerRadius(5.0)
-                .padding(.bottom, 20)
-                .alert(isPresented: $emailAddressIsMissing) {
-                    Alert(title: Text ("Email Missing"), message: Text("Please enter your email"), dismissButton: .default(Text("OK")))
-                }
+            InputTextField(hintText: "Full Name" , inputText: $fullName, showError: $showErrorFullName)
+            InputTextField(hintText: "Email Address", inputText: $emailAddress, showError: $showErrorEmailAddress)
+            InputPasswordField(hintText: "Password", inputPassword: $password, showError: $showErrorPassword, showErrorPasswordsNotMatching: $passwordsDoNotMatch)
+            InputPasswordField(hintText: "Repeat Password", inputPassword: $repeatPassword, showError: $showErrorRepeatPassword, showErrorPasswordsNotMatching: $passwordsDoNotMatch)
             
-            SecureField("Password", text: $password)
-                .padding()
-                .background(lightGreyColor)
-                .cornerRadius(5.0)
-                .padding(.bottom, 20)
-                .alert(isPresented: $passwordIsMissing) { // this alert make sure that BOTH of password field are filled
-                    Alert(title: Text("Password Missing"), message: Text("Please make sure to fill in both password fields"),
-                          dismissButton: .default(Text("Ok")))
-                }
-            
-            SecureField("Repeat Password", text: $repeatPassword)
-                .padding()
-                .background(lightGreyColor)
-                .cornerRadius(5.0)
-                .padding(.bottom, 100)
-                .alert(isPresented: $passwordsDoNotMatch) { // since the previous alert already checks if this secureField isn´t filled, this one checks if the passwords dont match
-                    Alert(title: Text("Password do not match"), message: Text("The passwords entered do not match. Please re-enter your password and confirm it again to proceed"),
-                          dismissButton: .default(Text("Ok")))
-                }
-            
+            Spacer()
             Button(action: {
                 createAccount()
             }) {
                 CreateAccountButtonContent()
             }
+            Spacer()
             
         }
         .padding()
@@ -94,12 +65,19 @@ struct CreatingAccountView: View {
         let userEmail = $emailAddress.wrappedValue
         let userPassword = $password.wrappedValue
         
-        if fullName == "" {
-            fullNameIsMissing = true
+        if fullName == "" && emailAddress == "" && password == "" && repeatPassword == "" {
+            showErrorFullName = true
+            showErrorEmailAddress = true
+            showErrorPassword = true
+            showErrorRepeatPassword = true
+        } else if fullName == "" {
+            showErrorFullName = true
         } else if emailAddress == "" {
-            emailAddressIsMissing = true
-        } else if password == "" || repeatPassword == "" {
-            passwordIsMissing = true
+            showErrorEmailAddress = true
+        } else if password == "" {
+            showErrorPassword = true
+        } else if repeatPassword == "" {
+            showErrorRepeatPassword = true
         } else if password != repeatPassword {
             passwordsDoNotMatch = true
         } else {
@@ -115,19 +93,6 @@ struct CreatingAccountView: View {
     }
     
     func saveUserDataToFirestore () {
-        
-//        guard let currentUser = Auth.auth().currentUser else {return}
-//
-//        let user = User(fullName: $fullName.wrappedValue, userId: currentUser.uid)
-//        do {
-//            _ = try
-//                db.collection("usersInformation").addDocument(from: user)
-//            print("successed to save")
-//            signedIn = true
-//        } catch {
-//            print("Error saving to Firebase")
-//        }
-        
         guard let currentUser = Auth.auth().currentUser else {return}
         
         let user = User(fullName: $fullName.wrappedValue, emailAddress: $emailAddress.wrappedValue, userId: currentUser.uid)
@@ -136,20 +101,63 @@ struct CreatingAccountView: View {
             db.collection("users").document(currentUser.uid).setData(from: user)
             print("successed to save")
             signedIn = true
+            signedOut = false
         } catch {
             print("Error saving to Firebase")
         }
     }
 }
 
-struct ErrorText : View {
-    var message : String
+
+struct InputTextField : View {
+    var hintText : String
+    @Binding var inputText : String
+    @Binding var showError : Bool
+   
     
     var body: some View {
-        Text(message)
-            .font(.title3)
-            .foregroundColor(.red)
-            .fontWeight(.semibold)
+        ZStack {
+            TextField(hintText, text: $inputText)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(5.0)
+                .padding(.bottom, 20)
+                .autocorrectionDisabled(true)
+            if showError {
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(Color.red, lineWidth: 1)
+                    .frame(width: UIScreen.main.bounds.width - 40, height: 50)
+                    .padding(.bottom, 20)
+            }
+        }
+    }
+}
+
+struct InputPasswordField : View {
+    var hintText : String
+    @Binding var inputPassword : String
+    @Binding var showError : Bool
+    @Binding var showErrorPasswordsNotMatching : Bool
+    
+    var body: some View {
+        ZStack {
+            SecureField(hintText, text: $inputPassword)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(5.0)
+                .padding(.bottom, 20)
+                .autocorrectionDisabled(true)
+                .alert(isPresented: $showErrorPasswordsNotMatching) {
+                    Alert(title: Text("The passwords do not match"), message: Text("Please try again with the same password in both fields"),
+                          dismissButton: .default(Text("Ok")))
+                }
+            if showError {
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(Color.red, lineWidth: 1)
+                    .frame(width: UIScreen.main.bounds.width - 40, height: 50)
+                    .padding(.bottom, 20)
+            }
+        }
     }
 }
 

@@ -14,7 +14,7 @@ import FirebaseStorage
 struct AddPlaceView: View {
     @Environment(\.presentationMode) var presentationMode
     var coordinate : CLLocationCoordinate2D
-    let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
+    //let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
     let db = Firestore.firestore()
     let places = Places()
     
@@ -60,11 +60,10 @@ struct AddPlaceView: View {
                         if let image = selectedImage {
                             Image(uiImage: image)
                                 .imageMod()
-                            
                         } else {
                             Image(systemName: "photo")
                                 .imageMod()
-                                .foregroundColor(.gray)
+                                .foregroundColor(Color(.systemGray3))
                         }
                     }).alert(isPresented: $showingAlert) {
                         Alert(title: Text("Choose Source"),
@@ -72,16 +71,14 @@ struct AddPlaceView: View {
                             sourceType = .camera
                             changeProfileImage = true
                             openCameraRoll = true
-                            print("camera pressed \(sourceType)")
                         }, secondaryButton: .default(Text("Photo")) {
                             sourceType = .photoLibrary
                             changeProfileImage = true
                             openCameraRoll = true
-                            print("photo pressed \(sourceType)")
                         })
                     }
-                    PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing, lightGreyColor: lightGreyColor)
-                    PlaceDescriptionField(description: $description, lightGreyColor: lightGreyColor)
+                    PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing)
+                    PlaceDescriptionField(description: $description)
                         .onTapGesture {
                             clearText()
                         }
@@ -214,14 +211,12 @@ struct MushroomSpeciesSubTitle : View {
 struct PlaceTextField : View {
     @Binding var placeName : String
     @Binding var placeNameMissing : Bool
-    let lightGreyColor : Color
     
     var body: some View {
-        
         ZStack {
-            TextField("Password", text: $placeName)
+            TextField("Place Name", text: $placeName)
                 .padding()
-                .background(lightGreyColor)
+                .background(Color(.systemGray6))
                 .cornerRadius(5.0)
                 .padding(.bottom, 20)
             if placeNameMissing {
@@ -231,25 +226,18 @@ struct PlaceTextField : View {
                     .padding(.bottom, 20)
             }
         }
-        
-//        TextField("Place Name", text: $placeName)
-//            .padding()
-//            .background(lightGreyColor)
-//            .cornerRadius(5.0)
-//            .padding(.bottom, 20)
     }
 }
 
 struct PlaceDescriptionField : View {
     @Binding var description : String
-    let lightGreyColor : Color
     
     var body: some View {
         TextEditor(text: $description)
             .frame(height: 80)
             .padding()
             .scrollContentBackground(.hidden)
-            .background(lightGreyColor)
+            .background(Color(.systemGray6))
             .cornerRadius(5.0)
             .padding(.bottom, 20)
         

@@ -10,13 +10,11 @@ import MapKit
 import Firebase
 
 struct MapView: View {
-    
-    var locationManager : LocationManager
+    let db = Firestore.firestore()
+    let locationManager : LocationManager
     @Binding var signedOut : Bool
     @EnvironmentObject var places : Places
-    let db = Firestore.firestore()
     @State var longPressLocation = CGPoint.zero
-    //    @State var customPlace = Place(latitude: 0, longitude: 0)
     @State var coordinate = CLLocationCoordinate2D(latitude: 200, longitude: 200)
     @Environment(\.colorScheme) var colorScheme
     let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
@@ -77,7 +75,7 @@ struct MapView: View {
                                     switch value {
                                     case .second(true, let drag):
                                         longPressLocation = drag?.location ?? .zero
-                                       coordinate = addPlaceByTap(at: longPressLocation, for: proxy.size)
+                                        coordinate = addPlaceByTap(at: longPressLocation, for: proxy.size)
                                         
                                     default:
                                         break

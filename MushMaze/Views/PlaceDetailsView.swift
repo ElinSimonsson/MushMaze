@@ -9,21 +9,25 @@ import SwiftUI
 
 struct PlaceDetailsView: View {
     var place : Place
-    @Binding var showProfileButton : Bool
-    
+    @Binding var isHeaderVisible : Bool
+    @Environment(\.presentationMode) var presentationMode
+
     var body: some View {
         Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-            .onAppear() {
-                showProfileButton = false
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        isHeaderVisible = true
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "arrow.left")
+                    }
+                }
             }
-            .onDisappear() {
-                showProfileButton = true
+            .onAppear() {
+                isHeaderVisible = false
             }
     }
 }
 
-//struct PlaceDetailsView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        PlaceDetailsView()
-//    }
-//}

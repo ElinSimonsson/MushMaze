@@ -31,7 +31,8 @@ class Places : ObservableObject {
                           imageURL: imageURL,
                           latitude: latitude,
                           longitude: longitude,
-                          isSelected: false)
+                          isSelected: false,
+                          favorite: false) // default
         
         do {
             _ = try
@@ -70,6 +71,13 @@ class Places : ObservableObject {
                     }
                 }
             }
+        }
+    }
+    
+    func updateFavroriteFirestore (place: Place) {
+        guard let user = Auth.auth().currentUser else {return}
+        if let id = place.id {
+            db.collection("users").document(user.uid).collection("places").document(id).updateData(["favorite" : !place.favorite])
         }
     }
     

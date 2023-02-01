@@ -18,10 +18,10 @@ struct ContentView: View {
     
     var body: some View {
 
-        if !signedOut && signedIn { // måste skicka med signedOut till signingInView för att ändra signedout till false när anvädmaren har loggat in
-            TabbedView(signedOut: $signedOut)
+        if !signedOut && signedIn {
+            DestinationView(signedOut: $signedOut)
         } else {
-            SigningInView(signedIn: $signedIn)
+            SigningInView(signedIn: $signedIn, signedOut: $signedOut)
         }
     }
 }
