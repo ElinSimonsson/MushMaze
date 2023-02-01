@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct ListOfPlacesView: View {
     let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
@@ -14,6 +15,14 @@ struct ListOfPlacesView: View {
     @State var showProfile = false
     @State var isHeaderVisible = true
     @State private var searchText = ""
+    @State var showFavorite = true
+    
+    enum FilterSetting: String, CaseIterable {
+        case all = "All places"
+        case favorite = "My favorites"
+    }
+    
+    @State var selectedFilter = FilterSetting.all
     
     
     var filteredPlaces: [Place] {
@@ -27,15 +36,29 @@ struct ListOfPlacesView: View {
         if isHeaderVisible {
             VStack {
                 HStack {
-                    SearchBar(text: $searchText)
-                    Spacer()
-                    Button(action: {
-                        showProfile = true
-                    }) {
-                        SmallUserImage()
-                    }.fullScreenCover(isPresented: $showProfile, content: {
-                        ProfileView(signedOut: $signedOut)
-                    })
+                    VStack {
+                        HStack {
+                            SearchBar(text: $searchText)
+                            Spacer()
+                            Button(action: {
+                                showProfile = true
+                            }) {
+                                SmallUserImage()
+                            }.fullScreenCover(isPresented: $showProfile, content: {
+                                ProfileView(signedOut: $signedOut)
+                            })
+                        }
+                        HStack {
+                            Picker(selection: $selectedFilter, label: Text("Välj ett alternativ")) {
+                                ForEach(FilterSetting.allCases, id: \.self) { selected in
+                                    Text(selected.rawValue).tag(selected)
+                                }
+                            }
+                            .onChange(of: selectedFilter, perform:  { tag in
+                                print("test \(tag)")
+                            })
+                        }
+                    }
                 }
                 MushroomTitle()
             }
@@ -45,17 +68,37 @@ struct ListOfPlacesView: View {
             List () {
                 if searchText == "" {
                     ForEach(places.places) { place in
-                        NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
-                            Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
-                                RowView(place: place)
+                        if selectedFilter == .favorite {
+                            if place.favorite {
+                                NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                    Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
+                                        RowView(place: place)
+                                    }
+                                }
+                            }
+                        } else if selectedFilter == .all {
+                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
+                                    RowView(place: place)
+                                }
                             }
                         }
                     }
                 } else {
                     ForEach(filteredPlaces) { place in
-                        NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
-                            Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
-                                FilteredRowView(text: $searchText, place: place)
+                        if selectedFilter == .favorite {
+                            if place.favorite {
+                                NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                    Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
+                                        FilteredRowView(text: $searchText, place: place)
+                                    }
+                                }
+                            }
+                        } else if selectedFilter == .all {
+                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
+                                    FilteredRowView(text: $searchText, place: place)
+                                }
                             }
                         }
                     }
@@ -72,7 +115,6 @@ struct FilteredRowView : View {
     @EnvironmentObject var places : Places
     @Binding var text : String
     var place : Place
-    //@State var isFavorite = false
     
     var body: some View {
         HStack {
@@ -102,10 +144,10 @@ struct FilteredRowView : View {
 struct RowView : View {
     @EnvironmentObject var places : Places
     var place: Place
-    //@State var isFavorite = false
-    
+
     var body: some View {
         HStack {
+            SmallProfileImage(place: place)
             Text(place.name)
                 .foregroundColor(.black)
             Spacer()
@@ -147,6 +189,45 @@ struct MushroomTitle : View {
                 .padding(.top)
             Spacer()
         }
+    }
+}
+
+struct SmallProfileImage : View {
+    let db = Firestore.firestore()
+    let place : Place
+    @State var imageURL = ""
+    
+    var body: some View {
+        AsyncImage(url: URL(string: imageURL),
+                   content:  { image in
+            image
+                .resizable()
+                .scaledToFit()
+            
+        },
+                   placeholder: {ProgressView()}
+        )
+        .aspectRatio(contentMode: .fill)
+        .frame(width: 40, height: 40)
+        .clipShape(Circle())
+        .onAppear() {
+            fetchCreaterProfileImage(place: place)
+        }
+    }
+    
+    func fetchCreaterProfileImage (place: Place) {
+        let id = place.createrUID
+        
+        let docRef = db.collection("users").document(id)
+        
+        docRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                imageURL = document.get("imageURL") as? String ?? ""
+            } else {
+                print("Document does not exist")
+            }
+        }
+        
     }
 }
 

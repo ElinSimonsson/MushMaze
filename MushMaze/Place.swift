@@ -11,6 +11,7 @@ import FirebaseFirestoreSwift
 
 struct Place : Identifiable, Codable, Equatable {
     @DocumentID var id : String?
+    var createrUID : String
     var name : String
     var description : String?
     var mushrooms : [String]?

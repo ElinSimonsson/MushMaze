@@ -25,7 +25,8 @@ class Places : ObservableObject {
         
         guard let user = Auth.auth().currentUser else {return}
         
-        let place = Place(name: name,
+        let place = Place(createrUID: user.uid,
+                          name: name,
                           description: description,
                           mushrooms: mushrooms,
                           imageURL: imageURL,
@@ -65,7 +66,6 @@ class Places : ObservableObject {
                     switch result {
                     case .success(let place) :
                         self.places.append(place)
-                        print(place.name)
                     case .failure(let error) :
                         print("Error decoding place : \(error.localizedDescription)")
                     }
