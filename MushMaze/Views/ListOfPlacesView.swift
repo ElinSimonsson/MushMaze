@@ -9,20 +9,19 @@ import SwiftUI
 import Firebase
 
 struct ListOfPlacesView: View {
-    let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
     @EnvironmentObject var places : Places
-    @Binding var signedOut : Bool
+    @EnvironmentObject var userModel : UserModel
     @State var showProfile = false
     @State var isHeaderVisible = true
     @State private var searchText = ""
     @State var showFavorite = true
     
-    enum FilterSetting: String, CaseIterable {
+    enum FilterPlace: String, CaseIterable {
         case all = "All places"
         case favorite = "My favorites"
     }
     
-    @State var selectedFilter = FilterSetting.all
+    @State var selectedPlaceFilter = FilterPlace.all
     
     
     var filteredPlaces: [Place] {
@@ -34,41 +33,13 @@ struct ListOfPlacesView: View {
     
     var body: some View {
         if isHeaderVisible {
-            VStack {
-                HStack {
-                    VStack {
-                        HStack {
-                            SearchBar(text: $searchText)
-                            Spacer()
-                            Button(action: {
-                                showProfile = true
-                            }) {
-                                SmallUserImage()
-                            }.fullScreenCover(isPresented: $showProfile, content: {
-                                ProfileView(signedOut: $signedOut)
-                            })
-                        }
-                        HStack {
-                            Picker(selection: $selectedFilter, label: Text("Välj ett alternativ")) {
-                                ForEach(FilterSetting.allCases, id: \.self) { selected in
-                                    Text(selected.rawValue).tag(selected)
-                                }
-                            }
-                            .onChange(of: selectedFilter, perform:  { tag in
-                                print("test \(tag)")
-                            })
-                        }
-                    }
-                }
-                MushroomTitle()
-            }
-            .padding(.leading, 10)
+            HeaderView(searchText: $searchText, showProfile: $showProfile, selectedPlaceFilter: $selectedPlaceFilter)
         }
         NavigationView  {
             List () {
                 if searchText == "" {
                     ForEach(places.places) { place in
-                        if selectedFilter == .favorite {
+                        if selectedPlaceFilter == .favorite {
                             if place.favorite {
                                 NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                     Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
@@ -76,7 +47,7 @@ struct ListOfPlacesView: View {
                                     }
                                 }
                             }
-                        } else if selectedFilter == .all {
+                        } else if selectedPlaceFilter == .all {
                             NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                 Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
                                     RowView(place: place)
@@ -86,7 +57,7 @@ struct ListOfPlacesView: View {
                     }
                 } else {
                     ForEach(filteredPlaces) { place in
-                        if selectedFilter == .favorite {
+                        if selectedPlaceFilter == .favorite {
                             if place.favorite {
                                 NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                     Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
@@ -94,7 +65,7 @@ struct ListOfPlacesView: View {
                                     }
                                 }
                             }
-                        } else if selectedFilter == .all {
+                        } else if selectedPlaceFilter == .all {
                             NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                 Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
                                     FilteredRowView(text: $searchText, place: place)
@@ -109,7 +80,6 @@ struct ListOfPlacesView: View {
         }
     }
 }
-
 
 struct FilteredRowView : View {
     @EnvironmentObject var places : Places
@@ -193,11 +163,12 @@ struct MushroomTitle : View {
 }
 
 struct SmallProfileImage : View {
-    let db = Firestore.firestore()
+    @EnvironmentObject var userModel : UserModel
     let place : Place
-    @State var imageURL = ""
+    @State private var imageURL = ""
     
     var body: some View {
+        
         AsyncImage(url: URL(string: imageURL),
                    content:  { image in
             image
@@ -217,19 +188,61 @@ struct SmallProfileImage : View {
     
     func fetchCreaterProfileImage (place: Place) {
         let id = place.createrUID
-        
-        let docRef = db.collection("users").document(id)
-        
-        docRef.getDocument { (document, error) in
-            if let document = document, document.exists {
-                imageURL = document.get("imageURL") as? String ?? ""
-            } else {
-                print("Document does not exist")
+        userModel.fetchUserImageURL(userID: id) { (url, error) in
+            if let error = error {
+                print("error fetching imageURL \(error)")
+            }
+            if let url = url {
+                imageURL = url
             }
         }
-        
     }
 }
+
+struct HeaderView: View {
+    //@Binding var isHeaderVisible: Bool
+    @Binding var searchText: String
+    @Binding var showProfile: Bool
+    @Binding var selectedPlaceFilter: ListOfPlacesView.FilterPlace
+
+    var body: some View {
+       // if isHeaderVisible {
+            VStack {
+                HStack {
+                    VStack {
+                        HStack {
+                            SearchBar(text: $searchText)
+                            Spacer()
+                            Button(action: {
+                                showProfile = true
+                            }) {
+                                SmallUserImage()
+                            }.fullScreenCover(isPresented: $showProfile, content: {
+                                ProfileView()
+                            })
+                        }
+                        HStack {
+                            Picker(selection: $selectedPlaceFilter, label: Text("")) {
+                                ForEach(ListOfPlacesView.FilterPlace.allCases, id: \.self) { selected in
+                                    Text(selected.rawValue).tag(selected)
+                                }
+                            }
+                            .onChange(of: selectedPlaceFilter, perform:  { tag in
+                                print("test \(tag)")
+                            })
+                        }
+                    }
+                }
+                MushroomTitle()
+            }
+            .padding(.leading, 10)
+        //}
+    }
+}
+
+
+
+
 
 //struct ListOfPlacesView_Previews: PreviewProvider {
 //    static var previews: some View {

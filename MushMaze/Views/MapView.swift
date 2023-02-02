@@ -12,108 +12,98 @@ import Firebase
 struct MapView: View {
     let db = Firestore.firestore()
     let locationManager : LocationManager
-    @Binding var signedOut : Bool
-    @EnvironmentObject var places : Places
-    @State var longPressLocation = CGPoint.zero
-    @State var coordinate = CLLocationCoordinate2D(latitude: 200, longitude: 200)
-    @Environment(\.colorScheme) var colorScheme
     let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    
+    @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var places : Places
+    @State var coordinate = CLLocationCoordinate2D(latitude: 200, longitude: 200)
+    @State var longPressLocation = CGPoint.zero
     @State var showProfile = false
     @State var showAddPlaceView = false
     @State var selectedPlace : Place?
-    
+    @State var placesList = [Place]()
     @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 59.243013423142024, longitude: 17.9932212288352), span:
                                             MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
     
     var body: some View {
         GeometryReader { proxy in
             ZStack {
+                Map(coordinateRegion: $region,
+                    interactionModes: [.all],
+                    showsUserLocation: true,
+                    userTrackingMode: .constant(.follow),
+                    annotationItems: places.places) { place in  //places.places
+                    MapAnnotation(coordinate: place.coordinate, anchorPoint: CGPoint(x: 0.5, y: 0.5)) { // create own content on every map marker
+                        ZStack {
+                            MapPinMarker(place: place)
+                                .onTapGesture {
+                                    self.selectedPlace = place
+                                    places.setAllIsSelectedFalse()
+                                    places.updateIsSelected(place: place, with: true)
+                                }
+                            // if isSelected == place doesn´t work, this view disappears if calculateDistance is executed
+                            if let isSelected = place.isSelected {
+                                if isSelected {
+                                    MapAnnotationDetailView(place: place, closure: calculateDistance)
+                                        .onAppear() {
+                                            calculateDistance()
+                                        }
+                                }
+                            }
+                            
+                        }
+                        .padding(.vertical, 60)
+                    }
+                }
+                    .gesture(LongPressGesture(
+                        minimumDuration: 0.25)
+                        .sequenced(before: DragGesture(
+                            minimumDistance: 0,
+                            coordinateSpace: .local))
+                            .onEnded { value in
+                                switch value {
+                                case .second(true, let drag):
+                                    longPressLocation = drag?.location ?? .zero
+                                    coordinate = convertPointToCoordinate(at: longPressLocation, for: proxy.size)
+                                default:
+                                    break
+                                }
+                            })
+                    .highPriorityGesture(DragGesture(minimumDistance: 10))
+                    .colorScheme(colorScheme == .dark ? .dark : .light)
+                
                 VStack {
-                    HStack{
+                    Spacer()
+                    HStack {
                         Spacer()
                         Button(action: {
-                            showProfile = true
-                        }) {
-                            SmallUserImage()
-                        }.fullScreenCover(isPresented: $showProfile, content: {
-                            ProfileView(signedOut: $signedOut)
-                        })
-                    }
-                    Map(coordinateRegion: $region,
-                        interactionModes: [.all],
-                        showsUserLocation: true,
-                        userTrackingMode: .constant(.follow),
-                        annotationItems: places.places) { place in
-                        MapAnnotation(coordinate: place.coordinate, anchorPoint: CGPoint(x: 0.5, y: 0.5)) { // create own content on every map marker
-                            ZStack {
-                                MapPinMarker(place: place)
-                                    .onTapGesture {
-                                        self.selectedPlace = place
-                                        places.setAllIsSelectedFalse()
-                                        places.updateIsSelected(place: place, with: true)
-                                    }
-                                // if isSelected == place doesn´t work, this view disappears if calculateDistance is executed
-                                if let isSelected = place.isSelected {
-                                    if isSelected {
-                                        MapAnnotationDetailView(place: place, closure: calculateDistance)
-                                            .onAppear() {
-                                                calculateDistance()
-                                            }
-                                    }
-                                }
-                                
+                            coordinate = addPin() ?? CLLocationCoordinate2D(latitude: 100, longitude: 200)
+                            if (coordinate.latitude >= -90 && coordinate.latitude <= 90) && (coordinate.longitude >= -180 && coordinate.longitude <= 180) {
+                                showAddPlaceView = true
+                            } }) {
+                                Image(systemName: "plus")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 30))
                             }
-                            .padding(.vertical, 60)
-                        }
+                            .fullScreenCover(isPresented: $showAddPlaceView, content: {
+                                AddPlaceView(coordinate: coordinate)
+                            })
+                            .frame(width: 50, height: 50)
+                            .background(Color(darkTurquoise))
+                            .clipShape(Circle())
+                        
                     }
-                        .gesture(LongPressGesture(
-                            minimumDuration: 0.25)
-                            .sequenced(before: DragGesture(
-                                minimumDistance: 0,
-                                coordinateSpace: .local))
-                                .onEnded { value in
-                                    switch value {
-                                    case .second(true, let drag):
-                                        longPressLocation = drag?.location ?? .zero
-                                        coordinate = addPlaceByTap(at: longPressLocation, for: proxy.size)
-                                        
-                                    default:
-                                        break
-                                    }
-                                })
-                        .highPriorityGesture(DragGesture(minimumDistance: 10))
-                        .colorScheme(colorScheme == .dark ? .dark : .light)
+                    
+                    Spacer().frame(maxHeight: 50)
                 }
+                .padding()
             }
             .onAppear() {
                 places.listenToFirestore()
             }
-            HStack {
-                Spacer()
-                VStack {
-                    Spacer()
-                    Button(action: {
-                        coordinate = addPin() ?? CLLocationCoordinate2D(latitude: 100, longitude: 200)
-                        if (coordinate.latitude >= -90 && coordinate.latitude <= 90) && (coordinate.longitude >= -180 && coordinate.longitude <= 180) {
-                            showAddPlaceView = true
-                        }
-                        
-                    }) {
-                        Image(systemName: "plus")
-                            .foregroundColor(.white)
-                            .font(.system(size: 30))
-                    }
-                    .fullScreenCover(isPresented: $showAddPlaceView, content: {
-                        AddPlaceView(coordinate: coordinate)
-                    })
-                    .frame(width: 50, height: 50)
-                    .background(Color(darkTurquoise))
-                    .clipShape(Circle())
-                }
-                .padding()
-            }
         }
     }
+    
     
     func addPin () -> CLLocationCoordinate2D? {
         if let location = locationManager.location {
@@ -122,7 +112,7 @@ struct MapView: View {
         return nil
     }
     
-    func addPlaceByTap (at point: CGPoint, for mapSize: CGSize) -> CLLocationCoordinate2D {
+    func convertPointToCoordinate (at point: CGPoint, for mapSize: CGSize) -> CLLocationCoordinate2D {
         let lat = region.center.latitude
         let lon = region.center.longitude
         
@@ -209,6 +199,7 @@ struct MapAnnotationDetailView : View {
         }
     }
 }
+
 
 struct MapPinMarker : View {
     var place : Place

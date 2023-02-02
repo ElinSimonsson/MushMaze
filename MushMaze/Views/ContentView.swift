@@ -8,20 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
-    //let locationManager = LocationManager()
-    @State var signedIn = false
-    @State var signedOut = false
+
+    @EnvironmentObject var userModel : UserModel
     
-//    init() {
-//        locationManager.startLocationUpdate()
-//    }
     
     var body: some View {
 
-        if !signedOut && signedIn {
-            DestinationView(signedOut: $signedOut)
+        if !userModel.signedOut && userModel.signedIn {
+            DestinationView()
         } else {
-            SigningInView(signedIn: $signedIn, signedOut: $signedOut)
+            SigningInView()
         }
     }
 }

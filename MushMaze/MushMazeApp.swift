@@ -12,6 +12,7 @@ import Firebase
 @main
 struct MushMazeApp: App {
     @StateObject var places = Places()
+    @StateObject var userModel = UserModel()
     
     
     init() {
@@ -22,6 +23,7 @@ struct MushMazeApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(places)
+                .environmentObject(userModel)
         }
     }
 }

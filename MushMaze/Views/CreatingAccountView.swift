@@ -14,8 +14,7 @@ struct CreatingAccountView: View {
     let db = Firestore.firestore()
     
     @Environment(\.presentationMode) var presentationMode
-    @Binding var signedIn : Bool
-    @Binding var signedOut : Bool
+    @EnvironmentObject var userModel : UserModel
     @State var fullName = ""
     @State var emailAddress = ""
     @State var password = ""
@@ -29,21 +28,19 @@ struct CreatingAccountView: View {
     
     var body: some View {
         VStack {
-         HStack {
-            Button(action: {
-                presentationMode.wrappedValue.dismiss()
-            }) {
-                Text("< Back")
+            HStack {
+                Button(action: {
+                    presentationMode.wrappedValue.dismiss()
+                }) {
+                    Text("< Back")
+                }
+                Spacer()
             }
-            Spacer()
-        }
-         .padding(.top, 1)
-         .frame(alignment: .leading)
-            
+            .padding(.top, 1)
+            .frame(alignment: .leading)
             SignUpText()
                 .padding(.top, 70)
             Spacer()
-            
             InputTextField(hintText: "Full Name" , inputText: $fullName, showError: $showErrorFullName)
             InputTextField(hintText: "Email Address", inputText: $emailAddress, showError: $showErrorEmailAddress)
             InputPasswordField(hintText: "Password", inputPassword: $password, showError: $showErrorPassword, showErrorPasswordsNotMatching: $passwordsDoNotMatch)
@@ -56,15 +53,11 @@ struct CreatingAccountView: View {
                 CreateAccountButtonContent()
             }
             Spacer()
-            
         }
         .padding()
     }
     
     func createAccount() {
-        let userEmail = $emailAddress.wrappedValue
-        let userPassword = $password.wrappedValue
-        
         if fullName == "" && emailAddress == "" && password == "" && repeatPassword == "" {
             showErrorFullName = true
             showErrorEmailAddress = true
@@ -81,39 +74,17 @@ struct CreatingAccountView: View {
         } else if password != repeatPassword {
             passwordsDoNotMatch = true
         } else {
-            Auth.auth().createUser(withEmail: userEmail, password: userPassword) { authResult, error in
-                if let error = error {
-                    print("error signing up \(error.localizedDescription)")
-                } else {
-                    print("account created successfully")
-                    saveUserDataToFirestore()
-                }
-            }
-        }
-    }
-    
-    func saveUserDataToFirestore () {
-        guard let currentUser = Auth.auth().currentUser else {return}
-        
-        let user = User(fullName: $fullName.wrappedValue, emailAddress: $emailAddress.wrappedValue, userId: currentUser.uid)
-        do {
-            _ = try
-            db.collection("users").document(currentUser.uid).setData(from: user)
-            print("successed to save")
-            signedIn = true
-            signedOut = false
-        } catch {
-            print("Error saving to Firebase")
+            userModel.createUserAndSaveToFirestore(fullName: $fullName.wrappedValue,
+                                                   emailAddress: $emailAddress.wrappedValue,
+                                                   password: $password.wrappedValue)
         }
     }
 }
-
 
 struct InputTextField : View {
     var hintText : String
     @Binding var inputText : String
     @Binding var showError : Bool
-   
     
     var body: some View {
         ZStack {
@@ -171,7 +142,7 @@ struct SignUpText : View {
 }
 
 struct CreateAccountButtonContent : View {
-  let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
     var body: some View {
         Text("Create Account")
             .font(.title3)

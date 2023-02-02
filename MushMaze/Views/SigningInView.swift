@@ -9,10 +9,8 @@ import SwiftUI
 import FirebaseAuth
 
 struct SigningInView: View {
-    //let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
-    
-    @Binding var signedIn : Bool
-    @Binding var signedOut : Bool
+  
+    @EnvironmentObject var userModel : UserModel
     @State var email = ""
     @State var password = ""
     @State var showCreatingAccountView = false
@@ -37,7 +35,7 @@ struct SigningInView: View {
                 Text("Not registered yet? Sign up here")
             }
             .fullScreenCover(isPresented: $showCreatingAccountView, content: {
-                CreatingAccountView(signedIn: $signedIn, signedOut: $signedOut)
+                CreatingAccountView()
             })
             Spacer()
             Button(action: {
@@ -62,27 +60,13 @@ struct SigningInView: View {
         } else if password == "" {
             passwordIsMissing = true
         } else {
-        
-        let email = $email.wrappedValue
-        let password = $password.wrappedValue
-        
-            Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-                if let error = error {
-                    print("error signing in \(error)")
-                } else {
-                    signedIn = true
-                    signedOut = false
-                    // if the user have logged out, and then logged in again - we need to change the signedOut
-                    // to false to show TappedView
-                }
-            }
+            userModel.logIn(email: $email.wrappedValue, password: $password.wrappedValue)
         }
-        
     }
     
     func checkIfUserIsLoggedIn() {
         if Auth.auth().currentUser != nil {
-            signedIn = true
+            userModel.signedIn = true
         }
     }
 }
@@ -168,13 +152,9 @@ struct PasswordFieldView: View {
     }
 }
 
-
-
-
 struct EyeImageButton : View {
     @Binding var isSecured : Bool
     var body: some View {
-        
             Image(systemName: isSecured ? "eye.slash.fill" : "eye.fill")
                 .foregroundColor(.gray)
                 .font(.system(size: 22))

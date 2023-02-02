@@ -10,8 +10,9 @@ import Firebase
 import FirebaseAuth
 import FirebaseStorage
 
+
 struct ProfileView: View {
-    @Binding var signedOut : Bool
+    @EnvironmentObject var userModel : UserModel
     let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
     let db = Firestore.firestore()
     @Environment(\.presentationMode) var presentationMode
@@ -23,7 +24,6 @@ struct ProfileView: View {
         VStack {
             HStack{
                 Button(action: {
-                   
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Image(systemName: "arrow.left")
@@ -31,78 +31,54 @@ struct ProfileView: View {
                 Spacer()
                 Button(action: {
                     signOut()
-                    signedOut = true
                     presentationMode.wrappedValue.dismiss()
                     
                 }) {
                     Text("Sign out")
                 }
             }
-
             YourProfileText()
-
-            ProfileImage(imageURL: $imageURL)
             
-            Button(action: {
-               print("the user want to edit profile picture")
-            }) {
-                Text("Edit")
-            }
-            .padding(.bottom, 60)
-
-            HStack {
-                Text("Full name:")
+            if let user = userModel.user {
+                ProfileImage(imageURL: user.imageURL)
+                
+                Button(action: {
+                    print("the user want to edit profile picture")
+                }) {
+                    Text("Edit")
+                }
+                .padding(.bottom, 60)
+                
+                HStack {
+                    Text("Full name:")
+                    Spacer()
+                }
+                FullNameTextField(fullName: $fullName, lightGreyColor: lightGreyColor)
+                    .onAppear() {
+                        fullName = user.fullName
+                    }
+                
                 Spacer()
+            Button(action: {
+                print("userName: \(fullName)")
+            }) {
+                Text("Save")
             }
-            FullNameTextField(fullName: $fullName, lightGreyColor: lightGreyColor)
-            
-            Spacer()
         }
+    }
         .padding()
         .onAppear() {
-            
-            getUserInformation()
-           // getAllUsers()
-        }
+            userModel.fetchUserData()
     }
-    
-    func getUserInformation () {
-        guard let user = Auth.auth().currentUser else {return}
-        
-       // print("user.id är \(user.uid)")
-        
-        let docRef = db.collection("users").document(user.uid)
-        
-        docRef.getDocument { (document, error) in
-            if let document = document, document.exists {
-               // let dataDescription = document.data().map(String.init(describing:)) ?? "nil"
-//                print("Document data: \(dataDescription)")
-                fullName = document.get("fullName") as? String ?? ""
-                email = document.get("emailAddress") as? String ?? ""
-                imageURL = document.get("imageURL") as? String ?? ""
-                
-            } else {
-                print("Document does not exist")
-            }
-        }
-    }
-    
-    func getAllUsers () {
-        db.collection("users").getDocuments() { (querySnapshot, err) in
-            if let err = err {
-                print("Error getting documents: \(err)")
-            } else {
-                for document in querySnapshot!.documents {
-                    print("\(document.documentID) => \(document.data())")
-                }
-            }
-        }
-    }
-    
+}
+
     func signOut () {
         let firebaseAuth = Auth.auth()
         do {
             try firebaseAuth.signOut()
+            userModel.signedOut = true
+            userModel.signedIn = false
+            userModel.user = nil
         } catch let signOutError as NSError {
             print("Error signing out: %@", signOutError)
         }
@@ -110,7 +86,7 @@ struct ProfileView: View {
 }
 
 struct ProfileImage : View {
-    @Binding var imageURL : String
+     var imageURL : String
     
     var body: some View {
         AsyncImage(url: URL(string: imageURL),

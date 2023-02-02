@@ -25,6 +25,7 @@
 		3F136790298016D6005B8666 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F13678F298016D6005B8666 /* FirebaseFirestore */; };
 		3F136792298016D6005B8666 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3F136791298016D6005B8666 /* FirebaseFirestoreSwift */; };
 		3F136794298016D6005B8666 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 3F136793298016D6005B8666 /* FirebaseFunctions */; };
+		3F42EA19298BCC3E00477F61 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F42EA18298BCC3E00477F61 /* UserModel.swift */; };
 		3F80B7722981468F00C39181 /* SigningInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80B7712981468F00C39181 /* SigningInView.swift */; };
 		3F80B7742981617E00C39181 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80B7732981617E00C39181 /* User.swift */; };
 		3F80E35D2981220D002877FD /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3F80E35C2981220D002877FD /* FirebaseAuth */; };
@@ -72,6 +73,7 @@
 		3F136788297FF0CC005B8666 /* Places.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Places.swift; sourceTree = "<group>"; };
 		3F13678A29801094005B8666 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		3F13678C29801616005B8666 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		3F42EA18298BCC3E00477F61 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
 		3F80B7712981468F00C39181 /* SigningInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigningInView.swift; sourceTree = "<group>"; };
 		3F80B7732981617E00C39181 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		3F80E35E29812359002877FD /* CreatingAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingAccountView.swift; sourceTree = "<group>"; };
@@ -135,17 +137,12 @@
 		3F136755297FE6F3005B8666 /* MushMaze */ = {
 			isa = PBXGroup;
 			children = (
+				3FB15A3A298C4A6B009B4A38 /* Models */,
 				3F8D357F2982768600DCBCBF /* Views */,
 				3F136756297FE6F3005B8666 /* MushMazeApp.swift */,
 				3F13675A297FE6F5005B8666 /* Assets.xcassets */,
 				3F13678C29801616005B8666 /* GoogleService-Info.plist */,
 				3F13675C297FE6F5005B8666 /* Preview Content */,
-				3F136780297FE916005B8666 /* LocationManager.swift */,
-				3F136786297FF064005B8666 /* Place.swift */,
-				3F136788297FF0CC005B8666 /* Places.swift */,
-				3F80B7732981617E00C39181 /* User.swift */,
-				3F8D35882983CA8600DCBCBF /* ImagePicker.swift */,
-				3F8D358A2983CB4800DCBCBF /* ImageMod.swift */,
 			);
 			path = MushMaze;
 			sourceTree = "<group>";
@@ -196,6 +193,20 @@
 				3F0DC4BA2989670A00C0BCBC /* DestinationView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		3FB15A3A298C4A6B009B4A38 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3F136780297FE916005B8666 /* LocationManager.swift */,
+				3F136786297FF064005B8666 /* Place.swift */,
+				3F136788297FF0CC005B8666 /* Places.swift */,
+				3F80B7732981617E00C39181 /* User.swift */,
+				3F8D35882983CA8600DCBCBF /* ImagePicker.swift */,
+				3F8D358A2983CB4800DCBCBF /* ImageMod.swift */,
+				3F42EA18298BCC3E00477F61 /* UserModel.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -295,6 +306,7 @@
 			mainGroup = 3F13674A297FE6F3005B8666;
 			packageReferences = (
 				3F13678E298016D6005B8666 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				3F42E99B298AF32A00477F61 /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */,
 			);
 			productRefGroup = 3F136754297FE6F3005B8666 /* Products */;
 			projectDirPath = "";
@@ -348,6 +360,7 @@
 				3F0DC4B92989618600C0BCBC /* PlaceDetailsView.swift in Sources */,
 				3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */,
 				3F0DC4BB2989670A00C0BCBC /* DestinationView.swift in Sources */,
+				3F42EA19298BCC3E00477F61 /* UserModel.swift in Sources */,
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
 				3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */,
 				3F80B7742981617E00C39181 /* User.swift in Sources */,
@@ -692,6 +705,14 @@
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
 			requirement = {
 				branch = master;
+				kind = branch;
+			};
+		};
+		3F42E99B298AF32A00477F61 /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lorenzofiamingo/swiftui-cached-async-image";
+			requirement = {
+				branch = main;
 				kind = branch;
 			};
 		};
