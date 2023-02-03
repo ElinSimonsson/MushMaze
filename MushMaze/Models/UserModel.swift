@@ -8,12 +8,14 @@
 import Foundation
 import Firebase
 import FirebaseAuth
+import UIKit
 
 class UserModel : ObservableObject {
     let db = Firestore.firestore()
     @Published var user : User?
     @Published var signedIn = false
     @Published var signedOut = false
+    @Published var saved = false
     
     func fetchUserImageURL(userID: String, completion: @escaping (_ imageURL: String?, _ error: Error?) -> Void) {
             let userRef = db.collection("users").document(userID)
@@ -40,25 +42,37 @@ class UserModel : ObservableObject {
         }
     }
 
-    func fetchUserData () {
-        guard let userUID = Auth.auth().currentUser?.uid else {return}
-        
-        let docRef = db.collection("users").document(userUID)
-        
-        docRef.getDocument { (document, error ) in
-            guard error == nil else {
-                print("error", error ?? "")
-                return
-            }
-            if let document = document, document.exists {
-                let data = document.data()
-                if let data = data {
-                    let fullName = data["fullName"] as? String ?? ""
-                    let email = document.get("emailAddress") as? String ?? ""
-                    let imageURL = document.get("imageURL") as? String ?? ""
-                    self.user = User(fullName: fullName, emailAddress: email, userId: userUID, imageURL: imageURL)
-                }
-            }
+//    func fetchUserData () {
+//        guard let userUID = Auth.auth().currentUser?.uid else {return}
+//
+//        let docRef = db.collection("users").document(userUID)
+//
+//        docRef.getDocument { (document, error ) in
+//            guard error == nil else {
+//                print("error", error ?? "")
+//                return
+//            }
+//            if let document = document, document.exists {
+//                let data = document.data()
+//                if let data = data {
+//                    let fullName = data["fullName"] as? String ?? ""
+//                    let email = document.get("emailAddress") as? String ?? ""
+//                    let imageURL = document.get("imageURL") as? String ?? ""
+//                    self.user = User(fullName: fullName, emailAddress: email, userId: userUID, imageURL: imageURL)
+//                }
+//            }
+//        }
+//    }
+    
+    func logOut () {
+        let firebaseAuth = Auth.auth()
+        do {
+            try firebaseAuth.signOut()
+            signedOut = true
+            signedIn = false
+            user = nil
+        } catch let signOutError as NSError {
+            print("Error signing out: %@", signOutError)
         }
     }
     
@@ -75,9 +89,23 @@ class UserModel : ObservableObject {
         }
     }
         
-        func updateUserDataToFirestore (user: User) {
-            
+    func updateUserDataToFirestore (imageURL: String, fullName: String) {
+
+        guard let currentUser = Auth.auth().currentUser else {return}
+        
+        db.collection("users").document(currentUser.uid).setData([
+            "fullName": fullName,
+            "imageURL": imageURL
+        ]) { err in
+            if let err = err {
+                print("Error writing document: \(err)")
+            } else {
+                print("Document successfully written!")
+                self.saved = true
+                
+            }
         }
+    }
         
         func saveUserDataToFirestore (fullName: String, emailAddress : String) {
             guard let userUID = Auth.auth().currentUser?.uid else {return}
@@ -103,6 +131,25 @@ class UserModel : ObservableObject {
                 }
             }
         }
+    
+    func addSnapShotTest () {
+        guard let user = Auth.auth().currentUser else {return}
+        let docRef = db.collection("users").document(user.uid)
+        
+        docRef.addSnapshotListener { (documentSnapshot, error) in
+          guard let document = documentSnapshot else {
+            print("Error fetching document: \(error!)")
+            return
+          }
+          let data = document.data()
+            if let data = data {
+                let fullName = data["fullName"] as? String ?? ""
+                let email = document.get("emailAddress") as? String ?? ""
+                let imageURL = document.get("imageURL") as? String ?? ""
+                self.user = User(fullName: fullName, emailAddress: email, userId: user.uid, imageURL: imageURL)
+            }
+        }
+    }
 }
 
 

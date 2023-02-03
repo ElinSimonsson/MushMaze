@@ -24,7 +24,7 @@ struct AddPlaceView: View {
     @State var mushrooms : [String] = []
     @State var newMushroomName = ""
     @State private var sourceType : UIImagePickerController.SourceType = .photoLibrary
-    @State var changeProfileImage = false
+    //@State var changeProfileImage = false
     @State var openCameraRoll = false
     @State var selectedImage : UIImage? = nil
     @State var showingAlert = false
@@ -32,7 +32,7 @@ struct AddPlaceView: View {
     @State var isSaving = false
     @State var placeNameIsMissing = false
     @State var mushroomsAreMissing = false
-    @State var imageIsNil = false
+    @State var showErrorImage = false
     
     var body: some View {
         ZStack {
@@ -50,7 +50,7 @@ struct AddPlaceView: View {
                         }) {
                             Text("Save")
                         }
-                        .alert(isPresented: $imageIsNil) {
+                        .alert(isPresented: $showErrorImage) {
                             Alert(title: Text("Image is missing"), dismissButton: .default(Text("Ok")))
                         }
                     }
@@ -69,11 +69,9 @@ struct AddPlaceView: View {
                         Alert(title: Text("Choose Source"),
                               primaryButton: .default(Text("Camera")) {
                             sourceType = .camera
-                            changeProfileImage = true
                             openCameraRoll = true
                         }, secondaryButton: .default(Text("Photo")) {
                             sourceType = .photoLibrary
-                            changeProfileImage = true
                             openCameraRoll = true
                         })
                     }
@@ -146,7 +144,7 @@ struct AddPlaceView: View {
     
     func uploadPhotoAndSaveToFirestore() {
         if selectedImage == nil {
-            imageIsNil = true
+            showErrorImage = true
         }
         else if placeName == "" && mushrooms.count == 0 {
             placeNameIsMissing = true

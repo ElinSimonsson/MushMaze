@@ -15,10 +15,14 @@ struct ProfileView: View {
     @EnvironmentObject var userModel : UserModel
     let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
     let db = Firestore.firestore()
+    @State private var sourceType : UIImagePickerController.SourceType = .photoLibrary
     @Environment(\.presentationMode) var presentationMode
     @State var fullName = ""
     @State var email = ""
     @State var imageURL = ""
+    @State var showSourceAlert = false
+    @State var openCameraRoll = false
+    @State var selectedImage : UIImage? = nil
     
     var body: some View {
         VStack {
@@ -30,7 +34,7 @@ struct ProfileView: View {
                 }
                 Spacer()
                 Button(action: {
-                    signOut()
+                    userModel.logOut()
                     presentationMode.wrappedValue.dismiss()
                     
                 }) {
@@ -40,10 +44,32 @@ struct ProfileView: View {
             YourProfileText()
             
             if let user = userModel.user {
-                ProfileImage(imageURL: user.imageURL)
+                Button(action: {
+                    showSourceAlert = true
+                }, label: {
+                    if let image = selectedImage {
+                        SelectedImageView(selectedImage: image)
+                    } else if user.imageURL == "" {
+                        DefaultProfilePicture()
+                    } else {
+                        ProfileImage(imageURL: user.imageURL)
+                    }
+                }).alert(isPresented: $showSourceAlert) {
+                    Alert(title: Text("Choose Source"),
+                          primaryButton: .default(Text("Camera")) {
+                        sourceType = .camera
+                        openCameraRoll = true
+                    }, secondaryButton: .default(Text("Photo")) {
+                        sourceType = .photoLibrary
+                        openCameraRoll = true
+                    })
+                }
+                .fullScreenCover(isPresented: $openCameraRoll) {
+                    ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
+                }
                 
                 Button(action: {
-                    print("the user want to edit profile picture")
+                    showSourceAlert = true
                 }) {
                     Text("Edit")
                 }
@@ -61,14 +87,16 @@ struct ProfileView: View {
                 Spacer()
             Button(action: {
                 print("userName: \(fullName)")
+                saveToFirestore()
             }) {
                 Text("Save")
             }
+                Spacer()
         }
     }
         .padding()
         .onAppear() {
-            userModel.fetchUserData()
+            userModel.addSnapShotTest()
     }
 }
 
@@ -83,6 +111,80 @@ struct ProfileView: View {
             print("Error signing out: %@", signOutError)
         }
     }
+    
+   
+    func saveToFirestore () {
+        if userModel.user?.imageURL == "" && selectedImage != nil {
+            uploadPhotoAndSaveToFirestore()
+        } else if userModel.user?.imageURL != "" && selectedImage != nil {
+            deleteImageFromStorageAndSaveNew()
+        } else if userModel.user?.imageURL != "" && selectedImage == nil {
+            if let user = userModel.user {
+                userModel.updateUserDataToFirestore(imageURL: user.imageURL, fullName: $fullName.wrappedValue)
+            }
+        }
+    }
+    
+    func uploadPhotoAndSaveToFirestore() {
+      //  guard let user = userModel.user else {return}
+//        if selectedImage == nil && user.imageURL == "" {
+            let fileName = "\(UUID().uuidString).jpg"
+            let ref = Storage.storage().reference(withPath: fileName)
+            guard let imageData = selectedImage?.jpegData(compressionQuality: 0.5) else {return}
+            ref.putData(imageData ,metadata: nil) { metadata, err in
+                if let err = err {
+                    print("failed to push image to Storage\(err)")
+                    return
+                }
+                ref.downloadURL { url, err in
+                    if let err = err {
+                        print("failed to retrieve downloadURL \(err)")
+                        return
+                    } else {
+                        print("successfully stored image with url : \(url?.absoluteString ?? "")")
+                        guard let imageURL = url?.absoluteString else {return}
+                        userModel.updateUserDataToFirestore(imageURL: imageURL, fullName: $fullName.wrappedValue)
+                      
+                       // presentationMode.wrappedValue.dismiss()
+                    }
+                }
+            }
+//        }
+    }
+    
+    func deleteImageFromStorageAndSaveNew () {
+        let storage = Storage.storage()
+        
+        if let user = userModel.user {
+            let storageRef = storage.reference(forURL: user.imageURL)
+
+            //Removes image from storage
+            storageRef.delete { error in
+                if let error = error {
+                    print(error)
+                } else {
+                   print("successfully deleted image")
+                    uploadPhotoAndSaveToFirestore()
+                }
+            }
+            
+        }
+    }
+}
+
+struct SelectedImageView : View {
+    let selectedImage : UIImage
+    var body: some View {
+        Image(uiImage: selectedImage)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .scaledToFill()
+            .frame(width: 200, height: 200)
+            .clipShape(Circle())
+            //.cornerRadius(10)
+            .padding(.bottom, 20)
+            .padding(.top, 30)
+    }
 }
 
 struct ProfileImage : View {
@@ -94,7 +196,6 @@ struct ProfileImage : View {
             image
                 .resizable()
                 .scaledToFit()
-            
         },
                    placeholder: {ProgressView()}
         )
@@ -103,6 +204,18 @@ struct ProfileImage : View {
         .clipShape(Circle())
         .padding(.bottom, 20)
         .padding(.top, 30)
+    }
+}
+
+struct DefaultProfilePicture : View {
+    var body: some View {
+        Image(systemName: "person")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 200, height: 200)
+            .clipShape(Circle())
+            .padding(.bottom, 20)
+            .padding(.top, 30)
     }
 }
 
