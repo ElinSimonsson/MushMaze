@@ -20,8 +20,10 @@ struct MapView: View {
     @State var longPressLocation = CGPoint.zero
     @State var showProfile = false
     @State var showAddPlaceView = false
-    @State var selectedPlace : Place?
     @State var placesList = [Place]()
+    @State var showMapAnnonation = false
+    @State var selectedPlace : Place?
+   // @State var selectedplace = Place(createrUID: "", name: "", imageURL: "", latitude: 0, longitude: 0, isSelected: false, favorite: false)
     @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 59.243013423142024, longitude: 17.9932212288352), span:
                                             MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
     
@@ -32,25 +34,34 @@ struct MapView: View {
                     interactionModes: [.all],
                     showsUserLocation: true,
                     userTrackingMode: .constant(.follow),
-                    annotationItems: places.places) { place in  //places.places
-                    MapAnnotation(coordinate: place.coordinate, anchorPoint: CGPoint(x: 0.5, y: 0.5)) { // create own content on every map marker
+                    annotationItems: places.places) { place in
+                    MapAnnotation(coordinate: place.coordinate, anchorPoint: CGPoint(x: 0.5, y: 0.5)) {
                         ZStack {
                             MapPinMarker(place: place)
                                 .onTapGesture {
-                                    self.selectedPlace = place
-                                    places.setAllIsSelectedFalse()
-                                    places.updateIsSelected(place: place, with: true)
+                                    if selectedPlace?.id != place.id {
+                                        self.selectedPlace = place
+                                        //self.places.place = place
+                                        self.showMapAnnonation = true
+                                    } else {
+                                        showMapAnnonation = false
+                                        places.place = nil
+                                    }
                                 }
-                            // if isSelected == place doesn´t work, this view disappears if calculateDistance is executed
-                            if let isSelected = place.isSelected {
-                                if isSelected {
-                                    MapAnnotationDetailView(place: place, closure: calculateDistance)
-                                        .onAppear() {
-                                            calculateDistance()
-                                        }
+                            
+                            if let selectedPlace = selectedPlace {
+                                if selectedPlace.id == place.id {
+                                    if showMapAnnonation {
+                                        MapAnnotationDetailView(place: selectedPlace, closure: calculateDistance)
+                                            .onTapGesture {
+                                                print("tap på place")
+                                            }
+                                            .onAppear() {
+                                                calculateDistance()
+                                            }
+                                    }
                                 }
                             }
-                            
                         }
                         .padding(.vertical, 60)
                     }
@@ -76,22 +87,11 @@ struct MapView: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        Button(action: {
-                            coordinate = addPin() ?? CLLocationCoordinate2D(latitude: 100, longitude: 200)
+                        AddPlaceButton(darkTurquoise: darkTurquoise, showAddPlaceView: $showAddPlaceView, coordinate: $coordinate) {
                             if (coordinate.latitude >= -90 && coordinate.latitude <= 90) && (coordinate.longitude >= -180 && coordinate.longitude <= 180) {
                                 showAddPlaceView = true
-                            } }) {
-                                Image(systemName: "plus")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 30))
                             }
-                            .fullScreenCover(isPresented: $showAddPlaceView, content: {
-                                AddPlaceView(coordinate: coordinate)
-                            })
-                            .frame(width: 50, height: 50)
-                            .background(Color(darkTurquoise))
-                            .clipShape(Circle())
-                        
+                        }
                     }
                     
                     Spacer().frame(maxHeight: 50)
@@ -157,6 +157,7 @@ struct MapAnnotationDetailView : View {
     var place : Place
     var closure : () -> Void
     @State var showThisView = true
+    @EnvironmentObject var places : Places
     
     var body: some View {
         if showThisView {
@@ -195,6 +196,7 @@ struct MapAnnotationDetailView : View {
             .offset(x: 0, y: -120)
             .onTapGesture() {
                 self.showThisView.toggle()
+                print("place som klickats, toogle: \(showThisView)")
             }
         }
     }
@@ -222,6 +224,30 @@ struct SmallUserImage : View {
             .clipped()
             .cornerRadius(150)
             .padding(.trailing, 5)
+    }
+}
+
+struct AddPlaceButton : View {
+    
+    let darkTurquoise : UIColor
+    @Binding var showAddPlaceView : Bool
+    @Binding var coordinate : CLLocationCoordinate2D
+    var closure : () -> Void
+    
+    var body : some View {
+        Button(action: {
+            self.closure()
+        }) {
+            Image(systemName: "plus")
+                .foregroundColor(.white)
+                .font(.system(size: 30))
+        }
+        .fullScreenCover(isPresented: $showAddPlaceView, content: {
+            AddPlaceView(coordinate: coordinate)
+        })
+        .frame(width: 50, height: 50)
+        .background(Color(darkTurquoise))
+        .clipShape(Circle())
     }
 }
 

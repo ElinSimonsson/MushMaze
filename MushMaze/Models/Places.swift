@@ -10,8 +10,9 @@ import FirebaseFirestore
 import FirebaseAuth
 
 class Places : ObservableObject {
-   @Published var places = [Place]()
-   @Published var placeSaved = false
+    @Published var places = [Place]()
+    @Published var placeSaved = false
+    @Published var place: Place?
     
    private var db = Firestore.firestore()
     
@@ -32,7 +33,6 @@ class Places : ObservableObject {
                           imageURL: imageURL,
                           latitude: latitude,
                           longitude: longitude,
-                          isSelected: false,
                           favorite: false) // default
         
         do {
@@ -81,36 +81,12 @@ class Places : ObservableObject {
         }
     }
     
-    func setAllIsSelectedFalse() {
-        for i in 0..<places.count {
-            places[i].isSelected = false
-        }
-    }
-    
-    func updateIsSelected (place: Place, with isSelected : Bool) {
-        for i in 0..<places.count {
-                places[i].isSelected = false
-            }
-        
-        if let index = places.firstIndex(of: place) {
-            places[index].isSelected = true
-            print("sätt till true \(place.name), isSelected: \(place.isSelected)")
-        }
-    }
-    
-    func testUpdateAllToFalse(place: Place, with isSelected: Bool) {
-        if let index = places.firstIndex(of: place) {
-            places[index].isSelected = false
-            print("sätt alla false \(place.name), isSelected: \(place.isSelected)")
-        }
-    }
-    
     func updateDistance (place: Place, with distance: Double) {
         
         if let index = places.firstIndex(of: place) {
-            print("funktion inne places körs")
+            
             places[index].distance = distance
-            print("\(place.name), distans: \(place.distance)")
+            
         }
     }
 }

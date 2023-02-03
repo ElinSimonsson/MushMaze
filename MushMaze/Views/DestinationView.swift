@@ -1,5 +1,5 @@
 //
-//  TabbedView.swift
+//  DestinationView.swift
 //  MushMaze
 //
 //  Created by Elin Simonsson on 2023-01-31.
@@ -16,16 +16,17 @@ struct DestinationView: View {
         case map, list
     }
     
+    init() {
+        locationManager.startLocationUpdate()
+    }
+    
     var body: some View {
         if destinations == .map {
-            ZStack { // map need to 
+            ZStack { // mapView needs to cover the entire screen for convertPointToCoordinate to be able to convert to the correct coordinate
                 if destinations == .map {
                     MapView(locationManager: locationManager)
                 }
                 ToggleButtonsView(destinations: $destinations)
-            }
-            .onAppear() {
-                locationManager.startLocationUpdate()
             }
         } else {
             VStack {

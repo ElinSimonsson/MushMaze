@@ -1,5 +1,5 @@
 //
-//  Users.swift
+//  UserModel.swift
 //  MushMaze
 //
 //  Created by Elin Simonsson on 2023-02-02.
