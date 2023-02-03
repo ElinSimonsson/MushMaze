@@ -88,6 +88,7 @@ struct FilteredRowView : View {
     
     var body: some View {
         HStack {
+            SmallProfileImage(place: place)
             VStack {
                 HStack {
                     Text(place.name)
@@ -200,13 +201,11 @@ struct SmallProfileImage : View {
 }
 
 struct HeaderView: View {
-    //@Binding var isHeaderVisible: Bool
     @Binding var searchText: String
     @Binding var showProfile: Bool
     @Binding var selectedPlaceFilter: ListOfPlacesView.FilterPlace
 
     var body: some View {
-       // if isHeaderVisible {
             VStack {
                 HStack {
                     VStack {
@@ -236,7 +235,6 @@ struct HeaderView: View {
                 MushroomTitle()
             }
             .padding(.leading, 10)
-        //}
     }
 }
 

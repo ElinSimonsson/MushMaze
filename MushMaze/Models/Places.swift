@@ -12,6 +12,7 @@ import FirebaseAuth
 class Places : ObservableObject {
     @Published var places = [Place]()
     @Published var placeSaved = false
+    @Published var newDataFetched = false
     @Published var place: Place?
     
    private var db = Firestore.firestore()
@@ -52,6 +53,7 @@ class Places : ObservableObject {
         db.collection("users")
             .document(user.uid)
             .collection("places")
+            .order(by: "date")
             .addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else {return}
             
@@ -66,10 +68,13 @@ class Places : ObservableObject {
                     switch result {
                     case .success(let place) :
                         self.places.append(place)
+                        print("place fetched hej")
+                        self.newDataFetched = true
                     case .failure(let error) :
                         print("Error decoding place : \(error.localizedDescription)")
                     }
                 }
+                self.places = self.places.reversed() // order the array so that the newest location is first and the oldest is last
             }
         }
     }

@@ -23,7 +23,7 @@ struct MapView: View {
     @State var placesList = [Place]()
     @State var showMapAnnonation = false
     @State var selectedPlace : Place?
-   // @State var selectedplace = Place(createrUID: "", name: "", imageURL: "", latitude: 0, longitude: 0, isSelected: false, favorite: false)
+    // @State var selectedplace = Place(createrUID: "", name: "", imageURL: "", latitude: 0, longitude: 0, isSelected: false, favorite: false)
     @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 59.243013423142024, longitude: 17.9932212288352), span:
                                             MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
     
@@ -53,9 +53,6 @@ struct MapView: View {
                                 if selectedPlace.id == place.id {
                                     if showMapAnnonation {
                                         MapAnnotationDetailView(place: selectedPlace, closure: calculateDistance)
-                                            .onTapGesture {
-                                                print("tap på place")
-                                            }
                                             .onAppear() {
                                                 calculateDistance()
                                             }
@@ -88,6 +85,7 @@ struct MapView: View {
                     HStack {
                         Spacer()
                         AddPlaceButton(darkTurquoise: darkTurquoise, showAddPlaceView: $showAddPlaceView, coordinate: $coordinate) {
+                            coordinate = addPin() ?? CLLocationCoordinate2D(latitude: 100, longitude: 200)
                             if (coordinate.latitude >= -90 && coordinate.latitude <= 90) && (coordinate.longitude >= -180 && coordinate.longitude <= 180) {
                                 showAddPlaceView = true
                             }
@@ -156,49 +154,43 @@ struct plusButtonContent : View {
 struct MapAnnotationDetailView : View {
     var place : Place
     var closure : () -> Void
-    @State var showThisView = true
     @EnvironmentObject var places : Places
     
+    
     var body: some View {
-        if showThisView {
-            VStack {
+        VStack {
+            Spacer()
+            Text("\(place.name)")
+                .fontWeight(.bold)
+            if let distance = place.distance {
+                if distance > 1000 {
+                    Text("distance: \(Int(distance / 1000 + 0.5)) km")
+                } else {
+                    Text("distance: \(Int(distance + 0.5)) m")
+                }
                 Spacer()
-                Text("\(place.name)")
-                    .fontWeight(.bold)
-                if let distance = place.distance {
-                    if distance > 1000 {
-                        Text("distance: \(Int(distance / 1000 + 0.5)) km")
-                    } else {
-                        Text("distance: \(Int(distance + 0.5)) m")
-                    }
-                    Spacer()
-                }
-                Text("Mushrooms founded here:")
-                    .fontWeight(.bold)
-                    .font(.subheadline)
-                if let mushrooms = place.mushrooms {
-                    if mushrooms.count > 1 {
-                        ForEach (mushrooms[0...1], id: \.self) { mushroom in
-                            Text("* \(mushroom)")
-                        }
-                    } else {
-                        ForEach (mushrooms, id: \.self) { mushroom in
-                            Text("* \(mushroom)")
-                        }
-                    }
-                    Spacer()
-                }
             }
-            .frame(width: 200, height: 200)
-            .background(Color.white)
-            .cornerRadius(10)
-            .shadow(radius: 10)
-            .offset(x: 0, y: -120)
-            .onTapGesture() {
-                self.showThisView.toggle()
-                print("place som klickats, toogle: \(showThisView)")
+            Text("Mushrooms founded here:")
+                .fontWeight(.bold)
+                .font(.subheadline)
+            if let mushrooms = place.mushrooms {
+                if mushrooms.count > 1 {
+                    ForEach (mushrooms[0...1], id: \.self) { mushroom in
+                        Text("* \(mushroom)")
+                    }
+                } else {
+                    ForEach (mushrooms, id: \.self) { mushroom in
+                        Text("* \(mushroom)")
+                    }
+                }
+                Spacer()
             }
         }
+        .frame(width: 200, height: 200)
+        .background(Color.white)
+        .cornerRadius(10)
+        .shadow(radius: 10)
+        .offset(x: 0, y: -120)
     }
 }
 

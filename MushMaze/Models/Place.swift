@@ -11,6 +11,7 @@ import FirebaseFirestoreSwift
 
 struct Place : Identifiable, Codable, Equatable {
     @DocumentID var id : String?
+    var date : Date = Date()
     var createrUID : String
     var name : String
     var description : String?

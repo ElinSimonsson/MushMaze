@@ -27,7 +27,19 @@ class UserModel : ObservableObject {
             }
         }
     
-    
+    func fetchUserInfo(userID: String, completion: @escaping (_ imageURL: String?, _ name: String?, _ error: Error?) -> Void) {
+        let userRef = db.collection("users").document(userID)
+        userRef.getDocument { (document, error) in
+            if let error = error {
+                completion(nil, nil, error)
+            } else if let document = document, let data = document.data() {
+                let imageURL = data["imageURL"] as? String
+                let name = data["fullName"] as? String
+                completion(imageURL, name, nil)
+            }
+        }
+    }
+
     func fetchUserData () {
         guard let userUID = Auth.auth().currentUser?.uid else {return}
         
