@@ -189,7 +189,7 @@ struct SmallProfileImage : View {
     
     func fetchCreaterProfileImage (place: Place) {
         let id = place.createrUID
-        userModel.fetchUserImageURL(userID: id) { (url, error) in
+        userModel.fetchUserInfo(userID: id) { (url, name, error) in
             if let error = error {
                 print("error fetching imageURL \(error)")
             }

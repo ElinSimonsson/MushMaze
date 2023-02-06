@@ -8,50 +8,142 @@
 import SwiftUI
 
 struct PlaceDetailsView: View {
+    enum FocusedField : Hashable {
+        case placeName, placeDescription, mushroom
+    }
+    
     var place : Place
     @EnvironmentObject var userModel : UserModel
+    @EnvironmentObject var places : Places
     @State var createrFullName = ""
     @State var createrImageURL = ""
-   
-    
+    @State var showChoicePopUp = false
+    @State var isEditing = false
+    @State var editingMushrooms = [String]()
+    @State var editingDescription = ""
+    @State var editingPlaceName = ""
+    @State var newMushroomName = ""
+    @State var isAddingMushroom = false
+    @State var showErrorMushroom = false
     @Binding var isHeaderVisible : Bool
+    
+    @FocusState var focusedField : FocusedField?
+    
     @Environment(\.presentationMode) var presentationMode
     
+    
     var body: some View {
-        ScrollView {
-            VStack{
+        ZStack {
+            ScrollView {
                 CreaterRowView(place: place, fullName: $createrFullName, imageURL: $createrImageURL)
-                PlaceName(placeName: place.name)
+                PlaceName(placeName: place.name, isEditing: isEditing, editingPlaceName: $editingPlaceName)
                 PlaceImage(imageURL: place.imageURL)
+                EllipsisButton(showChoicePopUp: $showChoicePopUp)
+
                 if let description = place.description {
-                    DescriptionContent(description: description)
+                    DescriptionContent(description: description, isEditing: isEditing, editingDescription: $editingDescription)
                 }
                 MushroomSubTitle()
+
                 if let mushrooms = place.mushrooms {
-                    ForEach(mushrooms, id: \.self) { mushroom in
-                        MushroomSpeciesRowView(mushroom: mushroom)
+                if isEditing {
+                    ForEach(editingMushrooms, id: \.self) { mushroom in
+                        EditingMushroomRowView(mushroom: mushroom) {
+                            deleteMushroom(mushroom)
+                        }
+                    }
+                        AddMushroomSpeciesTextField(mushrooms: $editingMushrooms,
+                                                    newMushroomName: $newMushroomName,
+                                                    showErrorMushroom: $showErrorMushroom,
+                                                    isAddingNewMushroom: $isAddingMushroom)
+                } else {
+                        ForEach(mushrooms, id: \.self) { mushroom in
+                            MushroomSpeciesRowView(mushroom: mushroom)
+                        }
                     }
                 }
             }
-            .onAppear() {
-                isHeaderVisible = false
-                fetchCreaterInfo(place: place)
+
+            .padding()
+            .disabled(showChoicePopUp)
+
+            if showChoicePopUp {
+                ChoicePopUp(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
             }
         }
-        
+        .onTapGesture {
+           dismissKeyBoard()
+
+            if isEditing {
+                isAddingMushroom = true
+            }
+            if showChoicePopUp {
+                self.showChoicePopUp.toggle()
+            }
+        }
+        .onAppear() {
+            isHeaderVisible = false
+            fetchCreaterInfo(place: place)
+            if let mushrooms = place.mushrooms {
+                editingMushrooms = mushrooms
+            }
+        }
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
-                    isHeaderVisible = true
-                    presentationMode.wrappedValue.dismiss()
+                    if isEditing {
+                        isEditing = false
+                    } else {
+                        isHeaderVisible = true
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }) {
-                    Image(systemName: "arrow.left")
+                    if isEditing {
+                        Text("Cancel")
+                    } else {
+                        Image(systemName: "arrow.left")
+                    }
+                }
+            }
+            if isEditing {
+                ToolbarItem (placement: .navigationBarTrailing) {
+                    Button(action: {
+                       updatePlace()
+                        
+                    }) {
+                        Text("Save")
+                    }
                 }
             }
         }
     }
     
+    func dismissKeyBoard () {
+        let keyWindow = UIApplication.shared.connectedScenes
+                                       .filter({$0.activationState == .foregroundActive})
+                                       .map({$0 as? UIWindowScene})
+                                       .compactMap({$0})
+                                       .first?.windows
+                                       .filter({$0.isKeyWindow}).first
+                    keyWindow!.endEditing(true)
+
+    }
+    
+    func updatePlace () {
+        if editingMushrooms.count == 0 {
+            showErrorMushroom = true
+        } else {
+            places.updatePlaceToFirestore(place: place, placeName: $editingPlaceName.wrappedValue,
+                                          description: $editingDescription.wrappedValue,
+                                          mushrooms: editingMushrooms)
+            isEditing = false
+        }
+    }
+    
+    func deleteMushroom(_ mushroom: String) {
+        editingMushrooms.removeAll(where: { $0 == mushroom })
+    }
     
     func fetchCreaterInfo (place : Place) {
         let id = place.createrUID
@@ -61,12 +153,70 @@ struct PlaceDetailsView: View {
                 print("error fetching creater info \(error)")
             }
             if let url = url {
-               createrImageURL = url
+                createrImageURL = url
             }
             if let name = name {
                 createrFullName = name
             }
         }
+    }
+}
+
+struct AddMushroomSpeciesTextField : View {
+    @Binding var mushrooms : [String]
+    @Binding var newMushroomName : String
+    @Binding var showErrorMushroom : Bool
+    @Binding var isAddingNewMushroom : Bool
+    @FocusState var focus: PlaceDetailsView.FocusedField?
+    @State var returButtonPressed = false
+    
+    
+    var body: some View {
+        HStack {
+            TextField("Add mushroom species", text: $newMushroomName, onCommit: {
+                mushrooms.append(newMushroomName)
+                self.isAddingNewMushroom = false
+                newMushroomName = ""
+                returButtonPressed = true
+                focus = .mushroom
+            })
+            .focused($focus, equals: .mushroom)
+            .submitLabel(.go)
+            .onChange(of: returButtonPressed) { newvalue in
+                if returButtonPressed {
+                    self.newMushroomName = ""
+                    returButtonPressed = false
+                }
+            }
+            
+            .alert(isPresented: $showErrorMushroom) {
+                Alert(title: Text("you must have entered at least one mushroom species"), dismissButton: .default(Text("Ok")))
+            }
+            .onAppear() {
+                self.newMushroomName = ""
+            }
+        }
+    }
+}
+
+struct EditingMushroomRowView : View {
+    var mushroom : String
+    var closure : () -> Void
+    
+    var body : some View {
+        HStack {
+            Spacer().frame(maxWidth: 15)
+            Text("* \(mushroom)")
+            Spacer()
+            Button(action: {
+                closure()
+            }) {
+                Image(systemName: "trash")
+                    .foregroundColor(.red)
+            }
+            Spacer().frame(maxWidth: 15)
+        }
+        .padding(.bottom, 5)
     }
 }
 
@@ -90,7 +240,7 @@ struct MushroomSubTitle : View {
             Spacer().frame(maxWidth: 15)
             Text("Mushroom founded here:")
                 .fontWeight(.bold)
-    
+            
             Spacer()
         }
         .padding(.top, 15)
@@ -100,28 +250,60 @@ struct MushroomSubTitle : View {
 
 struct DescriptionContent : View {
     let description : String
+    var isEditing : Bool
+    @Binding var editingDescription : String
+    @FocusState var focus: PlaceDetailsView.FocusedField?
     
     var body: some View {
         HStack {
             Spacer().frame(maxWidth: 15)
-            Text(description)
+        if isEditing {
+            TextEditor(text: $editingDescription)
+                .focused($focus, equals: .placeDescription)
+                .frame(height: 80)
+                .padding()
+                .cornerRadius(5.0)
+                .focused($focus, equals: .placeDescription)
+                .onAppear() {
+                    editingDescription = description
+                }
+        } else {
+
+                Text(description)
+            }
             Spacer().frame(maxWidth: 15)
         }
-        .padding(.top, 10)
+        .padding(.top, 20)
     }
+}
+
+struct EllipsisButton : View {
+    @Binding var showChoicePopUp: Bool
+
+       var body: some View {
+           HStack {
+               Spacer()
+               Button(action: {
+                   showChoicePopUp = true
+               }) {
+                   Image(systemName: "ellipsis")
+               }
+               Spacer().frame(maxWidth: 15)
+           }
+           .padding(.top, 5)
+       }
 }
 
 struct PlaceImage : View {
     let imageURL : String
     
     var body: some View {
-        
         HStack {
             AsyncImage(url: URL(string: imageURL),
                        content:  { image in
                 image
                     .resizable()
-                    .scaledToFill()
+                    .scaledToFit()
                 
             },
                        placeholder: {ProgressView()}
@@ -129,21 +311,38 @@ struct PlaceImage : View {
             .aspectRatio(contentMode: .fit)
             .frame(width: UIScreen.main.bounds.size.width - 10, height: 250)
         }
-
+        .padding(.top, 10)
     }
-    
 }
 
 struct PlaceName : View {
     let placeName : String
+    var isEditing : Bool
+    @Binding var editingPlaceName : String
+    @FocusState var focus: PlaceDetailsView.FocusedField?
     
     var body: some View {
         HStack {
-            Text(placeName)
-                .font(.title)
-                .fontWeight(.semibold)
-                .padding(.top, 20)
+            if isEditing {
+                TextField("Place Name", text: $editingPlaceName)
+                    .focused($focus, equals: .placeName)
+                    .font(.title)
+                    .fontWeight(.semibold)
+                    .multilineTextAlignment(.center)
+                    .onSubmit {
+                        focus = .placeDescription
+                    }
+                    .onAppear() {
+                        editingPlaceName = placeName
+                        focus = .placeName
+                    }
+            } else {
+                Text(placeName)
+                    .font(.title)
+                    .fontWeight(.semibold)
+            }
         }
+        .padding(.top, 20)
     }
 }
 
@@ -180,16 +379,16 @@ struct CreaterRowView : View {
     }
     
     var body : some View {
-            HStack {
-                Spacer().frame(maxWidth: 10)
-               SmallCreaterImage(imageURL: $imageURL)
-                Spacer().frame(maxWidth: 10)
-                Text(fullName)
-                Spacer()
-                Text(date)
-                Spacer().frame(maxWidth: 10)
-            }
-            .padding(.top, 20)
+        HStack {
+            Spacer().frame(maxWidth: 10)
+            SmallCreaterImage(imageURL: $imageURL)
+            Spacer().frame(maxWidth: 10)
+            Text(fullName)
+            Spacer()
+            Text(date)
+            Spacer().frame(maxWidth: 10)
+        }
+        .padding(.top, 20)
     }
 }
 

@@ -48,7 +48,6 @@ struct MapView: View {
                                         places.place = nil
                                     }
                                 }
-                            
                             if let selectedPlace = selectedPlace {
                                 if selectedPlace.id == place.id {
                                     if showMapAnnonation {
@@ -79,7 +78,6 @@ struct MapView: View {
                             })
                     .highPriorityGesture(DragGesture(minimumDistance: 10))
                     .colorScheme(colorScheme == .dark ? .dark : .light)
-                
                 VStack {
                     Spacer()
                     HStack {
@@ -91,10 +89,25 @@ struct MapView: View {
                             }
                         }
                     }
-                    
                     Spacer().frame(maxHeight: 50)
                 }
                 .padding()
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            showProfile = true
+                        }) {
+                            SmallUserImage()
+                        }.fullScreenCover(isPresented: $showProfile, content: {
+                            ProfileView()
+                        })
+                        .padding(.bottom,10)
+                    }
+                    .frame(height: 50)
+                    .background(.white)
+                    Spacer()
+                }
             }
             .onAppear() {
                 places.listenToFirestore()

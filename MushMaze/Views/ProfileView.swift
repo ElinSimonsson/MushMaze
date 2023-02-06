@@ -96,7 +96,7 @@ struct ProfileView: View {
     }
         .padding()
         .onAppear() {
-            userModel.addSnapShotTest()
+            userModel.loadUserInformation()
     }
 }
 
@@ -115,9 +115,13 @@ struct ProfileView: View {
    
     func saveToFirestore () {
         if userModel.user?.imageURL == "" && selectedImage != nil {
-            uploadPhotoAndSaveToFirestore()
+            //uploadPhotoAndSaveToFirestore()
+            userModel.uploadPhotoAndSaveToFirestore(selectedImage: selectedImage, fullName: $fullName.wrappedValue)
         } else if userModel.user?.imageURL != "" && selectedImage != nil {
-            deleteImageFromStorageAndSaveNew()
+            if let image = selectedImage {
+                userModel.deletePictureStorageAndSaveNewData(newImage: image, fullName: $fullName.wrappedValue)
+                //deleteImageFromStorageAndSaveNew()
+            }
         } else if userModel.user?.imageURL != "" && selectedImage == nil {
             if let user = userModel.user {
                 userModel.updateUserDataToFirestore(imageURL: user.imageURL, fullName: $fullName.wrappedValue)

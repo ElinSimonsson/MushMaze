@@ -24,7 +24,6 @@ struct AddPlaceView: View {
     @State var mushrooms : [String] = []
     @State var newMushroomName = ""
     @State private var sourceType : UIImagePickerController.SourceType = .photoLibrary
-    //@State var changeProfileImage = false
     @State var openCameraRoll = false
     @State var selectedImage : UIImage? = nil
     @State var showingAlert = false
@@ -37,84 +36,55 @@ struct AddPlaceView: View {
     var body: some View {
         ZStack {
             ScrollView {
-                VStack {
-                    HStack {
-                        Button(action: {
-                            presentationMode.wrappedValue.dismiss()
-                        }) {
-                            Text("< Back")
-                        }
-                        Spacer()
-                        Button(action: {
-                            uploadPhotoAndSaveToFirestore()
-                        }) {
-                            Text("Save")
-                        }
-                        .alert(isPresented: $showErrorImage) {
-                            Alert(title: Text("Image is missing"), dismissButton: .default(Text("Ok")))
-                        }
+                ToolBarView(showErrorImage: $showErrorImage, cancelAction: {
+                    presentationMode.wrappedValue.dismiss()
+                }, saveAction: {
+                    uploadPhotoAndSaveToFirestore()
+                })
+                Button(action: {
+                    showingAlert = true
+                }, label: {
+                    if let image = selectedImage {
+                        Image(uiImage: image)
+                            .imageMod()
+                    } else {
+                        Image(systemName: "photo")
+                            .imageMod()
+                            .foregroundColor(Color(.systemGray3))
                     }
-                    Button(action: {
-                        showingAlert = true
-                    }, label: {
-                        if let image = selectedImage {
-                            Image(uiImage: image)
-                                .imageMod()
-                        } else {
-                            Image(systemName: "photo")
-                                .imageMod()
-                                .foregroundColor(Color(.systemGray3))
-                        }
-                    }).alert(isPresented: $showingAlert) {
-                        Alert(title: Text("Choose Source"),
-                              primaryButton: .default(Text("Camera")) {
-                            sourceType = .camera
-                            openCameraRoll = true
-                        }, secondaryButton: .default(Text("Photo")) {
-                            sourceType = .photoLibrary
-                            openCameraRoll = true
-                        })
+                }).alert(isPresented: $showingAlert) {
+                    Alert(title: Text("Choose Source"),
+                          primaryButton: .default(Text("Camera")) {
+                        sourceType = .camera
+                        openCameraRoll = true
+                    }, secondaryButton: .default(Text("Photo")) {
+                        sourceType = .photoLibrary
+                        openCameraRoll = true
+                    })
+                }
+                PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing)
+                PlaceDescriptionField(description: $description)
+                    .onTapGesture {
+                        clearText()
                     }
-                    PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing)
-                    PlaceDescriptionField(description: $description)
-                        .onTapGesture {
-                            clearText()
-                        }
-                    MushroomSpeciesSubTitle()
-                    
-                    ForEach(mushrooms, id: \.self) { mushroom in
-                        HStack {
-                            Text("* \(mushroom)")
-                                .padding(.bottom, 10)
-                            Spacer()
-                        }
-                    }
-                    if isAddingNewMushroom {
-                        HStack {
-                            ZStack {
-                                TextField("Add mushroom species", text: $newMushroomName, onCommit: {
-                                    mushrooms.append(newMushroomName)
-                                    self.isAddingNewMushroom = false
-                                })
-                                .onAppear() {
-                                    self.newMushroomName = ""
-                                }
-                                if mushroomsAreMissing {
-                                    RoundedRectangle(cornerRadius: 5)
-                                        .stroke(Color.red, lineWidth: 1)
-                                        .frame(width: UIScreen.main.bounds.width - 30, height: 50)
-                                        
-                                }
-                            }
-                            
-                        }
+                MushroomSpeciesSubTitle()
+                
+                ForEach(mushrooms, id: \.self) { mushroom in
+                    MushroomRowView(mushroom: mushroom) {
+                        deleteMushroom(mushroom)
                     }
                 }
+                if isAddingNewMushroom {
+                    AddMushroomTextField(mushrooms: $mushrooms,
+                                         newMushroomName: $newMushroomName,
+                                         mushroomsAreMissing: mushroomsAreMissing,
+                                         isAddingNewMushroom: $isAddingNewMushroom)
+                }
             }
+            .padding()
             .fullScreenCover(isPresented: $openCameraRoll) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
             }
-            .padding()
             .onTapGesture {
                 isAddingNewMushroom = true
             }
@@ -122,7 +92,13 @@ struct AddPlaceView: View {
                 FirestoreSavingCircularProgressIndicator()
             }
         }
-        
+    }
+    
+    func deleteMushroom(_ mushroom: String) {
+        mushrooms.removeAll(where: { $0 == mushroom })
+        if mushrooms.isEmpty {
+            isAddingNewMushroom = true
+        }
     }
     
     func clearText () {
@@ -146,8 +122,9 @@ struct AddPlaceView: View {
         if selectedImage == nil {
             showErrorImage = true
         }
-        else if placeName == "" && mushrooms.count == 0 {
+        else if placeName == "" {
             placeNameIsMissing = true
+        } else if mushrooms.count == 0 {
             mushroomsAreMissing = true
         } else {
             isSaving = true
@@ -191,6 +168,76 @@ struct FirestoreSavingCircularProgressIndicator : View {
         .background(Color.white)
         .cornerRadius(10)
         .shadow(radius: 10)
+    }
+}
+
+struct AddMushroomTextField : View {
+    @Binding var mushrooms : [String]
+    @Binding var newMushroomName : String
+    var mushroomsAreMissing : Bool
+    @Binding var isAddingNewMushroom : Bool
+    
+    var body: some View {
+        HStack {
+            ZStack {
+                TextField("Add mushroom species", text: $newMushroomName, onCommit: {
+                    mushrooms.append(newMushroomName)
+                    self.isAddingNewMushroom = false
+                })
+                .onAppear() {
+                    self.newMushroomName = ""
+                }
+                if mushroomsAreMissing {
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(Color.red, lineWidth: 1)
+                        .frame(width: UIScreen.main.bounds.width - 30, height: 50)
+                    
+                }
+            }
+            
+        }
+    }
+}
+
+struct ToolBarView : View {
+    @Binding var showErrorImage : Bool
+    var cancelAction : () -> Void
+    var saveAction : () -> Void
+    
+    var body : some View {
+        HStack {
+            Button(action: cancelAction) {
+                Text("< Back")
+            }
+            Spacer()
+            Button(action: saveAction) {
+                Text("Save")
+            }
+            .alert(isPresented: $showErrorImage) {
+                Alert(title: Text("Image is missing"), dismissButton: .default(Text("Ok")))
+            }
+        }
+    }
+}
+
+struct MushroomRowView : View {
+    var mushroom : String
+    var closure : () -> Void
+    
+    var body: some View {
+        HStack {
+            Spacer().frame(maxWidth: 15)
+            Text("* \(mushroom)")
+            Spacer()
+            Button(action: {
+                closure()
+            }) {
+                Image(systemName: "trash")
+                    .foregroundColor(.red)
+            }
+            Spacer().frame(maxWidth: 15)
+        }
+        .padding(.bottom, 5)
     }
 }
 

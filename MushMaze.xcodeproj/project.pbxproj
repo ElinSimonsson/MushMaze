@@ -35,6 +35,7 @@
 		3F8D35832982C61900DCBCBF /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 3F8D35822982C61900DCBCBF /* FirebaseStorage */; };
 		3F8D35892983CA8700DCBCBF /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D35882983CA8600DCBCBF /* ImagePicker.swift */; };
 		3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D358A2983CB4800DCBCBF /* ImageMod.swift */; };
+		3FBF8B852990FA3B002C744F /* ChoicePopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBF8B842990FA3B002C744F /* ChoicePopUp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +82,7 @@
 		3F8D35802982A2B600DCBCBF /* AddPlaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlaceView.swift; sourceTree = "<group>"; };
 		3F8D35882983CA8600DCBCBF /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		3F8D358A2983CB4800DCBCBF /* ImageMod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMod.swift; sourceTree = "<group>"; };
+		3FBF8B842990FA3B002C744F /* ChoicePopUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoicePopUp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -191,6 +193,7 @@
 				3F0DC4B62989503700C0BCBC /* ListOfPlacesView.swift */,
 				3F0DC4B82989618600C0BCBC /* PlaceDetailsView.swift */,
 				3F0DC4BA2989670A00C0BCBC /* DestinationView.swift */,
+				3FBF8B842990FA3B002C744F /* ChoicePopUp.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -352,6 +355,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F136789297FF0CC005B8666 /* Places.swift in Sources */,
+				3FBF8B852990FA3B002C744F /* ChoicePopUp.swift in Sources */,
 				3F80E35F29812359002877FD /* CreatingAccountView.swift in Sources */,
 				3F8D35892983CA8700DCBCBF /* ImagePicker.swift in Sources */,
 				3F8D357E2982767300DCBCBF /* ProfileView.swift in Sources */,
@@ -526,7 +530,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MushMaze/Preview Content\"";
-				DEVELOPMENT_TEAM = YCHX4WNLM7;
+				DEVELOPMENT_TEAM = W5BK5DHQMV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need the camera permission";
@@ -558,7 +562,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MushMaze/Preview Content\"";
-				DEVELOPMENT_TEAM = YCHX4WNLM7;
+				DEVELOPMENT_TEAM = W5BK5DHQMV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need the camera permission";
