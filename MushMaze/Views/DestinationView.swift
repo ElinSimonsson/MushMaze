@@ -11,6 +11,7 @@ struct DestinationView: View {
     let locationManager = LocationManager()
     @State var destinations = Destination.map
     
+    
     enum Destination {
         case map, list
     }
@@ -41,7 +42,7 @@ struct DestinationView: View {
 
 struct ToggleButtonsView : View {
     @Binding var destinations : DestinationView.Destination
-    
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         if destinations == .map {
             VStack {
@@ -52,7 +53,7 @@ struct ToggleButtonsView : View {
                         destinations = .map
                     }){
                         Image(systemName: destinations == .map ? "map.fill" : "map")
-                            .foregroundColor(.black)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                             .font(.system(size: 30))
                     }
                     Spacer()
@@ -60,7 +61,7 @@ struct ToggleButtonsView : View {
                         destinations = .list
                     }) {
                         Image(systemName: destinations == .list ? "list.clipboard.fill" : "list.bullet.clipboard")
-                            .foregroundColor(.black)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                             .font(.system(size: 30))
                     }
                     Spacer()
@@ -76,7 +77,7 @@ struct ToggleButtonsView : View {
                     destinations = .map
                 }){
                     Image(systemName: destinations == .map ? "map.fill" : "map")
-                        .foregroundColor(.black)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                         .font(.system(size: 30))
                 }
                 Spacer()
@@ -84,14 +85,13 @@ struct ToggleButtonsView : View {
                     destinations = .list
                 }) {
                     Image(systemName: destinations == .list ? "list.clipboard.fill" : "list.bullet.clipboard")
-                        .foregroundColor(.black)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                         .font(.system(size: 30))
                 }
                 Spacer()
             }
             .edgesIgnoringSafeArea(.top)
             .background(Color(.systemGray6))
-            
         }
     }
 }

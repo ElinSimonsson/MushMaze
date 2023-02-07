@@ -19,7 +19,7 @@ struct AddPlaceView: View {
     let places = Places()
     
     @State var placeName = ""
-    @State var description = "brief description of the location"
+    @State var description = ""
     @State var isAddingNewMushroom = true
     @State var mushrooms : [String] = []
     @State var newMushroomName = ""
@@ -87,11 +87,22 @@ struct AddPlaceView: View {
             }
             .onTapGesture {
                 isAddingNewMushroom = true
+                dismissKeyBoard()
             }
             if isSaving {
                 FirestoreSavingCircularProgressIndicator()
             }
         }
+    }
+    
+    func dismissKeyBoard () {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .filter({$0.activationState == .foregroundActive})
+            .map({$0 as? UIWindowScene})
+            .compactMap({$0})
+            .first?.windows
+            .filter({$0.isKeyWindow}).first
+        keyWindow!.endEditing(true)
     }
     
     func deleteMushroom(_ mushroom: String) {
@@ -184,6 +195,9 @@ struct AddMushroomTextField : View {
                     mushrooms.append(newMushroomName)
                     self.isAddingNewMushroom = false
                 })
+                .simultaneousGesture(TapGesture().onEnded { _ in
+                    // to onTapGesture not triggers on this view
+                })
                 .onAppear() {
                     self.newMushroomName = ""
                 }
@@ -264,6 +278,9 @@ struct PlaceTextField : View {
                 .background(Color(.systemGray6))
                 .cornerRadius(5.0)
                 .padding(.bottom, 20)
+                .simultaneousGesture(TapGesture().onEnded { _ in
+                    // to onTapGesture not triggers on this view
+                })
             if placeNameMissing {
                 RoundedRectangle(cornerRadius: 5)
                     .stroke(Color.red, lineWidth: 1)
@@ -278,14 +295,15 @@ struct PlaceDescriptionField : View {
     @Binding var description : String
     
     var body: some View {
-        TextEditor(text: $description)
-            .frame(height: 80)
+        
+        TextField("brief description of the location", text: $description, axis: .vertical)
             .padding()
-            .scrollContentBackground(.hidden)
             .background(Color(.systemGray6))
             .cornerRadius(5.0)
             .padding(.bottom, 20)
-        
+            .simultaneousGesture(TapGesture().onEnded { _ in
+                // to onTapGesture not triggers on this view
+            })
     }
 }
 

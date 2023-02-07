@@ -12,7 +12,6 @@ import Firebase
 struct MapView: View {
     let db = Firestore.firestore()
     let locationManager : LocationManager
-    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
     
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var places : Places
@@ -23,9 +22,10 @@ struct MapView: View {
     @State var placesList = [Place]()
     @State var showMapAnnonation = false
     @State var selectedPlace : Place?
-    // @State var selectedplace = Place(createrUID: "", name: "", imageURL: "", latitude: 0, longitude: 0, isSelected: false, favorite: false)
+    @State var userTrackingModeValue: MapUserTrackingMode = .follow
     @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 59.243013423142024, longitude: 17.9932212288352), span:
                                             MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
+    
     
     var body: some View {
         GeometryReader { proxy in
@@ -33,7 +33,7 @@ struct MapView: View {
                 Map(coordinateRegion: $region,
                     interactionModes: [.all],
                     showsUserLocation: true,
-                    userTrackingMode: .constant(.follow),
+                    userTrackingMode: .constant(userTrackingModeValue),
                     annotationItems: places.places) { place in
                     MapAnnotation(coordinate: place.coordinate, anchorPoint: CGPoint(x: 0.5, y: 0.5)) {
                         ZStack {
@@ -41,19 +41,20 @@ struct MapView: View {
                                 .onTapGesture {
                                     if selectedPlace?.id != place.id {
                                         self.selectedPlace = place
-                                        //self.places.place = place
                                         self.showMapAnnonation = true
                                     } else {
                                         showMapAnnonation = false
-                                        places.place = nil
+                                        self.selectedPlace = nil
                                     }
                                 }
                             if let selectedPlace = selectedPlace {
                                 if selectedPlace.id == place.id {
                                     if showMapAnnonation {
-                                        MapAnnotationDetailView(place: selectedPlace, closure: calculateDistance)
+                                        MapAnnotationDetailView(place: place, closure: calculateDistance)
                                             .onAppear() {
+                                                print("onAppear")
                                                 calculateDistance()
+                                                
                                             }
                                     }
                                 }
@@ -80,13 +81,13 @@ struct MapView: View {
                     .colorScheme(colorScheme == .dark ? .dark : .light)
                 VStack {
                     Spacer()
-                    HStack {
-                        Spacer()
-                        AddPlaceButton(darkTurquoise: darkTurquoise, showAddPlaceView: $showAddPlaceView, coordinate: $coordinate) {
-                            coordinate = addPin() ?? CLLocationCoordinate2D(latitude: 100, longitude: 200)
-                            if (coordinate.latitude >= -90 && coordinate.latitude <= 90) && (coordinate.longitude >= -180 && coordinate.longitude <= 180) {
-                                showAddPlaceView = true
-                            }
+                    MapUserTrackingModeButton(userTrackingModeValue: $userTrackingModeValue)
+                    Spacer().frame(maxHeight: 20)
+                    AddPlaceButton(showAddPlaceView: $showAddPlaceView, coordinate: $coordinate) {
+                        
+                        coordinate = addPin() ?? CLLocationCoordinate2D(latitude: 100, longitude: 200)
+                        if (coordinate.latitude >= -90 && coordinate.latitude <= 90) && (coordinate.longitude >= -180 && coordinate.longitude <= 180) {
+                            showAddPlaceView = true
                         }
                     }
                     Spacer().frame(maxHeight: 50)
@@ -105,7 +106,7 @@ struct MapView: View {
                         .padding(.bottom,10)
                     }
                     .frame(height: 50)
-                    .background(.white)
+                    .background(colorScheme == .light ? .white : .black)
                     Spacer()
                 }
             }
@@ -118,6 +119,7 @@ struct MapView: View {
     
     func addPin () -> CLLocationCoordinate2D? {
         if let location = locationManager.location {
+            print("addPin, location inte nil")
             return CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
         }
         return nil
@@ -142,6 +144,7 @@ struct MapView: View {
     }
     
     func calculateDistance () {
+ 
         if let location = locationManager.location {
             let currentLatitude = location.latitude
             let currentLongitude = location.longitude
@@ -156,19 +159,13 @@ struct MapView: View {
     }
 }
 
-struct plusButtonContent : View {
-    var body: some View {
-        Image(systemName: "plus")
-            .foregroundColor(.white)
-            .font(.system(size: 30))
-    }
-}
+
 
 struct MapAnnotationDetailView : View {
     var place : Place
     var closure : () -> Void
     @EnvironmentObject var places : Places
-    
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack {
@@ -200,13 +197,12 @@ struct MapAnnotationDetailView : View {
             }
         }
         .frame(width: 200, height: 200)
-        .background(Color.white)
+        .background(colorScheme == .light ? .white : .black)
         .cornerRadius(10)
         .shadow(radius: 10)
         .offset(x: 0, y: -120)
     }
 }
-
 
 struct MapPinMarker : View {
     var place : Place
@@ -223,7 +219,7 @@ struct SmallUserImage : View {
     var body: some View {
         Image(systemName: "person")
             .resizable()
-            .aspectRatio(contentMode: .fit)
+            .aspectRatio(contentMode: .fill)
             .background(lightGreyColor)
             .frame(width: 40, height: 40)
             .clipped()
@@ -232,29 +228,60 @@ struct SmallUserImage : View {
     }
 }
 
-struct AddPlaceButton : View {
+struct MapUserTrackingModeButton : View {
+    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    @Binding var userTrackingModeValue: MapUserTrackingMode
     
-    let darkTurquoise : UIColor
+    
+    var body: some View {
+        HStack {
+            Spacer()
+            Button(action: {
+                if userTrackingModeValue == .follow {
+                    userTrackingModeValue = .none
+                } else {
+                    userTrackingModeValue = .follow
+                }
+            }) {
+                Image(systemName: userTrackingModeValue == . none ? "paperplane" : "paperplane.fill")
+                    .foregroundColor(.white)
+                    .font(.system(size: 20))
+            }
+            .frame(width: 50, height: 50)
+            .background(Color(darkTurquoise))
+            .clipShape(Circle())
+        }
+    }
+}
+
+struct AddPlaceButton : View {
+    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
     @Binding var showAddPlaceView : Bool
     @Binding var coordinate : CLLocationCoordinate2D
     var closure : () -> Void
     
     var body : some View {
-        Button(action: {
-            self.closure()
-        }) {
-            Image(systemName: "plus")
-                .foregroundColor(.white)
-                .font(.system(size: 30))
+        HStack {
+            Spacer()
+            
+            Button(action: {
+                self.closure()
+            }) {
+                Image(systemName: "plus")
+                    .foregroundColor(.white)
+                    .font(.system(size: 30))
+            }
+            .fullScreenCover(isPresented: $showAddPlaceView, content: {
+                AddPlaceView(coordinate: coordinate)
+            })
+            .frame(width: 50, height: 50)
+            .background(Color(darkTurquoise))
+            .clipShape(Circle())
         }
-        .fullScreenCover(isPresented: $showAddPlaceView, content: {
-            AddPlaceView(coordinate: coordinate)
-        })
-        .frame(width: 50, height: 50)
-        .background(Color(darkTurquoise))
-        .clipShape(Circle())
     }
 }
+
+
 
 //struct MapView_Previews: PreviewProvider {
 //    static var previews: some View {

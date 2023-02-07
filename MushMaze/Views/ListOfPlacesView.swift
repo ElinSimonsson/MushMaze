@@ -11,6 +11,7 @@ import Firebase
 struct ListOfPlacesView: View {
     @EnvironmentObject var places : Places
     @EnvironmentObject var userModel : UserModel
+
     @State var showProfile = false
     @State var isHeaderVisible = true
     @State private var searchText = ""
@@ -83,6 +84,7 @@ struct ListOfPlacesView: View {
 
 struct FilteredRowView : View {
     @EnvironmentObject var places : Places
+    @Environment(\.colorScheme) var colorScheme
     @Binding var text : String
     var place : Place
     
@@ -92,13 +94,13 @@ struct FilteredRowView : View {
             VStack {
                 HStack {
                     Text(place.name)
-                        .foregroundColor(.black)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                     Spacer()
                 }
                 HStack {
                     Text("\(place.mushrooms?.first(where: { $0.lowercased().contains(self.text.lowercased())}) ?? "") have been found here")
                         .font(.custom("Arial", size: 12))
-                        .foregroundColor(.black)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                     Spacer()
                 }
             }
@@ -114,13 +116,14 @@ struct FilteredRowView : View {
 
 struct RowView : View {
     @EnvironmentObject var places : Places
+    @Environment(\.colorScheme) var colorScheme
     var place: Place
 
     var body: some View {
         HStack {
             SmallProfileImage(place: place)
             Text(place.name)
-                .foregroundColor(.black)
+                .foregroundColor(colorScheme == .light ? .black : .white)
             Spacer()
             Button(action: {
                 places.updateFavroriteFirestore(place: place)

@@ -7,10 +7,9 @@
 
 import SwiftUI
 
+
+
 struct PlaceDetailsView: View {
-    enum FocusedField : Hashable {
-        case placeName, placeDescription, mushroom
-    }
     
     var place : Place
     @EnvironmentObject var userModel : UserModel
@@ -27,7 +26,6 @@ struct PlaceDetailsView: View {
     @State var showErrorMushroom = false
     @Binding var isHeaderVisible : Bool
     
-    @FocusState var focusedField : FocusedField?
     
     @Environment(\.presentationMode) var presentationMode
     
@@ -35,45 +33,49 @@ struct PlaceDetailsView: View {
     var body: some View {
         ZStack {
             ScrollView {
-                CreaterRowView(place: place, fullName: $createrFullName, imageURL: $createrImageURL)
-                PlaceName(placeName: place.name, isEditing: isEditing, editingPlaceName: $editingPlaceName)
-                PlaceImage(imageURL: place.imageURL)
-                EllipsisButton(showChoicePopUp: $showChoicePopUp)
-
-                if let description = place.description {
-                    DescriptionContent(description: description, isEditing: isEditing, editingDescription: $editingDescription)
-                }
-                MushroomSubTitle()
-
-                if let mushrooms = place.mushrooms {
-                if isEditing {
-                    ForEach(editingMushrooms, id: \.self) { mushroom in
-                        EditingMushroomRowView(mushroom: mushroom) {
-                            deleteMushroom(mushroom)
-                        }
+                VStack {
+                    CreaterRowView(place: place, fullName: $createrFullName, imageURL: $createrImageURL)
+                    PlaceName(placeName: place.name, isEditing: isEditing, editingPlaceName: $editingPlaceName)
+                    
+                    PlaceImage(imageURL: place.imageURL)
+                    EllipsisButton(showChoicePopUp: $showChoicePopUp)
+                    
+                    if let description = place.description {
+                        DescriptionContent(description: description,
+                                           isEditing: isEditing,
+                                           editingDescription: $editingDescription)
                     }
-                        AddMushroomSpeciesTextField(mushrooms: $editingMushrooms,
-                                                    newMushroomName: $newMushroomName,
-                                                    showErrorMushroom: $showErrorMushroom,
-                                                    isAddingNewMushroom: $isAddingMushroom)
-                } else {
-                        ForEach(mushrooms, id: \.self) { mushroom in
-                            MushroomSpeciesRowView(mushroom: mushroom)
+                    MushroomSubTitle()
+                    
+                    if let mushrooms = place.mushrooms {
+                        if isEditing {
+                            ForEach(editingMushrooms, id: \.self) { mushroom in
+                                EditingMushroomRowView(mushroom: mushroom) {
+                                    deleteMushroom(mushroom)
+                                }
+                            }
+                            AddMushroomSpeciesTextField(mushrooms: $editingMushrooms,
+                                                        newMushroomName: $newMushroomName,
+                                                        showErrorMushroom: $showErrorMushroom,
+                                                        isAddingNewMushroom: $isAddingMushroom)
+                        } else {
+                            ForEach(mushrooms, id: \.self) { mushroom in
+                                MushroomSpeciesRowView(mushroom: mushroom)
+                            }
                         }
                     }
                 }
             }
-
             .padding()
             .disabled(showChoicePopUp)
-
+            
             if showChoicePopUp {
                 ChoicePopUp(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
             }
         }
+        
         .onTapGesture {
-           dismissKeyBoard()
-
+            dismissKeyBoard()
             if isEditing {
                 isAddingMushroom = true
             }
@@ -109,7 +111,7 @@ struct PlaceDetailsView: View {
             if isEditing {
                 ToolbarItem (placement: .navigationBarTrailing) {
                     Button(action: {
-                       updatePlace()
+                        updatePlace()
                         
                     }) {
                         Text("Save")
@@ -121,13 +123,12 @@ struct PlaceDetailsView: View {
     
     func dismissKeyBoard () {
         let keyWindow = UIApplication.shared.connectedScenes
-                                       .filter({$0.activationState == .foregroundActive})
-                                       .map({$0 as? UIWindowScene})
-                                       .compactMap({$0})
-                                       .first?.windows
-                                       .filter({$0.isKeyWindow}).first
-                    keyWindow!.endEditing(true)
-
+            .filter({$0.activationState == .foregroundActive})
+            .map({$0 as? UIWindowScene})
+            .compactMap({$0})
+            .first?.windows
+            .filter({$0.isKeyWindow}).first
+        keyWindow!.endEditing(true)
     }
     
     func updatePlace () {
@@ -167,7 +168,6 @@ struct AddMushroomSpeciesTextField : View {
     @Binding var newMushroomName : String
     @Binding var showErrorMushroom : Bool
     @Binding var isAddingNewMushroom : Bool
-    @FocusState var focus: PlaceDetailsView.FocusedField?
     @State var returButtonPressed = false
     
     
@@ -178,9 +178,7 @@ struct AddMushroomSpeciesTextField : View {
                 self.isAddingNewMushroom = false
                 newMushroomName = ""
                 returButtonPressed = true
-                focus = .mushroom
             })
-            .focused($focus, equals: .mushroom)
             .submitLabel(.go)
             .onChange(of: returButtonPressed) { newvalue in
                 if returButtonPressed {
@@ -188,7 +186,6 @@ struct AddMushroomSpeciesTextField : View {
                     returButtonPressed = false
                 }
             }
-            
             .alert(isPresented: $showErrorMushroom) {
                 Alert(title: Text("you must have entered at least one mushroom species"), dismissButton: .default(Text("Ok")))
             }
@@ -230,7 +227,6 @@ struct MushroomSpeciesRowView : View {
                 .padding(.bottom, 5)
             Spacer()
         }
-        
     }
 }
 
@@ -252,23 +248,17 @@ struct DescriptionContent : View {
     let description : String
     var isEditing : Bool
     @Binding var editingDescription : String
-    @FocusState var focus: PlaceDetailsView.FocusedField?
+    @State var value : CGFloat = 0
     
     var body: some View {
         HStack {
             Spacer().frame(maxWidth: 15)
-        if isEditing {
-            TextEditor(text: $editingDescription)
-                .focused($focus, equals: .placeDescription)
-                .frame(height: 80)
-                .padding()
-                .cornerRadius(5.0)
-                .focused($focus, equals: .placeDescription)
-                .onAppear() {
-                    editingDescription = description
-                }
-        } else {
-
+            if isEditing {
+                TextField("description of the place", text: $editingDescription, axis: .vertical)
+                    .onAppear() {
+                        editingDescription = description
+                    }
+            } else {
                 Text(description)
             }
             Spacer().frame(maxWidth: 15)
@@ -279,19 +269,19 @@ struct DescriptionContent : View {
 
 struct EllipsisButton : View {
     @Binding var showChoicePopUp: Bool
-
-       var body: some View {
-           HStack {
-               Spacer()
-               Button(action: {
-                   showChoicePopUp = true
-               }) {
-                   Image(systemName: "ellipsis")
-               }
-               Spacer().frame(maxWidth: 15)
-           }
-           .padding(.top, 5)
-       }
+    
+    var body: some View {
+        HStack {
+            Spacer()
+            Button(action: {
+                showChoicePopUp = true
+            }) {
+                Image(systemName: "ellipsis")
+            }
+            Spacer().frame(maxWidth: 15)
+        }
+        .padding(.top, 5)
+    }
 }
 
 struct PlaceImage : View {
@@ -304,12 +294,11 @@ struct PlaceImage : View {
                 image
                     .resizable()
                     .scaledToFit()
-                
             },
                        placeholder: {ProgressView()}
             )
             .aspectRatio(contentMode: .fit)
-            .frame(width: UIScreen.main.bounds.size.width - 10, height: 250)
+            .frame(width: UIScreen.main.bounds.size.width - 10, height: .none) // 250
         }
         .padding(.top, 10)
     }
@@ -319,22 +308,22 @@ struct PlaceName : View {
     let placeName : String
     var isEditing : Bool
     @Binding var editingPlaceName : String
-    @FocusState var focus: PlaceDetailsView.FocusedField?
+    //@FocusState var focus: PlaceDetailsView.FocusedField?
     
     var body: some View {
         HStack {
             if isEditing {
                 TextField("Place Name", text: $editingPlaceName)
-                    .focused($focus, equals: .placeName)
+                    .simultaneousGesture(TapGesture().onEnded { _ in
+                        // tapGesture in other struct wont triggers in this view
+                    })
+                
                     .font(.title)
                     .fontWeight(.semibold)
                     .multilineTextAlignment(.center)
-                    .onSubmit {
-                        focus = .placeDescription
-                    }
+                
                     .onAppear() {
                         editingPlaceName = placeName
-                        focus = .placeName
                     }
             } else {
                 Text(placeName)
