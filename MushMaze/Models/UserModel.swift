@@ -60,27 +60,29 @@ class UserModel : ObservableObject {
         
     func updateUserDataToFirestore (imageURL: String, fullName: String) {
         guard let currentUser = Auth.auth().currentUser else {return}
+        let user = User(fullName: fullName, userId: currentUser.uid, imageURL: imageURL)
         
-        db.collection("users").document(currentUser.uid).setData([
-            "fullName": fullName,
-            "imageURL": imageURL
-        ]) { err in
-            if let err = err {
-                print("Error writing document: \(err)")
-            } else {
-                print("Document successfully written!")
-                self.saved = true
-                
-            }
+        do {
+            let document = db.collection("users").document(currentUser.uid)
+            try document.setData(from: user)
+            document.updateData(["keywordsForLookup" : user.keywordsForLookup])
+            self.saved = true
+        } catch {
+            print("Error updating: \(error)")
         }
     }
         
-        func saveUserDataToFirestore (fullName: String, emailAddress : String) {
+        func saveUserDataToFirestore (fullName: String) {
             guard let userUID = Auth.auth().currentUser?.uid else {return}
-            let user = User(fullName: fullName, emailAddress: emailAddress, userId: userUID, imageURL: "")
+            let user = User(fullName: fullName, userId: userUID, imageURL: "")
             do {
+                
+                let document = db.collection("users").document(userUID) // ny rad
                 _ = try
-                db.collection("users").document(userUID).setData(from: user)
+                //db.collection("users").document(userUID)
+                    document.setData(from: user)
+                document.updateData(["keywordsForLookup" : user.keywordsForLookup])
+                
                 print("successed to save")
                 signedIn = true
                 signedOut = false
@@ -95,7 +97,7 @@ class UserModel : ObservableObject {
                     print("error signing up \(error.localizedDescription)")
                 } else {
                     print("account created successfully")
-                    self.saveUserDataToFirestore(fullName: fullName, emailAddress: emailAddress)
+                    self.saveUserDataToFirestore(fullName: fullName)
                 }
             }
         }
@@ -114,7 +116,7 @@ class UserModel : ObservableObject {
                 let fullName = data["fullName"] as? String ?? ""
                 let email = document.get("emailAddress") as? String ?? ""
                 let imageURL = document.get("imageURL") as? String ?? ""
-                self.user = User(fullName: fullName, emailAddress: email, userId: user.uid, imageURL: imageURL)
+                self.user = User(fullName: fullName, userId: user.uid, imageURL: imageURL)
             }
         }
     }

@@ -13,7 +13,7 @@ struct DestinationView: View {
     
     
     enum Destination {
-        case map, list
+        case map, list, friendList
     }
     
     init() {
@@ -32,6 +32,8 @@ struct DestinationView: View {
             VStack {
                 if destinations == .list {
                     ListOfPlacesView()
+                } else if destinations == .friendList {
+                    ProfileSearchView()
                 }
                 Spacer()
                 ToggleButtonsView(destinations: $destinations)
@@ -65,11 +67,19 @@ struct ToggleButtonsView : View {
                             .font(.system(size: 30))
                     }
                     Spacer()
+                    Button(action: {
+                        destinations = .friendList
+                    }) {
+                        Image(systemName: destinations == .friendList ? "person.2.fill" : "person.2")
+                            .foregroundColor(colorScheme == .light ? . black : .white)
+                            .font(.system(size: 30))
+                    }
+                    Spacer()
                 }
                 .edgesIgnoringSafeArea(.top)
                 .background(Color(.systemGray6))
             }
-        } else if destinations == .list {
+        } else  {
             
             HStack (spacing: 0) {
                 Spacer()
@@ -86,6 +96,14 @@ struct ToggleButtonsView : View {
                 }) {
                     Image(systemName: destinations == .list ? "list.clipboard.fill" : "list.bullet.clipboard")
                         .foregroundColor(colorScheme == .light ? .black : .white)
+                        .font(.system(size: 30))
+                }
+                Spacer()
+                Button(action: {
+                    destinations = .friendList
+                }) {
+                    Image(systemName: destinations == .friendList ? "person.2.fill" : "person.2")
+                        .foregroundColor(colorScheme == .light ? . black : .white)
                         .font(.system(size: 30))
                 }
                 Spacer()

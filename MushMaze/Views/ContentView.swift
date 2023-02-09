@@ -14,12 +14,13 @@ struct ContentView: View {
     
     var body: some View {
 
+        //ProfileSearchView()
         if !userModel.signedOut && userModel.signedIn {
             DestinationView()
         } else {
             SigningInView()
         }
-    }
+   }
 }
 
 //struct ContentView_Previews: PreviewProvider {
