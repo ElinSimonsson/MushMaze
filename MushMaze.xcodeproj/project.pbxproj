@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		3F0305522994E5E400D0724B /* UsersLookupModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0305512994E5E400D0724B /* UsersLookupModel.swift */; };
 		3F0305542994EE1700D0724B /* ProfileSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0305532994EE1700D0724B /* ProfileSearchView.swift */; };
+		3F030556299516AA00D0724B /* Friend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F030555299516A900D0724B /* Friend.swift */; };
+		3F03055829951ACE00D0724B /* FriendRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F03055729951ACE00D0724B /* FriendRequest.swift */; };
+		3F03055A29953C6F00D0724B /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F03055929953C6F00D0724B /* NotificationView.swift */; };
 		3F0DC4B72989503700C0BCBC /* ListOfPlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0DC4B62989503700C0BCBC /* ListOfPlacesView.swift */; };
 		3F0DC4B92989618600C0BCBC /* PlaceDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0DC4B82989618600C0BCBC /* PlaceDetailsView.swift */; };
 		3F0DC4BB2989670A00C0BCBC /* DestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0DC4BA2989670A00C0BCBC /* DestinationView.swift */; };
@@ -60,6 +63,9 @@
 /* Begin PBXFileReference section */
 		3F0305512994E5E400D0724B /* UsersLookupModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersLookupModel.swift; sourceTree = "<group>"; };
 		3F0305532994EE1700D0724B /* ProfileSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSearchView.swift; sourceTree = "<group>"; };
+		3F030555299516A900D0724B /* Friend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Friend.swift; sourceTree = "<group>"; };
+		3F03055729951ACE00D0724B /* FriendRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequest.swift; sourceTree = "<group>"; };
+		3F03055929953C6F00D0724B /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
 		3F0DC4B62989503700C0BCBC /* ListOfPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListOfPlacesView.swift; sourceTree = "<group>"; };
 		3F0DC4B82989618600C0BCBC /* PlaceDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailsView.swift; sourceTree = "<group>"; };
 		3F0DC4BA2989670A00C0BCBC /* DestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationView.swift; sourceTree = "<group>"; };
@@ -199,6 +205,7 @@
 				3F0DC4BA2989670A00C0BCBC /* DestinationView.swift */,
 				3FBF8B842990FA3B002C744F /* ChoicePopUp.swift */,
 				3F0305532994EE1700D0724B /* ProfileSearchView.swift */,
+				3F03055929953C6F00D0724B /* NotificationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -214,6 +221,8 @@
 				3F8D358A2983CB4800DCBCBF /* ImageMod.swift */,
 				3F42EA18298BCC3E00477F61 /* UserModel.swift */,
 				3F0305512994E5E400D0724B /* UsersLookupModel.swift */,
+				3F030555299516A900D0724B /* Friend.swift */,
+				3F03055729951ACE00D0724B /* FriendRequest.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -364,6 +373,7 @@
 				3FBF8B852990FA3B002C744F /* ChoicePopUp.swift in Sources */,
 				3F80E35F29812359002877FD /* CreatingAccountView.swift in Sources */,
 				3F8D35892983CA8700DCBCBF /* ImagePicker.swift in Sources */,
+				3F03055A29953C6F00D0724B /* NotificationView.swift in Sources */,
 				3F8D357E2982767300DCBCBF /* ProfileView.swift in Sources */,
 				3F13678B29801094005B8666 /* MapView.swift in Sources */,
 				3F8D35812982A2B600DCBCBF /* AddPlaceView.swift in Sources */,
@@ -373,8 +383,10 @@
 				3F0DC4BB2989670A00C0BCBC /* DestinationView.swift in Sources */,
 				3F42EA19298BCC3E00477F61 /* UserModel.swift in Sources */,
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
+				3F03055829951ACE00D0724B /* FriendRequest.swift in Sources */,
 				3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */,
 				3F80B7742981617E00C39181 /* User.swift in Sources */,
+				3F030556299516AA00D0724B /* Friend.swift in Sources */,
 				3F136781297FE916005B8666 /* LocationManager.swift in Sources */,
 				3F0305542994EE1700D0724B /* ProfileSearchView.swift in Sources */,
 				3F136787297FF064005B8666 /* Place.swift in Sources */,

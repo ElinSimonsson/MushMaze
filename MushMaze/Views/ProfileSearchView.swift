@@ -28,7 +28,9 @@ struct ProfileSearchView: View {
             SearchBarView(keyword: keywordBinding)
             ScrollView {
                 ForEach(usersLookup.queriedUsers, id: \.id) { user in
-                    ProfileBarView(user: user)
+                    ProfileBarView(user: user) {
+                        userModel.sendRequestToFriend(recipientId: user.userId)
+                    }
                 }
             }
         }
@@ -36,11 +38,6 @@ struct ProfileSearchView: View {
         .navigationBarHidden(true)
         .navigationBarTitleDisplayMode(.inline)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear() {
-            userModel.loadUserInformation()
-        }
-        
-        
     }
 }
 
@@ -49,6 +46,8 @@ struct SearchBarView : View {
     
     var body: some View {
         HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
             TextField("Search friends", text: $keyword)
             Button(action: {
                 self.keyword = ""
@@ -66,6 +65,7 @@ struct SearchBarView : View {
 struct ProfileBarView : View {
     @EnvironmentObject var userModel : UserModel
     var user : User
+    let action : () -> Void
     
     var body: some View {
         if let currentUser = userModel.user {
@@ -74,10 +74,35 @@ struct ProfileBarView : View {
                     ProfileImageView(imageURL: user.imageURL)
                     Text(user.fullName)
                     Spacer()
-                    Button(action: {
-                        print("user: \(user.userId) tapped")
-                    }) {
-                        Text("Request")
+                    
+                    let pendingRequest = userModel.friendRequests.first(where: {
+                        ($0.senderId == currentUser.userId && $0.recipientId == user.userId) ||
+                        ($0.recipientId == currentUser.userId && $0.senderId == user.userId)
+                    })
+                    
+                    if let pendingRequest = pendingRequest {
+                        if pendingRequest.senderId != currentUser.userId && pendingRequest.status == .pending {
+                            Button(action: {
+                                print("accept")
+                            }) {
+                                Text("Accept")
+                            }
+                            Button(action: {
+                                print("decline")
+                            }) {
+                                Text("Decline")
+                            }
+                        } else if pendingRequest.status == .pending {
+                            Text("Pending")
+                        } else if pendingRequest.status == .accepted {
+                            Text("Friend")
+                        }
+                    } else {
+                        Button(action: {
+                            userModel.sendRequestToFriend(recipientId: user.userId)
+                        }) {
+                            Text("Request")
+                        }
                     }
                 }
             }

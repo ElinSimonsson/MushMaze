@@ -139,6 +139,8 @@ struct SearchBar: View {
     
     var body: some View {
         HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
             TextField("Search", text: $text)
             Button(action: {
                 self.text = ""

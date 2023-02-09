@@ -9,16 +9,119 @@ import Foundation
 import Firebase
 import FirebaseAuth
 import FirebaseStorage
+import FirebaseFirestoreSwift
 import UIKit
 
 class UserModel : ObservableObject {
     let db = Firestore.firestore()
     let storage = Storage.storage()
     @Published var user : User?
+    @Published var friendRequests = [FriendRequest]()
     @Published var signedIn = false
     @Published var signedOut = false
     @Published var saved = false
     
+    
+    func acceptFriendRequest (friendRequest : FriendRequest) {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        guard let friendRequestID = friendRequest.id else {return}
+        
+
+        do {
+            try db.collection("users")
+                .document(friendRequest.senderId)
+                .collection("friendRequest")
+                .document(friendRequestID)
+                .updateData(["status" : "accepted"])
+            print("friendRequest sender ID \(friendRequest.senderId)")
+
+            try db.collection("users")
+                .document(friendRequest.recipientId)
+                .collection("friendRequest")
+                .document(friendRequestID)
+                .updateData(["status" : "accepted"])
+            print("currentUser id \(currentUser.uid)")
+
+
+        } catch {
+            print("Error updating status: \(error)")
+        }
+        
+        
+    }
+    
+    func sendRequestToFriend (recipientId : String) {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        
+//        let dateFormatter = DateFormatter()
+//        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+//        let dateString = dateFormatter.string(from: Date())
+//
+////        let date = Date()
+////        let timeStamp = Timestamp(date: date)
+//
+//        let date : Date = Date()
+//        let timestamp = Timestamp(date: date)
+        
+        //let friendRequest = FriendRequest(senderId: currentUser.uid, recipientId: recipientId, status: .pending)
+
+        var ref: DocumentReference? = nil // error Cannot find type DocumentReference in scope
+        ref = db.collection("users").document(currentUser.uid).collection("friendRequest").addDocument(data: [
+//            "date": timestamp,
+            "senderId": currentUser.uid,
+            "recipientId" : recipientId,
+            "status" : "pending"
+        ]) { err in
+            if let err = err {
+                print("Error adding document: \(err)")
+            } else {
+                print("Document added with ID: \(ref!.documentID)")
+                
+                //let data = FriendRequest(id: ref!.documentID , senderId: currentUser.uid, recipientId: recipientId, status: .pending)
+                
+                
+                self.db.collection("users").document(recipientId).collection("friendRequest").document(ref!.documentID).setData([
+//                        "date": date,
+                        "senderId": currentUser.uid,
+                        "recipientId" : recipientId,
+                        "status" : "pending"
+                    ])
+                
+            }
+        }
+        
+//        do {
+//            try db.collection("users").document(currentUser.uid).collection("friendRequest").addDocument(from: friendRequest)
+//            try db.collection("users").document(recipientId).collection("friendRequest").addDocument(from: friendRequest)
+//        } catch {
+//            print("failed to send request to recipient ")
+//        }
+    }
+    
+    func listenFriendRequestFirestore () {
+        guard let user = Auth.auth().currentUser else {return}
+        
+        db.collection("users").document(user.uid).collection("friendRequest").addSnapshotListener { snapshot, err in
+            guard let snapshot = snapshot else {return}
+            if let err = err {
+                print("failed getting documents \(err)")
+            } else {
+                self.friendRequests.removeAll()
+                for document in snapshot.documents {
+                    let result = Result {
+                        try document.data(as: FriendRequest.self)
+                    }
+                    switch result {
+                    case .success(let friendRequest) :
+                        self.friendRequests.append(friendRequest)
+                        print("friendRequest: \(friendRequest)")
+                    case .failure(let error) :
+                        print("Error decoding friendRequest \(err)")
+                    }
+                }
+            }
+        }
+    }
     
     func fetchUserInfo(userID: String, completion: @escaping (_ imageURL: String?, _ name: String?, _ error: Error?) -> Void) {
         let userRef = db.collection("users").document(userID)
@@ -138,8 +241,6 @@ class UserModel : ObservableObject {
                     print("successfully stored image with url : \(url?.absoluteString ?? "")")
                     guard let imageURL = url?.absoluteString else {return}
                     self.updateUserDataToFirestore(imageURL: imageURL, fullName: fullName)
-                  
-                   // presentationMode.wrappedValue.dismiss()
                 }
             }
         }

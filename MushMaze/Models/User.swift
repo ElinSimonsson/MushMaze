@@ -17,6 +17,7 @@ struct User : Codable, Identifiable {
         [self.fullName.generateStringSequence()].flatMap {$0}
     }
 }
+
 extension String {
     func generateStringSequence () -> [String] {
         guard self.count > 0 else {return []}
