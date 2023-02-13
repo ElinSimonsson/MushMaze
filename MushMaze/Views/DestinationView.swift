@@ -33,6 +33,7 @@ struct DestinationView: View {
             .onAppear() {
                 userModel.loadUserInformation()
                 userModel.listenFriendRequestFirestore()
+                //userModel.startListenFriends()
                 
             }
         } else {
@@ -40,7 +41,7 @@ struct DestinationView: View {
                 if destinations == .list {
                     ListOfPlacesView()
                 } else if destinations == .friendList {
-                    ProfileSearchView()
+                    FriendListView()
                 } else if destinations == .notification {
                     NotificationView()
                 }
@@ -54,6 +55,7 @@ struct DestinationView: View {
 struct ToggleButtonsView : View {
     @Binding var destinations : DestinationView.Destination
     @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
             HStack (spacing: 0) {
                 Spacer()

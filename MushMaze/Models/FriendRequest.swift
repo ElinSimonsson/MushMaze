@@ -10,7 +10,7 @@ import FirebaseFirestoreSwift
 
 struct FriendRequest : Codable, Identifiable {
     @DocumentID var id : String?
-    //var date : Date = Date()
+    var date : Date = Date()
     var senderId: String
     var recipientId: String
     var status : RequestStatus

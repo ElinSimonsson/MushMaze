@@ -9,7 +9,7 @@ import SwiftUI
 import FirebaseAuth
 
 struct SigningInView: View {
-  
+
     @EnvironmentObject var userModel : UserModel
     @State var email = ""
     @State var password = ""
@@ -34,12 +34,13 @@ struct SigningInView: View {
             }) {
                 Text("Not registered yet? Sign up here")
             }
-            .fullScreenCover(isPresented: $showCreatingAccountView, content: {
+            .sheet(isPresented: $showCreatingAccountView, content: {
                 CreatingAccountView()
             })
             Spacer()
             Button(action: {
                 logIn()
+                
             }) {
                 LogInButtonContent()
             }

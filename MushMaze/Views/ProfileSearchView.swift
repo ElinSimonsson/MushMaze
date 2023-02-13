@@ -28,9 +28,7 @@ struct ProfileSearchView: View {
             SearchBarView(keyword: keywordBinding)
             ScrollView {
                 ForEach(usersLookup.queriedUsers, id: \.id) { user in
-                    ProfileBarView(user: user) {
-                        userModel.sendRequestToFriend(recipientId: user.userId)
-                    }
+                    ProfileBarView(user: user)
                 }
             }
         }
@@ -65,7 +63,6 @@ struct SearchBarView : View {
 struct ProfileBarView : View {
     @EnvironmentObject var userModel : UserModel
     var user : User
-    let action : () -> Void
     
     var body: some View {
         if let currentUser = userModel.user {
@@ -82,31 +79,84 @@ struct ProfileBarView : View {
                     
                     if let pendingRequest = pendingRequest {
                         if pendingRequest.senderId != currentUser.userId && pendingRequest.status == .pending {
+                        
                             Button(action: {
-                                print("accept")
+                                userModel.declineFriendRequest(friendRequest: pendingRequest)
                             }) {
-                                Text("Accept")
+                                DeclineButtonContent()
                             }
                             Button(action: {
-                                print("decline")
+                                userModel.acceptFriendRequest(friendRequest: pendingRequest)
                             }) {
-                                Text("Decline")
+                                AcceptButtonContent()
                             }
                         } else if pendingRequest.status == .pending {
-                            Text("Pending")
+                            DefaultButtonContent(buttonText: "Pending")
                         } else if pendingRequest.status == .accepted {
-                            Text("Friend")
+                            DefaultButtonContent(buttonText: "Friend")
                         }
                     } else {
                         Button(action: {
-                            userModel.sendRequestToFriend(recipientId: user.userId)
+                            userModel.sendRequestToFriend(recipientId: user.userId) //
                         }) {
-                            Text("Request")
+                            RequestButtonContent()
                         }
                     }
                 }
             }
         }
+    }
+}
+
+struct DefaultButtonContent : View {
+    var buttonText : String
+    var body: some View {
+        Text(buttonText)
+            .frame(width: 100, height: 30)
+            .background(Color(.systemGray6))
+            .cornerRadius(15)
+    }
+}
+
+struct DeclineButtonContent : View {
+    var body: some View {
+        Text("Decline")
+            .frame(width: 90, height: 30)
+            .foregroundColor(.black)
+            .background(Color(.systemGray6))
+            .cornerRadius(15)
+    }
+}
+
+struct RequestButtonContent : View {
+    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    var body: some View {
+        Text("Request")
+            .frame(width: 100, height: 30)
+            .foregroundColor(.black)
+            .background(Color.init(uiColor: darkTurquoise))
+            .cornerRadius(15)
+    }
+}
+
+struct AcceptButtonContent : View {
+    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    var body: some View {
+        Text("Accept")
+            .frame(width: 90, height: 30)
+            .foregroundColor(.black)
+            .background(Color.init(uiColor: darkTurquoise))
+            .cornerRadius(15)
+            .font(.headline)
+    }
+}
+
+struct FriendTextContent : View {
+    var body: some View {
+        Text("Friend")
+            .frame(width: 100, height: 30)
+            .background(Color(.systemGray6))
+            .cornerRadius(15)
     }
 }
 

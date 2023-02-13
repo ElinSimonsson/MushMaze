@@ -56,6 +56,7 @@ struct ListOfPlacesView: View {
                             }
                         }
                     }
+                    .listRowBackground(Color(.systemGray6))
                 } else {
                     ForEach(filteredPlaces) { place in
                         if selectedPlaceFilter == .favorite {
@@ -74,6 +75,7 @@ struct ListOfPlacesView: View {
                             }
                         }
                     }
+                    .listRowBackground(Color(.systemGray6))
                 }
                 
             }
@@ -162,7 +164,7 @@ struct MushroomTitle : View {
                 .font(.largeTitle)
                 .background(.clear)
                 .fontWeight(.bold)
-                .padding(.top)
+                
             Spacer()
         }
     }

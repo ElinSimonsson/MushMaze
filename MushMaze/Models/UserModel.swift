@@ -17,85 +17,115 @@ class UserModel : ObservableObject {
     let storage = Storage.storage()
     @Published var user : User?
     @Published var friendRequests = [FriendRequest]()
+    @Published var friends = [Friend]()
     @Published var signedIn = false
     @Published var signedOut = false
     @Published var saved = false
     
+    init() {
+        startListenFriends()
+    }
+    
+    
+    func declineFriendRequest(friendRequest : FriendRequest) {
+        guard let friendRequestID = friendRequest.id else {return}
+        db.collection("users")
+            .document(friendRequest.senderId)
+            .collection("friendRequest")
+            .document(friendRequestID)
+            .delete()
+        
+        db.collection("users")
+            .document(friendRequest.recipientId)
+            .collection("friendRequest")
+            .document(friendRequestID)
+            .delete()
+        
+    }
     
     func acceptFriendRequest (friendRequest : FriendRequest) {
-        guard let currentUser = Auth.auth().currentUser else {return}
         guard let friendRequestID = friendRequest.id else {return}
         
-
-        do {
-            try db.collection("users")
-                .document(friendRequest.senderId)
-                .collection("friendRequest")
-                .document(friendRequestID)
-                .updateData(["status" : "accepted"])
-            print("friendRequest sender ID \(friendRequest.senderId)")
-
-            try db.collection("users")
-                .document(friendRequest.recipientId)
-                .collection("friendRequest")
-                .document(friendRequestID)
-                .updateData(["status" : "accepted"])
-            print("currentUser id \(currentUser.uid)")
-
-
-        } catch {
-            print("Error updating status: \(error)")
+        db.collection("users")
+            .document(friendRequest.senderId)
+            .collection("friendRequest")
+            .document(friendRequestID)
+            .updateData(["status" : "accepted"])
+        
+        db.collection("users")
+            .document(friendRequest.recipientId)
+            .collection("friendRequest")
+            .document(friendRequestID)
+            .updateData(["status" : "accepted"])
+    }
+    
+    func startListenFriends () {
+        print("start Listen friends körs")
+        guard let currentUser = Auth.auth().currentUser else {return}
+        db.collection("users").document(currentUser.uid).collection("friends").addSnapshotListener { snapshot, err in
+            guard let snapshot = snapshot else {return}
+            if let err = err {
+                print("failed getting friends document \(err)")
+            } else {
+                self.friends.removeAll()
+                for document in snapshot.documents {
+                    let result = Result {
+                        try document.data(as: Friend.self)
+                    }
+                    switch result {
+                    case .success(let friend) :
+                        self.friends.append(friend)
+                    case .failure(let error) :
+                        print("Error decoding friend \(error)")
+                    }
+                }
+            }
         }
+    }
+    
+    func createFriend (friendRequest : FriendRequest) {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        let friendRef = db.collection("users").document(currentUser.uid).collection("friends")
         
+        let friendId = friendRequest.senderId == currentUser.uid ? friendRequest.recipientId : friendRequest.senderId
         
+        if !self.friends.contains(where: {$0.id == friendId}) {
+            self.db.collection("users").document(friendId).getDocument { (document, error) in
+                if let document = document, let data = document.data() {
+                    let fullName = data["fullName"] as? String ?? ""
+                    let imageURL = data["imageURL"] as? String ?? ""
+                
+                    let newFriend = Friend(id: friendId, fullName: fullName, imageURL: imageURL)
+                    
+                    do {
+                        let newFriendRef = friendRef.document(friendId)
+                        try newFriendRef.setData(from: newFriend)
+                    } catch {
+                        print("Error setting data: \(error)")
+                    }
+                }
+            }
+        }
     }
     
     func sendRequestToFriend (recipientId : String) {
         guard let currentUser = Auth.auth().currentUser else {return}
         
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-//        let dateString = dateFormatter.string(from: Date())
-//
-////        let date = Date()
-////        let timeStamp = Timestamp(date: date)
-//
-//        let date : Date = Date()
-//        let timestamp = Timestamp(date: date)
-        
-        //let friendRequest = FriendRequest(senderId: currentUser.uid, recipientId: recipientId, status: .pending)
-
-        var ref: DocumentReference? = nil // error Cannot find type DocumentReference in scope
-        ref = db.collection("users").document(currentUser.uid).collection("friendRequest").addDocument(data: [
-//            "date": timestamp,
-            "senderId": currentUser.uid,
+        let data : [String : Any] = [
+            "date" : Timestamp(date: Date()),
+            "senderId" : currentUser.uid,
             "recipientId" : recipientId,
-            "status" : "pending"
-        ]) { err in
+            "status" : "pending"]
+        
+        var ref: DocumentReference? = nil
+        ref = db.collection("users").document(currentUser.uid).collection("friendRequest").addDocument(data: data) { err in
             if let err = err {
                 print("Error adding document: \(err)")
             } else {
                 print("Document added with ID: \(ref!.documentID)")
-                
-                //let data = FriendRequest(id: ref!.documentID , senderId: currentUser.uid, recipientId: recipientId, status: .pending)
-                
-                
-                self.db.collection("users").document(recipientId).collection("friendRequest").document(ref!.documentID).setData([
-//                        "date": date,
-                        "senderId": currentUser.uid,
-                        "recipientId" : recipientId,
-                        "status" : "pending"
-                    ])
-                
+                self.db.collection("users").document(recipientId).collection("friendRequest").document(ref!.documentID).setData(data)
             }
         }
-        
-//        do {
-//            try db.collection("users").document(currentUser.uid).collection("friendRequest").addDocument(from: friendRequest)
-//            try db.collection("users").document(recipientId).collection("friendRequest").addDocument(from: friendRequest)
-//        } catch {
-//            print("failed to send request to recipient ")
-//        }
     }
     
     func listenFriendRequestFirestore () {
@@ -114,9 +144,12 @@ class UserModel : ObservableObject {
                     switch result {
                     case .success(let friendRequest) :
                         self.friendRequests.append(friendRequest)
+                        if friendRequest.status == .accepted {
+                            self.createFriend(friendRequest: friendRequest)
+                        }
                         print("friendRequest: \(friendRequest)")
                     case .failure(let error) :
-                        print("Error decoding friendRequest \(err)")
+                        print("Error decoding friendRequest \(error)")
                     }
                 }
             }
@@ -160,7 +193,7 @@ class UserModel : ObservableObject {
             }
         }
     }
-        
+    
     func updateUserDataToFirestore (imageURL: String, fullName: String) {
         guard let currentUser = Auth.auth().currentUser else {return}
         let user = User(fullName: fullName, userId: currentUser.uid, imageURL: imageURL)
@@ -174,50 +207,48 @@ class UserModel : ObservableObject {
             print("Error updating: \(error)")
         }
     }
-        
-        func saveUserDataToFirestore (fullName: String) {
-            guard let userUID = Auth.auth().currentUser?.uid else {return}
-            let user = User(fullName: fullName, userId: userUID, imageURL: "")
-            do {
-                
-                let document = db.collection("users").document(userUID) // ny rad
-                _ = try
-                //db.collection("users").document(userUID)
-                    document.setData(from: user)
-                document.updateData(["keywordsForLookup" : user.keywordsForLookup])
-                
-                print("successed to save")
-                signedIn = true
-                signedOut = false
-            } catch {
-                print("Error saving to Firebase")
+    
+    func saveUserDataToFirestore (fullName: String) {
+        guard let userUID = Auth.auth().currentUser?.uid else {return}
+        let user = User(fullName: fullName, userId: userUID, imageURL: "")
+        do {
+            
+            let document = db.collection("users").document(userUID) // ny rad
+            _ = try
+            document.setData(from: user)
+            document.updateData(["keywordsForLookup" : user.keywordsForLookup])
+            
+            print("successed to save")
+            signedIn = true
+            signedOut = false
+        } catch {
+            print("Error saving to Firebase")
+        }
+    }
+    
+    func createUserAndSaveToFirestore (fullName: String, emailAddress: String, password: String) {
+        Auth.auth().createUser(withEmail: emailAddress, password: password) { authResult, error in
+            if let error = error {
+                print("error signing up \(error.localizedDescription)")
+            } else {
+                print("account created successfully")
+                self.saveUserDataToFirestore(fullName: fullName)
             }
         }
-        
-        func createUserAndSaveToFirestore (fullName: String, emailAddress: String, password: String) {
-            Auth.auth().createUser(withEmail: emailAddress, password: password) { authResult, error in
-                if let error = error {
-                    print("error signing up \(error.localizedDescription)")
-                } else {
-                    print("account created successfully")
-                    self.saveUserDataToFirestore(fullName: fullName)
-                }
-            }
-        }
+    }
     
     func loadUserInformation () {
         guard let user = Auth.auth().currentUser else {return}
         let docRef = db.collection("users").document(user.uid)
         
         docRef.addSnapshotListener { (documentSnapshot, error) in
-          guard let document = documentSnapshot else {
-            print("Error fetching document: \(error!)")
-            return
-          }
-          let data = document.data()
+            guard let document = documentSnapshot else {
+                print("Error fetching document: \(error!)")
+                return
+            }
+            let data = document.data()
             if let data = data {
                 let fullName = data["fullName"] as? String ?? ""
-                let email = document.get("emailAddress") as? String ?? ""
                 let imageURL = document.get("imageURL") as? String ?? ""
                 self.user = User(fullName: fullName, userId: user.uid, imageURL: imageURL)
             }
@@ -249,13 +280,13 @@ class UserModel : ObservableObject {
     func deletePictureStorageAndSaveNewData(newImage: UIImage, fullName: String) {
         if let user = user {
             let storageRef = storage.reference(forURL: user.imageURL)
-
+            
             //Removes image from storage
             storageRef.delete { error in
                 if let error = error {
                     print(error)
                 } else {
-                   print("successfully deleted image")
+                    print("successfully deleted image")
                     self.uploadPhotoAndSaveToFirestore(selectedImage: newImage, fullName: fullName)
                 }
             }

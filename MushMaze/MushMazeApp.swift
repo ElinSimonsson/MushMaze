@@ -11,9 +11,8 @@ import Firebase
 
 @main
 struct MushMazeApp: App {
-    @StateObject var places = Places()
     @StateObject var userModel = UserModel()
-    
+    @StateObject var places = Places()
     
     init() {
         FirebaseApp.configure()

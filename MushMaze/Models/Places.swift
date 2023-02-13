@@ -19,6 +19,7 @@ class Places : ObservableObject {
     
    private var db = Firestore.firestore()
     
+  
     
     func addPlaceWithMushrooms (latitude: Double,
                                 longitude: Double,
@@ -48,8 +49,6 @@ class Places : ObservableObject {
     }
     
     func listenToFirestore () {
-        print("listenToFirestore körs")
-        
         guard let user = Auth.auth().currentUser else {return}
         
         db.collection("users")

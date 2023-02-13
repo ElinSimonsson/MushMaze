@@ -10,9 +10,7 @@ import FirebaseFirestoreSwift
 
 struct Friend : Codable, Identifiable {
     @DocumentID var id : String?
-    var senderId : String
-    var recipientId: String
-    var requested : Bool
-    var declined : Bool
-    var accepted : Bool
+    var fullName: String
+    var imageURL : String
+    
 }
