@@ -34,6 +34,13 @@ struct AddPlaceView: View {
     @State var mushroomsAreMissing = false
     @State var showErrorImage = false
     
+    enum PrivacySetting: String, CaseIterable {
+        case privateSetting = "Keep it private"
+        case sharedSetting = "Share with friends"
+    }
+    
+    @State var selectedPrivacy = PrivacySetting.privateSetting
+    
     var body: some View {
         ZStack {
             ScrollView {
@@ -65,9 +72,7 @@ struct AddPlaceView: View {
                 }
                 PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing)
                 PlaceDescriptionField(description: $description)
-                    .onTapGesture {
-                        clearText()
-                    }
+                PickerView(selectedPrivacy: $selectedPrivacy)
                 MushroomSpeciesSubTitle()
                 
                 ForEach(mushrooms, id: \.self) { mushroom in
@@ -82,14 +87,18 @@ struct AddPlaceView: View {
                                          isAddingNewMushroom: $isAddingNewMushroom)
                 }
             }
+            .simultaneousGesture(
+                   DragGesture().onChanged({ gesture in
+                       if (gesture.location.y < gesture.predictedEndLocation.y){
+                                  dismissKeyBoard()
+                                 }
+                   }))
+            
             .padding()
             .fullScreenCover(isPresented: $openCameraRoll) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
             }
-            .onTapGesture {
-                isAddingNewMushroom = true
-                dismissKeyBoard()
-            }
+            
             if isSaving {
                 FirestoreSavingCircularProgressIndicator()
             }
@@ -122,12 +131,18 @@ struct AddPlaceView: View {
     }
     
     func savePlaceToFirestore(imageURL : String) {
+        var isSharedPlace = false
+        if selectedPrivacy == .sharedSetting {
+            isSharedPlace = true
+        }
+      
         places.addPlaceWithMushrooms(latitude: coordinate.latitude,
                                      longitude: coordinate.longitude,
                                      name: $placeName.wrappedValue,
                                      description: $description.wrappedValue,
                                      mushrooms: mushrooms,
-                                     imageURL: imageURL)
+                                     imageURL: imageURL,
+                                     sharedPlace: isSharedPlace)
     }
     
     func uploadPhotoAndSaveToFirestore() {
@@ -162,6 +177,21 @@ struct AddPlaceView: View {
                 }
             }
         }
+    }
+}
+
+struct PickerView : View {
+    @Binding var selectedPrivacy : AddPlaceView.PrivacySetting
+    var body: some View {
+        HStack {
+                Picker(selection: $selectedPrivacy, label: Text("Välj ett alternativ")) {
+                    ForEach(AddPlaceView.PrivacySetting.allCases, id: \.self) { privacy in
+                        Text(privacy.rawValue).tag(privacy)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+        }
+        .padding(.bottom, 20)
     }
 }
 
@@ -301,7 +331,7 @@ struct PlaceDescriptionField : View {
             .padding()
             .background(Color(.systemGray6))
             .cornerRadius(5.0)
-            .padding(.bottom, 20)
+            .padding(.bottom, 10)
             .simultaneousGesture(TapGesture().onEnded { _ in
                 // to onTapGesture not triggers on this view
             })

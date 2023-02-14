@@ -21,11 +21,8 @@ class UserModel : ObservableObject {
     @Published var signedIn = false
     @Published var signedOut = false
     @Published var saved = false
-    
-    init() {
-        startListenFriends()
-    }
-    
+    @Published var allFriendsAreFetched = false
+
     
     func declineFriendRequest(friendRequest : FriendRequest) {
         guard let friendRequestID = friendRequest.id else {return}
@@ -40,7 +37,6 @@ class UserModel : ObservableObject {
             .collection("friendRequest")
             .document(friendRequestID)
             .delete()
-        
     }
     
     func acceptFriendRequest (friendRequest : FriendRequest) {
@@ -75,11 +71,14 @@ class UserModel : ObservableObject {
                     switch result {
                     case .success(let friend) :
                         self.friends.append(friend)
+                        print("funktionen startListenFriends körs, hämtar user")
                     case .failure(let error) :
                         print("Error decoding friend \(error)")
                     }
                 }
             }
+            print("har hämtat user körs")
+            self.allFriendsAreFetched = true
         }
     }
     

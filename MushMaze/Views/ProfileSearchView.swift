@@ -26,11 +26,18 @@ struct ProfileSearchView: View {
         )
         VStack {
             SearchBarView(keyword: keywordBinding)
-            ScrollView {
-                ForEach(usersLookup.queriedUsers, id: \.id) { user in
-                    ProfileBarView(user: user)
+           Spacer()
+                if keyword != "" && usersLookup.queriedUsers.isEmpty {
+                    Text("There were no results for \"\(keyword)\". Try a new search")
+                    Spacer()
+                } else {
+                    ScrollView {
+                    ForEach(usersLookup.queriedUsers, id: \.id) { user in
+                        ProfileBarView(user: user)
+                    }
                 }
             }
+            
         }
         .padding()
         .navigationBarHidden(true)

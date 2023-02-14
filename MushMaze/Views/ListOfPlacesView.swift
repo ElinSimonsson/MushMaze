@@ -77,7 +77,6 @@ struct ListOfPlacesView: View {
                     }
                     .listRowBackground(Color(.systemGray6))
                 }
-                
             }
             .scrollContentBackground(.hidden)
         }

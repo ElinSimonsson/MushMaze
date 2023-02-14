@@ -11,6 +11,7 @@ struct DestinationView: View {
     let locationManager = LocationManager()
     @State var destinations = Destination.map
     @EnvironmentObject var userModel : UserModel
+    @EnvironmentObject var places : Places
     
     
     enum Destination {
@@ -19,6 +20,7 @@ struct DestinationView: View {
     
     init() {
         locationManager.startLocationUpdate()
+        
     }
     
     var body: some View {
@@ -30,11 +32,16 @@ struct DestinationView: View {
                     ToggleButtonsView(destinations: $destinations)
                 }
             }
+            .onChange(of: userModel.allFriendsAreFetched, perform: { tag in
+                if userModel.allFriendsAreFetched {
+                    places.testListenToFirestoreWithFriendsSharedPlace()
+                }
+            })
             .onAppear() {
+                userModel.startListenFriends()
                 userModel.loadUserInformation()
                 userModel.listenFriendRequestFirestore()
-                //userModel.startListenFriends()
-                
+                places.listenToFirestore()
             }
         } else {
             VStack {

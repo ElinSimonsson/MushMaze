@@ -58,10 +58,6 @@ struct FriendListView: View {
             }
             .navigationTitle("Your friends")
         }
-        .onAppear() {
-            print("onAppear körs")
-            places.testLoop()
-        }
     }
 }
 

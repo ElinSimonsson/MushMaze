@@ -26,7 +26,6 @@ struct MapView: View {
     @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 59.243013423142024, longitude: 17.9932212288352), span:
                                             MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02))
     
-    
     var body: some View {
         GeometryReader { proxy in
             ZStack {
@@ -109,9 +108,6 @@ struct MapView: View {
                     .background(colorScheme == .light ? .white : .black)
                     Spacer()
                 }
-            }
-            .onAppear() {
-                places.listenToFirestore()
             }
         }
     }
