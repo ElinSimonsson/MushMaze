@@ -34,7 +34,7 @@ struct DestinationView: View {
             }
             .onChange(of: userModel.allFriendsAreFetched, perform: { tag in
                 if userModel.allFriendsAreFetched {
-                    places.testListenToFirestoreWithFriendsSharedPlace()
+                    places.listenFriendsSharedPlaces()
                 }
             })
             .onAppear() {
@@ -55,6 +55,7 @@ struct DestinationView: View {
                 Spacer()
                 ToggleButtonsView(destinations: $destinations)
             }
+            .ignoresSafeArea(.keyboard)
         }
     }
 }
@@ -99,6 +100,7 @@ struct ToggleButtonsView : View {
                 }
                 Spacer()
             }
+
             .edgesIgnoringSafeArea(.top)
             .background(Color(.systemGray6))
     }

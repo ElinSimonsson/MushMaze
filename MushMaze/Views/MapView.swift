@@ -33,7 +33,7 @@ struct MapView: View {
                     interactionModes: [.all],
                     showsUserLocation: true,
                     userTrackingMode: .constant(userTrackingModeValue),
-                    annotationItems: places.places) { place in
+                    annotationItems: places.allSavedPlaces) { place in
                     MapAnnotation(coordinate: place.coordinate, anchorPoint: CGPoint(x: 0.5, y: 0.5)) {
                         ZStack {
                             MapPinMarker(place: place)
@@ -145,7 +145,7 @@ struct MapView: View {
             let currentLatitude = location.latitude
             let currentLongitude = location.longitude
             
-            for place in places.places {
+            for place in places.allSavedPlaces {
                 let placeLocation = CLLocation(latitude: place.latitude, longitude: place.longitude)
                 let userLocation = CLLocation(latitude: currentLatitude, longitude: currentLongitude)
                 let distance = userLocation.distance(from: placeLocation)
@@ -225,7 +225,8 @@ struct SmallUserImage : View {
 }
 
 struct MapUserTrackingModeButton : View {
-    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    let darkTurquoise = Color(UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1))
+
     @Binding var userTrackingModeValue: MapUserTrackingMode
     
     
@@ -240,12 +241,15 @@ struct MapUserTrackingModeButton : View {
                 }
             }) {
                 Image(systemName: userTrackingModeValue == . none ? "paperplane" : "paperplane.fill")
-                    .foregroundColor(.white)
+                    .foregroundColor(darkTurquoise
+                )
                     .font(.system(size: 20))
             }
             .frame(width: 50, height: 50)
-            .background(Color(darkTurquoise))
+            .background(Color.white)
             .clipShape(Circle())
+            .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+            Spacer().frame(maxWidth: 5)
         }
     }
 }
@@ -270,9 +274,10 @@ struct AddPlaceButton : View {
             .fullScreenCover(isPresented: $showAddPlaceView, content: {
                 AddPlaceView(coordinate: coordinate)
             })
-            .frame(width: 50, height: 50)
+            .frame(width: 60, height: 60)
             .background(Color(darkTurquoise))
             .clipShape(Circle())
+            .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
         }
     }
 }

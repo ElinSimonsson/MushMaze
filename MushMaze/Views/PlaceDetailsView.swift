@@ -32,13 +32,21 @@ struct PlaceDetailsView: View {
     
     var body: some View {
         ZStack {
+           
             ScrollView {
-                VStack {
                     CreaterRowView(place: place, fullName: $createrFullName, imageURL: $createrImageURL)
                     PlaceName(placeName: place.name, isEditing: isEditing, editingPlaceName: $editingPlaceName)
                     
                     PlaceImage(imageURL: place.imageURL)
-                    EllipsisButton(showChoicePopUp: $showChoicePopUp)
+                    if let user = userModel.user {
+                        if user.userId == place.createrUID {
+                            EllipsisButton(showChoicePopUp: $showChoicePopUp)
+                                .sheet(isPresented: $showChoicePopUp) {
+                                    ChoicePopUp(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
+                                        .presentationDetents([.fraction(0.35), .fraction(0.36)])
+                                }
+                        }
+                    }
                     
                     if let description = place.description {
                         DescriptionContent(description: description,
@@ -63,15 +71,24 @@ struct PlaceDetailsView: View {
                                 MushroomSpeciesRowView(mushroom: mushroom)
                             }
                         }
-                    }
                 }
             }
             .padding()
-            .disabled(showChoicePopUp)
+            //.disabled(showChoicePopUp)
             
-            if showChoicePopUp {
-                ChoicePopUp(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
-            }
+//            if showChoicePopUp {
+//                ChoicePopUp(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
+//            }
+//            if showChoicePopUp {
+//                            Color.black.opacity(0.4)
+//                                .edgesIgnoringSafeArea(.all)
+//                                .onTapGesture {
+//                                    if showChoicePopUp {
+//                                        self.showChoicePopUp.toggle()
+//                                    }
+//                                }
+//        }
+            
         }
         
         .onTapGesture {
@@ -79,9 +96,9 @@ struct PlaceDetailsView: View {
             if isEditing {
                 isAddingMushroom = true
             }
-            if showChoicePopUp {
-                self.showChoicePopUp.toggle()
-            }
+//            if showChoicePopUp {
+//                self.showChoicePopUp.toggle()
+//            }
         }
         .onAppear() {
             isHeaderVisible = false
@@ -112,7 +129,7 @@ struct PlaceDetailsView: View {
                 ToolbarItem (placement: .navigationBarTrailing) {
                     Button(action: {
                         updatePlace()
-                        
+
                     }) {
                         Text("Save")
                     }
@@ -173,13 +190,16 @@ struct AddMushroomSpeciesTextField : View {
     
     var body: some View {
         HStack {
-            TextField("Add mushroom species", text: $newMushroomName, onCommit: {
+            TextField(" Add mushroom species", text: $newMushroomName, onCommit: {
                 mushrooms.append(newMushroomName)
                 self.isAddingNewMushroom = false
                 newMushroomName = ""
                 returButtonPressed = true
             })
             .submitLabel(.go)
+            .simultaneousGesture(TapGesture().onEnded { _ in
+                // tapGesture wont triggers in this view
+            })
             .onChange(of: returButtonPressed) { newvalue in
                 if returButtonPressed {
                     self.newMushroomName = ""
@@ -255,6 +275,9 @@ struct DescriptionContent : View {
             Spacer().frame(maxWidth: 15)
             if isEditing {
                 TextField("description of the place", text: $editingDescription, axis: .vertical)
+                    .simultaneousGesture(TapGesture().onEnded { _ in
+                        // tapGesture wont triggers in this view
+                    })
                     .onAppear() {
                         editingDescription = description
                     }

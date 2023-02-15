@@ -7,11 +7,12 @@
 
 import SwiftUI
 import Firebase
+import FirebaseAuth
 
 struct ListOfPlacesView: View {
     @EnvironmentObject var places : Places
     @EnvironmentObject var userModel : UserModel
-
+    
     @State var showProfile = false
     @State var isHeaderVisible = true
     @State private var searchText = ""
@@ -20,17 +21,28 @@ struct ListOfPlacesView: View {
     enum FilterPlace: String, CaseIterable {
         case all = "All places"
         case favorite = "My favorites"
+        case myPlaces = "My places"
+        case friendsPlace = "Friend´s places"
     }
     
     @State var selectedPlaceFilter = FilterPlace.all
     
     
     var filteredPlaces: [Place] {
-        return places.places.filter { place in
-            guard let mushrooms = place.mushrooms else { return false }
-            return mushrooms.contains(where: {$0.lowercased().contains(searchText.lowercased())})
+        if selectedPlaceFilter == .favorite {
+            return places.favoritePlaces.filter { place in
+                guard let mushrooms = place.mushrooms else { return false }
+                return mushrooms.contains(where: {$0.lowercased().contains(searchText.lowercased())})
+            }
+        } else {
+            return places.allSavedPlaces.filter { place in
+                guard let mushrooms = place.mushrooms else { return false }
+                return mushrooms.contains(where: {$0.lowercased().contains(searchText.lowercased())})
+            }
         }
     }
+    
+    
     
     var body: some View {
         if isHeaderVisible {
@@ -39,43 +51,74 @@ struct ListOfPlacesView: View {
         NavigationView  {
             List () {
                 if searchText == "" {
-                    ForEach(places.places) { place in
-                        if selectedPlaceFilter == .favorite {
-                            if place.favorite {
-                                NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
-                                    Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
-                                        RowView(place: place)
+                    if selectedPlaceFilter == .favorite {
+                        ForEach(places.favoritePlaces) { place in
+                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                    RowView(place: place)
+                            }
+                        }
+                        .listRowBackground(Color(.systemGray6))
+                    } else if selectedPlaceFilter == .myPlaces {
+                        ForEach(places.allSavedPlaces) { place in
+                            if let user = userModel.user {
+                                if user.userId == place.createrUID {
+                                    NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                            RowView(place: place)
                                     }
                                 }
                             }
-                        } else if selectedPlaceFilter == .all {
-                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
-                                Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
-                                    RowView(place: place)
+                        }
+                        .listRowBackground(Color(.systemGray6))
+                    } else if selectedPlaceFilter == .friendsPlace {
+                        ForEach(places.allSavedPlaces) { place in
+                            if let user = userModel.user {
+                                if user.userId != place.createrUID {
+                                    NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                            RowView(place: place)
+                                    }
                                 }
                             }
                         }
+                        .listRowBackground(Color(.systemGray6))
+                    } else if selectedPlaceFilter == .all {
+                        ForEach(places.allSavedPlaces) { place in
+                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                    RowView(place: place)
+                            }
+                        }
+                        .listRowBackground(Color(.systemGray6))
                     }
-                    .listRowBackground(Color(.systemGray6))
                 } else {
-                    ForEach(filteredPlaces) { place in
-                        if selectedPlaceFilter == .favorite {
-                            if place.favorite {
-                                NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
-                                    Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
+                    if selectedPlaceFilter == .myPlaces {
+                        ForEach(filteredPlaces) { place in
+                            if let user = userModel.user {
+                                if user.userId == place.createrUID {
+                                    NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                         FilteredRowView(text: $searchText, place: place)
                                     }
                                 }
                             }
-                        } else if selectedPlaceFilter == .all {
-                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
-                                Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
-                                    FilteredRowView(text: $searchText, place: place)
+                        }
+                        .listRowBackground(Color(.systemGray6))
+                    } else if selectedPlaceFilter == .friendsPlace {
+                        ForEach(filteredPlaces) { place in
+                            if let user = userModel.user {
+                                if user.userId != place.createrUID {
+                                    NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                        FilteredRowView(text: $searchText, place: place)
+                                    }
                                 }
                             }
                         }
+                        .listRowBackground(Color(.systemGray6))
+                    } else {
+                        ForEach(filteredPlaces) { place in
+                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                FilteredRowView(text: $searchText, place: place)
+                            }
+                        }
+                        .listRowBackground(Color(.systemGray6))
                     }
-                    .listRowBackground(Color(.systemGray6))
                 }
             }
             .scrollContentBackground(.hidden)
@@ -90,26 +133,32 @@ struct FilteredRowView : View {
     var place : Place
     
     var body: some View {
-        HStack {
-            SmallProfileImage(place: place)
-            VStack {
-                HStack {
-                    Text(place.name)
-                        .foregroundColor(colorScheme == .light ? .black : .white)
-                    Spacer()
+        Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
+            HStack {
+                SmallProfileImage(place: place)
+                VStack {
+                    HStack {
+                        Text(place.name)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
+                        Spacer()
+                    }
+                    HStack {
+                        Text("\(place.mushrooms?.first(where: { $0.lowercased().contains(self.text.lowercased())}) ?? "") have been found here")
+                            .font(.custom("Arial", size: 12))
+                            .foregroundColor(colorScheme == .light ? .black : .white)
+                        Spacer()
+                    }
                 }
-                HStack {
-                    Text("\(place.mushrooms?.first(where: { $0.lowercased().contains(self.text.lowercased())}) ?? "") have been found here")
-                        .font(.custom("Arial", size: 12))
-                        .foregroundColor(colorScheme == .light ? .black : .white)
-                    Spacer()
+                Spacer()
+                Button(action: {
+                    places.updateFavorites(place: place)
+                }) {
+                    if places.favoritePlaces.contains(where: {$0.id == place.id}) {
+                        Image(systemName: "star.fill")
+                    } else {
+                        Image(systemName: "star")
+                    }
                 }
-            }
-            Spacer()
-            Button(action: {
-                places.updateFavroriteFirestore(place: place)
-            }) {
-                Image(systemName: place.favorite ? "star.fill" : "star" )
             }
         }
     }
@@ -121,15 +170,22 @@ struct RowView : View {
     var place: Place
 
     var body: some View {
-        HStack {
-            SmallProfileImage(place: place)
-            Text(place.name)
-                .foregroundColor(colorScheme == .light ? .black : .white)
-            Spacer()
-            Button(action: {
-                places.updateFavroriteFirestore(place: place)
-            }) {
-                Image(systemName: place.favorite ? "star.fill" : "star" )
+        Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
+            HStack {
+                SmallProfileImage(place: place)
+                Text(place.name)
+                    .foregroundColor(colorScheme == .light ? .black : .white)
+                Spacer()
+                
+                Button(action: {
+                    places.updateFavorites(place: place)
+                }) {
+                    if places.favoritePlaces.contains(where: {$0.id == place.id}) {
+                        Image(systemName: "star.fill")
+                    } else {
+                        Image(systemName: "star")
+                    }
+                }
             }
         }
     }

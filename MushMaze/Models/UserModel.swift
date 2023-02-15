@@ -20,7 +20,7 @@ class UserModel : ObservableObject {
     @Published var friends = [Friend]()
     @Published var signedIn = false
     @Published var signedOut = false
-    @Published var saved = false
+    
     @Published var allFriendsAreFetched = false
 
     
@@ -71,13 +71,11 @@ class UserModel : ObservableObject {
                     switch result {
                     case .success(let friend) :
                         self.friends.append(friend)
-                        print("funktionen startListenFriends körs, hämtar user")
                     case .failure(let error) :
                         print("Error decoding friend \(error)")
                     }
                 }
             }
-            print("har hämtat user körs")
             self.allFriendsAreFetched = true
         }
     }
@@ -201,7 +199,6 @@ class UserModel : ObservableObject {
             let document = db.collection("users").document(currentUser.uid)
             try document.setData(from: user)
             document.updateData(["keywordsForLookup" : user.keywordsForLookup])
-            self.saved = true
         } catch {
             print("Error updating: \(error)")
         }

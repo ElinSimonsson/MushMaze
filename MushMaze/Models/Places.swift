@@ -11,8 +11,9 @@ import FirebaseAuth
 import FirebaseStorage
 
 class Places : ObservableObject {
-    @Published var places = [Place]()
-    @Published var placeSaved = false
+    @Published var allSavedPlaces = [Place]()
+    @Published var favoritePlaces = [Place]()
+    @Published var placeIsSaved = false
     @Published var newDataFetched = false
     @Published var place: Place?
     @Published var placeDeleted = false
@@ -20,6 +21,7 @@ class Places : ObservableObject {
     
     init(userModel : UserModel) {
         self.userModel = userModel
+        listenToFavoritePlacesFirestore()
     }
    private var db = Firestore.firestore()
     
@@ -40,8 +42,7 @@ class Places : ObservableObject {
                           imageURL: imageURL,
                           latitude: latitude,
                           longitude: longitude,
-                          favorite: false,
-                          sharedPlace: sharedPlace) // default
+                          sharedPlace: sharedPlace)
         
         do {
             _ = try
@@ -50,6 +51,32 @@ class Places : ObservableObject {
         } catch {
             print("error saving to firebase")
         }
+    }
+    
+    func listenToFavoritePlacesFirestore () {
+        print("listen favorit körs")
+        guard let currentUser = Auth.auth().currentUser else {return}
+        
+        db.collection("users").document(currentUser.uid).collection("favoritePlaces").addSnapshotListener { snapshot, err in
+            guard let snapshot = snapshot else {return}
+            if let err = err {
+                print("error getting document from firestore \(err)")
+            } else {
+                self.favoritePlaces.removeAll()
+                for document in snapshot.documents {
+                    let result = Result {
+                        try document.data(as: Place.self)
+                    }
+                    switch result {
+                    case .success(let favoritePlace) :
+                        self.favoritePlaces.append(favoritePlace)
+                    case .failure(let error) :
+                        print("failed decoding favoritePlace \(error)")
+                    }
+                }
+            }
+        }
+        
     }
     
     func listenToFirestore () {
@@ -80,34 +107,34 @@ class Places : ObservableObject {
                 }
                 
                 // find existing places in the list that match the user ID
-                let existingPlaces = self.places.filter { $0.createrUID == user.uid }
+                let existingPlaces = self.allSavedPlaces.filter { $0.createrUID == user.uid }
                 
                 // replace existing places with updated place if they match
                 for place in myPlaces {
-                    if let existingPlaceIndex = self.places.firstIndex(where: { $0.id == place.id }) {
-                        self.places[existingPlaceIndex] = place
+                    if let existingPlaceIndex = self.allSavedPlaces.firstIndex(where: { $0.id == place.id }) {
+                        self.allSavedPlaces[existingPlaceIndex] = place
                     } else {
-                        self.places.append(place)
+                        self.allSavedPlaces.append(place)
                     }
                 }
                 // delete existing place if this place isn´t in the user places list
                 for existingPlace in existingPlaces {
                     if !myPlaces.contains(where: { $0.id == existingPlace.id }) {
-                        if let index = self.places.firstIndex(where: { $0.id == existingPlace.id }) {
-                            self.places.remove(at: index)
+                        if let index = self.allSavedPlaces.firstIndex(where: { $0.id == existingPlace.id }) {
+                            self.allSavedPlaces.remove(at: index)
                         }
                     }
                 }
-                self.places = self.places.sorted (by:{ $0.date > $1.date })
+                self.updateFavoritesDataFirestore()
+                self.allSavedPlaces = self.allSavedPlaces.sorted (by:{ $0.date > $1.date })
             }
         }
     }
     
-    func testListenToFirestoreWithFriendsSharedPlace() {
-        
+    func listenFriendsSharedPlaces() {
         for friend in userModel.friends {
             if let friendID = friend.id {
-                db.collection("users").document(friendID).collection("places").addSnapshotListener { snapshot, error in
+                db.collection("users").document(friendID).collection("places").whereField("sharedPlace", isEqualTo: true).addSnapshotListener { snapshot, error in
                     guard let snapshot = snapshot else { return }
                     
                     if let error = error {
@@ -121,36 +148,47 @@ class Places : ObservableObject {
                             }
                             switch result {
                             case.success(let friendPlace) :
-                                if friendPlace.sharedPlace {
                                     friendPlaces.append(friendPlace)
-                                }
+                                
                             case .failure(let error) :
                                 print("failed decoding friend place : \(error)")
                             }
                         }
                         // find existing places in the list that match the friend ID
-                        let existingPlaces = self.places.filter { $0.createrUID == friendID }
+                        let existingPlaces = self.allSavedPlaces.filter { $0.createrUID == friendID }
                         
                         // replace existing places with updated place if they match
                         for friendPlace in friendPlaces {
-                            if let existingPlaceIndex = self.places.firstIndex(where: { $0.id == friendPlace.id }) {
-                                self.places[existingPlaceIndex] = friendPlace
+                            if let existingPlaceIndex = self.allSavedPlaces.firstIndex(where: { $0.id == friendPlace.id }) {
+                                self.allSavedPlaces[existingPlaceIndex] = friendPlace
                             } else {
-                                self.places.append(friendPlace)
+                                self.allSavedPlaces.append(friendPlace)
                             }
                         }
                         // delete existing place if this place isn´t in the friend places list
                         for existingPlace in existingPlaces {
                             if !friendPlaces.contains(where: { $0.id == existingPlace.id }) {
-                                if let index = self.places.firstIndex(where: { $0.id == existingPlace.id }) {
-                                    self.places.remove(at: index)
+                                if let index = self.allSavedPlaces.firstIndex(where: { $0.id == existingPlace.id }) {
+                                    self.allSavedPlaces.remove(at: index)
                                 }
                             }
                         }
                     }
-                    self.places = self.places.sorted (by:{ $0.date > $1.date })
+                    self.updateFavoritesDataFirestore()
+                    self.allSavedPlaces = self.allSavedPlaces.sorted (by:{ $0.date > $1.date })
                 }
             }
+        }
+    }
+    
+    func updateSharedPlace(place: Place) {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        if let documentID = place.id {
+            db.collection("users")
+                .document(currentUser.uid)
+                .collection("places")
+                .document(documentID)
+                .updateData(["sharedPlace" : !place.sharedPlace])
         }
     }
     
@@ -167,16 +205,62 @@ class Places : ObservableObject {
         }
     }
     
-    func updateFavroriteFirestore (place: Place) {
-        guard let user = Auth.auth().currentUser else {return}
-        if let documentId = place.id {
-            db.collection("users").document(user.uid).collection("places").document(documentId).updateData(["favorite" : !place.favorite])
+    func updateFavoritesDataFirestore () {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        for place in allSavedPlaces {
+            
+            if favoritePlaces.contains(where: {$0.id == place.id}) {
+                guard let placeID = place.id else {return}
+                
+                let favoritePlaceRef = db.collection("users")
+                   .document(currentUser.uid)
+                   .collection("favoritePlaces")
+                   .document(placeID)
+                
+                do {
+                 try favoritePlaceRef.setData(from: place)
+                } catch {
+                    print("failed to update favorite data")
+                }
+            }
+        }
+        
+        for favoritePlace in favoritePlaces {
+            if !allSavedPlaces.contains(where: {$0.id == favoritePlace.id}) {
+                guard let placeID = favoritePlace.id else {return}
+                db.collection("users")
+                   .document(currentUser.uid)
+                   .collection("favoritePlaces")
+                   .document(placeID)
+                   .delete()
+            }
+        }
+    }
+    
+    func updateFavorites (place: Place) {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        
+        guard let placeID = place.id else {return}
+        
+        let favoritePlaceRef = db.collection("users")
+            .document(currentUser.uid)
+            .collection("favoritePlaces")
+            .document(placeID)
+        
+        if favoritePlaces.contains(where: {$0.id == place.id}) {
+            favoritePlaceRef.delete()
+        } else {
+            do {
+             try favoritePlaceRef.setData(from: place)
+            } catch {
+                print("failed to make a clon of the place and save in firestore")
+            }
         }
     }
     
     func updateDistance (place: Place, with distance: Double) {
-        if let index = places.firstIndex(of: place) {
-            places[index].distance = distance
+        if let index = allSavedPlaces.firstIndex(of: place) {
+            allSavedPlaces[index].distance = distance
         }
     }
     
