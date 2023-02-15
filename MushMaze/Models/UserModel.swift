@@ -56,7 +56,6 @@ class UserModel : ObservableObject {
     }
     
     func startListenFriends () {
-        print("start Listen friends körs")
         guard let currentUser = Auth.auth().currentUser else {return}
         db.collection("users").document(currentUser.uid).collection("friends").addSnapshotListener { snapshot, err in
             guard let snapshot = snapshot else {return}

@@ -13,6 +13,7 @@ import FirebaseStorage
 
 struct ProfileView: View {
     @EnvironmentObject var userModel : UserModel
+    @EnvironmentObject var places : Places
     let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
     let db = Firestore.firestore()
     @State private var sourceType : UIImagePickerController.SourceType = .photoLibrary
@@ -35,8 +36,8 @@ struct ProfileView: View {
                 Spacer()
                 Button(action: {
                     userModel.logOut()
+                    places.clearAllPlaces()
                     presentationMode.wrappedValue.dismiss()
-                    
                 }) {
                     Text("Sign out")
                 }

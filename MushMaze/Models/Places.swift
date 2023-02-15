@@ -21,7 +21,6 @@ class Places : ObservableObject {
     
     init(userModel : UserModel) {
         self.userModel = userModel
-        listenToFavoritePlacesFirestore()
     }
    private var db = Firestore.firestore()
     
@@ -80,7 +79,7 @@ class Places : ObservableObject {
     }
     
     func listenToFirestore () {
-        var myPlaces = [Place]()
+        
         guard let user = Auth.auth().currentUser else {return}
 
         db.collection("users")
@@ -93,6 +92,7 @@ class Places : ObservableObject {
             if let error = error {
                 print("error getting document \(error.localizedDescription)")
             } else {
+                var myPlaces = [Place]()
                 for document in snapshot.documents {
                     let result = Result {
                         try document.data(as: Place.self)
@@ -100,6 +100,7 @@ class Places : ObservableObject {
                     switch result {
                     case .success(let place) :
                         myPlaces.append(place)
+                        print("myPlace append: \(place.name)")
                         self.newDataFetched = true
                     case .failure(let error) :
                         print("Error decoding place : \(error.localizedDescription)")
@@ -286,5 +287,10 @@ class Places : ObservableObject {
                 }
             }
         }
+    }
+    
+    func clearAllPlaces () {
+        allSavedPlaces.removeAll()
+        favoritePlaces.removeAll()
     }
 }

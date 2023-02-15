@@ -35,6 +35,7 @@ struct DestinationView: View {
             .onChange(of: userModel.allFriendsAreFetched, perform: { tag in
                 if userModel.allFriendsAreFetched {
                     places.listenFriendsSharedPlaces()
+                    userModel.allFriendsAreFetched = false
                 }
             })
             .onAppear() {
@@ -42,6 +43,7 @@ struct DestinationView: View {
                 userModel.loadUserInformation()
                 userModel.listenFriendRequestFirestore()
                 places.listenToFirestore()
+                places.listenToFavoritePlacesFirestore()
             }
         } else {
             VStack {

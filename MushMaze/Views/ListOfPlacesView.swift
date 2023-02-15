@@ -49,79 +49,83 @@ struct ListOfPlacesView: View {
             HeaderView(searchText: $searchText, showProfile: $showProfile, selectedPlaceFilter: $selectedPlaceFilter)
         }
         NavigationView  {
-            List () {
-                if searchText == "" {
-                    if selectedPlaceFilter == .favorite {
-                        ForEach(places.favoritePlaces) { place in
-                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+            if searchText != "" && filteredPlaces.isEmpty {
+                Text("There were no results for \"\(searchText)\". Try a new search")
+            } else {
+                List () {
+                    if searchText == "" {
+                        if selectedPlaceFilter == .favorite {
+                            ForEach(places.favoritePlaces) { place in
+                                NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                     RowView(place: place)
+                                }
                             }
-                        }
-                        .listRowBackground(Color(.systemGray6))
-                    } else if selectedPlaceFilter == .myPlaces {
-                        ForEach(places.allSavedPlaces) { place in
-                            if let user = userModel.user {
-                                if user.userId == place.createrUID {
-                                    NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                            .listRowBackground(Color(.systemGray6))
+                        } else if selectedPlaceFilter == .myPlaces {
+                            ForEach(places.allSavedPlaces) { place in
+                                if let user = userModel.user {
+                                    if user.userId == place.createrUID {
+                                        NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                             RowView(place: place)
+                                        }
                                     }
                                 }
                             }
-                        }
-                        .listRowBackground(Color(.systemGray6))
-                    } else if selectedPlaceFilter == .friendsPlace {
-                        ForEach(places.allSavedPlaces) { place in
-                            if let user = userModel.user {
-                                if user.userId != place.createrUID {
-                                    NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                            .listRowBackground(Color(.systemGray6))
+                        } else if selectedPlaceFilter == .friendsPlace {
+                            ForEach(places.allSavedPlaces) { place in
+                                if let user = userModel.user {
+                                    if user.userId != place.createrUID {
+                                        NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                             RowView(place: place)
+                                        }
                                     }
                                 }
                             }
-                        }
-                        .listRowBackground(Color(.systemGray6))
-                    } else if selectedPlaceFilter == .all {
-                        ForEach(places.allSavedPlaces) { place in
-                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                            .listRowBackground(Color(.systemGray6))
+                        } else if selectedPlaceFilter == .all {
+                            ForEach(places.allSavedPlaces) { place in
+                                NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                     RowView(place: place)
-                            }
-                        }
-                        .listRowBackground(Color(.systemGray6))
-                    }
-                } else {
-                    if selectedPlaceFilter == .myPlaces {
-                        ForEach(filteredPlaces) { place in
-                            if let user = userModel.user {
-                                if user.userId == place.createrUID {
-                                    NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
-                                        FilteredRowView(text: $searchText, place: place)
-                                    }
                                 }
                             }
+                            .listRowBackground(Color(.systemGray6))
                         }
-                        .listRowBackground(Color(.systemGray6))
-                    } else if selectedPlaceFilter == .friendsPlace {
-                        ForEach(filteredPlaces) { place in
-                            if let user = userModel.user {
-                                if user.userId != place.createrUID {
-                                    NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
-                                        FilteredRowView(text: $searchText, place: place)
-                                    }
-                                }
-                            }
-                        }
-                        .listRowBackground(Color(.systemGray6))
                     } else {
-                        ForEach(filteredPlaces) { place in
-                            NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
-                                FilteredRowView(text: $searchText, place: place)
+                        if selectedPlaceFilter == .myPlaces {
+                            ForEach(filteredPlaces) { place in
+                                if let user = userModel.user {
+                                    if user.userId == place.createrUID {
+                                        NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                            FilteredRowView(text: $searchText, place: place)
+                                        }
+                                    }
+                                }
                             }
+                            .listRowBackground(Color(.systemGray6))
+                        } else if selectedPlaceFilter == .friendsPlace {
+                            ForEach(filteredPlaces) { place in
+                                if let user = userModel.user {
+                                    if user.userId != place.createrUID {
+                                        NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                            FilteredRowView(text: $searchText, place: place)
+                                        }
+                                    }
+                                }
+                            }
+                            .listRowBackground(Color(.systemGray6))
+                        } else {
+                            ForEach(filteredPlaces) { place in
+                                NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
+                                    FilteredRowView(text: $searchText, place: place)
+                                }
+                            }
+                            .listRowBackground(Color(.systemGray6))
                         }
-                        .listRowBackground(Color(.systemGray6))
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
-            .scrollContentBackground(.hidden)
         }
     }
 }

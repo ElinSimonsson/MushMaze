@@ -26,7 +26,7 @@ struct ProfileSearchView: View {
         )
         VStack {
             SearchBarView(keyword: keywordBinding)
-           Spacer()
+            Spacer()
                 if keyword != "" && usersLookup.queriedUsers.isEmpty {
                     Text("There were no results for \"\(keyword)\". Try a new search")
                     Spacer()
@@ -36,6 +36,7 @@ struct ProfileSearchView: View {
                         ProfileBarView(user: user)
                     }
                 }
+                    .padding(.top, 30)
             }
             
         }
