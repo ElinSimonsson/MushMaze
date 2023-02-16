@@ -19,10 +19,10 @@ struct ListOfPlacesView: View {
     @State var showFavorite = true
     
     enum FilterPlace: String, CaseIterable {
-        case all = "All places"
-        case favorite = "My favorites"
-        case myPlaces = "My places"
-        case friendsPlace = "Friend´s places"
+        case all = "Show all places"
+        case favorite = "Show my favorites"
+        case myPlaces = "Show my places"
+        case friendsPlace = "Show friends' places"
     }
     
     @State var selectedPlaceFilter = FilterPlace.all
@@ -45,9 +45,9 @@ struct ListOfPlacesView: View {
     
     
     var body: some View {
-        if isHeaderVisible {
-            HeaderView(searchText: $searchText, showProfile: $showProfile, selectedPlaceFilter: $selectedPlaceFilter)
-        }
+                if isHeaderVisible {
+                    HeaderView(searchText: $searchText, showProfile: $showProfile, selectedPlaceFilter: $selectedPlaceFilter)
+                }
         NavigationView  {
             if searchText != "" && filteredPlaces.isEmpty {
                 Text("There were no results for \"\(searchText)\". Try a new search")
@@ -79,6 +79,7 @@ struct ListOfPlacesView: View {
                                         NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                             RowView(place: place)
                                         }
+                                        
                                     }
                                 }
                             }
@@ -124,6 +125,12 @@ struct ListOfPlacesView: View {
                         }
                     }
                 }
+                .shadow(
+                    color: Color.gray.opacity(0.7),
+                    radius: 8,
+                    x: 0,
+                    y: 0
+                )
                 .scrollContentBackground(.hidden)
             }
         }
@@ -172,13 +179,15 @@ struct RowView : View {
     @EnvironmentObject var places : Places
     @Environment(\.colorScheme) var colorScheme
     var place: Place
-
+    
+    
     var body: some View {
         Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
             HStack {
                 SmallProfileImage(place: place)
                 Text(place.name)
                     .foregroundColor(colorScheme == .light ? .black : .white)
+                    .font(.headline)
                 Spacer()
                 
                 Button(action: {
@@ -219,11 +228,11 @@ struct SearchBar: View {
 struct MushroomTitle : View {
     var body: some View {
         HStack {
-            Text(" Mushroom place")
+            Spacer().frame(maxWidth: 10)
+            Text("Mushroom place")
                 .font(.largeTitle)
                 .background(.clear)
                 .fontWeight(.bold)
-                
             Spacer()
         }
     }
@@ -246,7 +255,7 @@ struct SmallProfileImage : View {
                    placeholder: {ProgressView()}
         )
         .aspectRatio(contentMode: .fill)
-        .frame(width: 40, height: 40)
+        .frame(width: 50, height: 50)
         .clipShape(Circle())
         .onAppear() {
             fetchCreaterProfileImage(place: place)
@@ -270,37 +279,38 @@ struct HeaderView: View {
     @Binding var searchText: String
     @Binding var showProfile: Bool
     @Binding var selectedPlaceFilter: ListOfPlacesView.FilterPlace
-
+    
     var body: some View {
-            VStack {
-                HStack {
-                    VStack {
-                        HStack {
-                            SearchBar(text: $searchText)
-                            Spacer()
-                            Button(action: {
-                                showProfile = true
-                            }) {
-                                SmallUserImage()
-                            }.fullScreenCover(isPresented: $showProfile, content: {
-                                ProfileView()
-                            })
-                        }
-                        HStack {
-                            Picker(selection: $selectedPlaceFilter, label: Text("")) {
-                                ForEach(ListOfPlacesView.FilterPlace.allCases, id: \.self) { selected in
-                                    Text(selected.rawValue).tag(selected)
-                                }
+        VStack {
+            HStack {
+                VStack {
+                    HStack {
+                        SearchBar(text: $searchText)
+                        Spacer()
+                        Button(action: {
+                            showProfile = true
+                        }) {
+                            SmallUserImage()
+                        }.fullScreenCover(isPresented: $showProfile, content: {
+                            ProfileView()
+                        })
+                    }
+                    HStack {
+                        Picker(selection: $selectedPlaceFilter, label: Text("")) {
+                            ForEach(ListOfPlacesView.FilterPlace.allCases, id: \.self) { selected in
+                                Text(selected.rawValue).tag(selected)
                             }
-                            .onChange(of: selectedPlaceFilter, perform:  { tag in
-                                print("test \(tag)")
-                            })
                         }
+                        .onChange(of: selectedPlaceFilter, perform:  { tag in
+                            print("test \(tag)")
+                        })
                     }
                 }
-                MushroomTitle()
             }
-            .padding(.leading, 10)
+            MushroomTitle()
+        }
+        .edgesIgnoringSafeArea(.bottom)
+        .padding(.leading, 10)
     }
 }
 

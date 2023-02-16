@@ -25,11 +25,8 @@ struct PlaceDetailsView: View {
     @State var isAddingMushroom = false
     @State var showErrorMushroom = false
     @Binding var isHeaderVisible : Bool
-    
-    
     @Environment(\.presentationMode) var presentationMode
-    
-    
+
     var body: some View {
         ZStack {
            
@@ -42,7 +39,7 @@ struct PlaceDetailsView: View {
                         if user.userId == place.createrUID {
                             EllipsisButton(showChoicePopUp: $showChoicePopUp)
                                 .sheet(isPresented: $showChoicePopUp) {
-                                    ChoicePopUp(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
+                                    ActionSheet(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
                                         .presentationDetents([.fraction(0.35), .fraction(0.36)])
                                 }
                         }
@@ -74,21 +71,6 @@ struct PlaceDetailsView: View {
                 }
             }
             .padding()
-            //.disabled(showChoicePopUp)
-            
-//            if showChoicePopUp {
-//                ChoicePopUp(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
-//            }
-//            if showChoicePopUp {
-//                            Color.black.opacity(0.4)
-//                                .edgesIgnoringSafeArea(.all)
-//                                .onTapGesture {
-//                                    if showChoicePopUp {
-//                                        self.showChoicePopUp.toggle()
-//                                    }
-//                                }
-//        }
-            
         }
         
         .onTapGesture {
@@ -96,9 +78,6 @@ struct PlaceDetailsView: View {
             if isEditing {
                 isAddingMushroom = true
             }
-//            if showChoicePopUp {
-//                self.showChoicePopUp.toggle()
-//            }
         }
         .onAppear() {
             isHeaderVisible = false
@@ -129,9 +108,16 @@ struct PlaceDetailsView: View {
                 ToolbarItem (placement: .navigationBarTrailing) {
                     Button(action: {
                         updatePlace()
-
                     }) {
                         Text("Save")
+                    }
+                }
+            } else {
+                ToolbarItem (placement: .navigationBarTrailing) {
+                    Button(action: {
+                        print("want to send place to friends")
+                    }) {
+                        Image(systemName: "paperplane")
                     }
                 }
             }
@@ -320,8 +306,9 @@ struct PlaceImage : View {
             },
                        placeholder: {ProgressView()}
             )
-            .aspectRatio(contentMode: .fit)
-            .frame(width: UIScreen.main.bounds.size.width - 10, height: .none) // 250
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 330, height: 260)
+            .cornerRadius(10) // 250
         }
         .padding(.top, 10)
     }

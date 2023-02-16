@@ -20,36 +20,29 @@ class UserModel : ObservableObject {
     @Published var friends = [Friend]()
     @Published var signedIn = false
     @Published var signedOut = false
+    var friendRequestAddedToFriendCollection = false
     
     @Published var allFriendsAreFetched = false
 
     
     func declineFriendRequest(friendRequest : FriendRequest) {
         guard let friendRequestID = friendRequest.id else {return}
-        db.collection("users")
-            .document(friendRequest.senderId)
-            .collection("friendRequest")
-            .document(friendRequestID)
-            .delete()
+        guard let currentUser = Auth.auth().currentUser else {return}
         
         db.collection("users")
-            .document(friendRequest.recipientId)
+            .document(currentUser.uid)
             .collection("friendRequest")
             .document(friendRequestID)
             .delete()
-    }
+        }
+    
     
     func acceptFriendRequest (friendRequest : FriendRequest) {
         guard let friendRequestID = friendRequest.id else {return}
+        guard let currentUser = Auth.auth().currentUser else {return}
         
         db.collection("users")
-            .document(friendRequest.senderId)
-            .collection("friendRequest")
-            .document(friendRequestID)
-            .updateData(["status" : "accepted"])
-        
-        db.collection("users")
-            .document(friendRequest.recipientId)
+            .document(currentUser.uid)
             .collection("friendRequest")
             .document(friendRequestID)
             .updateData(["status" : "accepted"])
@@ -105,6 +98,7 @@ class UserModel : ObservableObject {
     }
     
     func sendRequestToFriend (recipientId : String) {
+        friendRequestAddedToFriendCollection = false
         guard let currentUser = Auth.auth().currentUser else {return}
         
         let data : [String : Any] = [
@@ -118,8 +112,14 @@ class UserModel : ObservableObject {
             if let err = err {
                 print("Error adding document: \(err)")
             } else {
-                print("Document added with ID: \(ref!.documentID)")
-                self.db.collection("users").document(recipientId).collection("friendRequest").document(ref!.documentID).setData(data)
+                self.db.collection("users").document(recipientId).collection("friendRequest").document(ref!.documentID).setData(data) { err in
+                    if let err = err {
+                        print("Error adding document :\(err)")
+                    } else {
+                        print("set document successfully i väns collection")
+                        self.friendRequestAddedToFriendCollection = true
+                    }
+                }
             }
         }
     }
@@ -143,12 +143,67 @@ class UserModel : ObservableObject {
                         if friendRequest.status == .accepted {
                             self.createFriend(friendRequest: friendRequest)
                         }
-                        print("friendRequest: \(friendRequest)")
                     case .failure(let error) :
                         print("Error decoding friendRequest \(error)")
                     }
                 }
+                self.listenMyFriendsFriendRequest()
             }
+        }
+    }
+    
+    func listenMyFriendsFriendRequest() {
+        guard let currentUser = Auth.auth().currentUser else { return }
+        for friendRequest in friendRequests {
+            guard let friendRequestID = friendRequest.id else {return}
+            if friendRequest.senderId == currentUser.uid && friendRequest.recipientId != currentUser.uid {
+                let friendID = friendRequest.recipientId
+                db.collection("users").document(friendRequest.recipientId)
+                    .collection("friendRequest")
+                    .whereField("senderId", isEqualTo: currentUser.uid)
+                    .whereField("recipientId", isEqualTo: friendID)
+                    .addSnapshotListener { snapshot, error in
+                        guard let snapshot = snapshot else {return}
+                        var friendRequestExists = false
+                        for document in snapshot.documents {
+                            let result = Result {
+                                try document.data(as: FriendRequest.self)
+                            }
+                            
+                            switch result {
+                            case .success(let friendRequest):
+                                friendRequestExists = true
+                                 self.updateMyFriendRequest(friendRequest: friendRequest)
+                            case .failure(let error):
+                                print("Error decoding friendRequest: \(error)")
+                            }
+                        }
+                        if !friendRequestExists && self.friendRequestAddedToFriendCollection {
+                            self.db.collection("users").document(currentUser.uid)
+                                .collection("friendRequest").document(friendRequestID).delete() { error in
+                                    if let error = error {
+                                        print("Error removing friend request: \(error)")
+                                    } else {
+                                        print("Friend request successfully removed!")
+                                    }
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
+    func updateMyFriendRequest (friendRequest : FriendRequest) {
+        guard let friendRequestID = friendRequest.id else {return}
+        guard let currentUser = Auth.auth().currentUser else {return}
+        
+        if friendRequest.status == .accepted {
+            print("accepted")
+            db.collection("users")
+                .document(currentUser.uid)
+                .collection("friendRequest")
+                .document(friendRequestID)
+                .updateData(["status" : "accepted"])
         }
     }
     

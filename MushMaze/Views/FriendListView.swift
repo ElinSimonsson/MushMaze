@@ -45,6 +45,13 @@ struct FriendListView: View {
                         }
                         .listRowBackground(Color(.systemGray6))
                     }
+                    .navigationTitle("Your friends")
+                    .shadow(
+                        color: Color.gray.opacity(0.7),
+                        radius: 8,
+                        x: 0,
+                        y: 0
+                    )
                     .scrollContentBackground(.hidden)
                 }
             }
@@ -55,8 +62,9 @@ struct FriendListView: View {
                     AddFriendButton(showProfileSearchView: $showProfileSearchView)
                         .sheet(isPresented: $showProfileSearchView, content: ProfileSearchView.init)
                 }
+                Spacer().frame(maxHeight: 18)
             }
-            .navigationTitle("Your friends")
+           // .navigationTitle("Your friends")
         }
     }
 }
@@ -84,7 +92,8 @@ struct SmallProfileImageView : View {
 struct YourFriendsTitle : View {
     var body: some View {
         HStack {
-            Text(" Your friends")
+            Spacer().frame(maxWidth: 10)
+            Text("Your friends")
                 .font(.largeTitle)
                 .background(.clear)
                 .fontWeight(.bold)
@@ -108,10 +117,12 @@ struct AddFriendButton : View {
                     .foregroundColor(.white)
                     .font(.system(size: 30))
             }
-            .frame(width: 50, height: 50)
+            .frame(width: 60, height: 60)
             .background(Color(darkTurquoise))
             .clipShape(Circle())
+            .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
         }
+        Spacer().frame(maxWidth: 15)
     }
 }
 

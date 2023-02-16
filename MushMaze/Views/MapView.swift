@@ -226,10 +226,8 @@ struct SmallUserImage : View {
 
 struct MapUserTrackingModeButton : View {
     let darkTurquoise = Color(UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1))
-
     @Binding var userTrackingModeValue: MapUserTrackingMode
-    
-    
+
     var body: some View {
         HStack {
             Spacer()

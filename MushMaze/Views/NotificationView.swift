@@ -13,36 +13,40 @@ struct NotificationView: View {
     @State var senderFullName = ""
     
     var body: some View {
-        ScrollView {
-            ForEach (userModel.friendRequests) { friendRequest in
-                if let user = userModel.user {
-                    if friendRequest.senderId != user.userId {
-                        HStack {
-                            SenderProfileView(imageURL: $senderImageURL)
-                            Text("\(senderFullName) has requested to be friends with you")
-                            if friendRequest.status == .pending {
-                                Button(action: {
-                                    userModel.acceptFriendRequest(friendRequest: friendRequest)
-                                }) {
-                                   Text("Accept")
+        NavigationView {
+            List {
+                ForEach (userModel.friendRequests) { friendRequest in
+                    if let user = userModel.user {
+                        if friendRequest.senderId != user.userId {
+                            HStack {
+                                SenderProfileView(imageURL: $senderImageURL)
+                                Text("\(senderFullName) has requested to be friends with you")
+                                if friendRequest.status == .pending {
+                                    Button(action: {
+                                        userModel.acceptFriendRequest(friendRequest: friendRequest)
+                                    }) {
+                                        Text("Accept")
+                                    }
+                                    Button(action: {
+                                        
+                                    }) {
+                                        Text("Decline")
+                                    }
+                                } else if friendRequest.status == .accepted {
+                                    Text("Accepted")
                                 }
-                                Button(action: {
-                                    
-                                }) {
-                                   Text("Decline")
-                                }
-                            } else if friendRequest.status == .accepted {
-                                Text("Accepted")
                             }
-                        }
-                        .onAppear() {
-                            fetchSenderInformation(friendRequest: friendRequest)
+                            .onAppear() {
+                                fetchSenderInformation(friendRequest: friendRequest)
+                            }
                         }
                     }
                 }
             }
+            .navigationTitle("Notifications")
         }
-        .padding()
+        //.navigationTitle("Notifications")
+       // .padding()
     }
     
     func fetchSenderInformation (friendRequest : FriendRequest) {

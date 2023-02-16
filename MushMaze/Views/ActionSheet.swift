@@ -1,5 +1,5 @@
 //
-//  ChoicePopUp.swift
+//  ActionSheet.swift
 //  MushMaze
 //
 //  Created by Elin Simonsson on 2023-02-06.
@@ -7,15 +7,15 @@
 
 import SwiftUI
 
-struct ChoicePopUp : View {
+struct ActionSheet : View {
     @EnvironmentObject var places : Places
+    @Environment(\.presentationMode) var presentationMode
     @Binding var showChoicePopUp : Bool
     @Binding var isEditing : Bool
     @Binding var isHeaderVisible : Bool
     var place : Place
     
     var body: some View {
-    
             List {
                 HStack {
                     Button {
@@ -55,7 +55,6 @@ struct ChoicePopUp : View {
                     }
                 }
                 .listRowBackground(Color(.systemGray6))
-                
                 HStack {
                     Button {
                         places.deletePlace(place: place)
@@ -68,6 +67,7 @@ struct ChoicePopUp : View {
                             // so header in ListOfPlacesView be displayed at the same time when the view becomes visible
                             isHeaderVisible = true
                             places.placeDeleted = false
+                            presentationMode.wrappedValue.dismiss()
                         }
                     }
                 }

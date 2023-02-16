@@ -41,7 +41,8 @@
 		3F8D35832982C61900DCBCBF /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 3F8D35822982C61900DCBCBF /* FirebaseStorage */; };
 		3F8D35892983CA8700DCBCBF /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D35882983CA8600DCBCBF /* ImagePicker.swift */; };
 		3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D358A2983CB4800DCBCBF /* ImageMod.swift */; };
-		3FBF8B852990FA3B002C744F /* ChoicePopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBF8B842990FA3B002C744F /* ChoicePopUp.swift */; };
+		3FBF8B852990FA3B002C744F /* ActionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBF8B842990FA3B002C744F /* ActionSheet.swift */; };
+		3FD4CECF299E5F7900205DED /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD4CECE299E5F7900205DED /* Notification.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,7 +95,8 @@
 		3F8D35802982A2B600DCBCBF /* AddPlaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlaceView.swift; sourceTree = "<group>"; };
 		3F8D35882983CA8600DCBCBF /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		3F8D358A2983CB4800DCBCBF /* ImageMod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMod.swift; sourceTree = "<group>"; };
-		3FBF8B842990FA3B002C744F /* ChoicePopUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoicePopUp.swift; sourceTree = "<group>"; };
+		3FBF8B842990FA3B002C744F /* ActionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSheet.swift; sourceTree = "<group>"; };
+		3FD4CECE299E5F7900205DED /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -205,7 +207,7 @@
 				3F0DC4B62989503700C0BCBC /* ListOfPlacesView.swift */,
 				3F0DC4B82989618600C0BCBC /* PlaceDetailsView.swift */,
 				3F0DC4BA2989670A00C0BCBC /* DestinationView.swift */,
-				3FBF8B842990FA3B002C744F /* ChoicePopUp.swift */,
+				3FBF8B842990FA3B002C744F /* ActionSheet.swift */,
 				3F0305532994EE1700D0724B /* ProfileSearchView.swift */,
 				3F03055929953C6F00D0724B /* NotificationView.swift */,
 				3F2DC4BD299A3989008A511B /* FriendListView.swift */,
@@ -226,6 +228,7 @@
 				3F0305512994E5E400D0724B /* UsersLookupModel.swift */,
 				3F030555299516A900D0724B /* Friend.swift */,
 				3F03055729951ACE00D0724B /* FriendRequest.swift */,
+				3FD4CECE299E5F7900205DED /* Notification.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -373,7 +376,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F136789297FF0CC005B8666 /* Places.swift in Sources */,
-				3FBF8B852990FA3B002C744F /* ChoicePopUp.swift in Sources */,
+				3FBF8B852990FA3B002C744F /* ActionSheet.swift in Sources */,
 				3F80E35F29812359002877FD /* CreatingAccountView.swift in Sources */,
 				3F8D35892983CA8700DCBCBF /* ImagePicker.swift in Sources */,
 				3F03055A29953C6F00D0724B /* NotificationView.swift in Sources */,
@@ -388,6 +391,7 @@
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
 				3F2DC4BE299A3989008A511B /* FriendListView.swift in Sources */,
 				3F03055829951ACE00D0724B /* FriendRequest.swift in Sources */,
+				3FD4CECF299E5F7900205DED /* Notification.swift in Sources */,
 				3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */,
 				3F80B7742981617E00C39181 /* User.swift in Sources */,
 				3F030556299516AA00D0724B /* Friend.swift in Sources */,

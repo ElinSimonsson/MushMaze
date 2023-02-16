@@ -13,12 +13,10 @@ extension Image {
     func imageMod() -> some View {
         self
             .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 300, height: 150)
+            .scaledToFill()
+            .frame(width: 300, height: 230)
             .cornerRadius(10)
             .padding(.top, 40)
             .padding(.bottom, 40)
-            
     }
-    
 }
