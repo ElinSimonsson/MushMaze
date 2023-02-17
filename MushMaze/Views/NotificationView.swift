@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct NotificationView: View {
     @EnvironmentObject var userModel : UserModel
@@ -13,87 +14,159 @@ struct NotificationView: View {
     @State var senderImageURL = ""
     @State var senderFullName = ""
     
+    
     var body: some View {
         NavigationView {
             List {
-                ForEach (friends.friendRequests) { friendRequest in
-                    if let user = userModel.user {
-                        if friendRequest.senderId != user.userId {
-                            HStack {
-                                SenderProfileView(imageURL: $senderImageURL)
-                                Text("\(senderFullName) has requested to be friends with you")
-                                if friendRequest.status == .pending {
-                                    Button(action: {
-                                        friends.acceptFriendRequest(friendRequest: friendRequest)
-                                    }) {
-                                        Text("Accept")
-                                    }
-                                    Button(action: {
-                                        
-                                    }) {
-                                        Text("Decline")
-                                    }
-                                } else if friendRequest.status == .accepted {
-                                    Text("Accepted")
-                                }
-                            }
-                            .onAppear() {
-                                fetchSenderInformation(friendRequest: friendRequest)
+                ForEach(userModel.notifications) { notification in
+                    switch notification.type {
+                    case .friendRequest:
+                        if let matchingFriendRequest = friends.friendRequests.first(where: { $0.id == notification.friendRequestID }) {
+                            Button(action: {}) {
+                                FriendRequestRowView(notification: notification, friendRequest: matchingFriendRequest)
                             }
                         }
+                    case .tag:
+                        // lägg till vy för tag-notiser här
+                        Text("Tag notification")
                     }
                 }
             }
             .navigationTitle("Notifications")
         }
-        //.navigationTitle("Notifications")
-       // .padding()
     }
+}
+
+struct FriendRequestRowView : View {
+    @EnvironmentObject var friends : Friends
+    @EnvironmentObject var userModel: UserModel
+    let notification : Notification
+    let friendRequest : FriendRequest
+    @State var fullName = ""
+    @State var friendUserID = ""
     
-    func fetchSenderInformation (friendRequest : FriendRequest) {
-        userModel.fetchUserInfo(userID: friendRequest.senderId) { imageurl, name, error in
-            if let imageurl = imageurl {
-                senderImageURL = imageurl
+    var body: some View {
+        if let currentUser = Auth.auth().currentUser {
+            HStack {
+                SenderProfileView(userId: notification.senderNotificationUserId)
+                
+                if friendRequest.status == .accepted {
+                    Text("You and **\(fullName)** are now connected as friends!")
+                        .foregroundColor(.black)
+                    
+                } else if currentUser.uid != notification.senderNotificationUserId {
+                    
+                    Text("**\(fullName)** has requested to be friends with you")
+                        .foregroundColor(.black)
+                    
+                    if friendRequest.status == .pending {
+                        VStack {
+                            Button(action: {
+                                friends.acceptFriendRequest(friendRequest: friendRequest)
+                            }) {
+                                AcceptButtonContent()
+                            }
+                            
+                            Button(action: {
+                                friends.declineFriendRequest(friendRequest: friendRequest)
+                            }) {
+                                DeclineButtonContent()
+                            }
+                        }
+                    }
+                }
             }
-            if let name = name {
-                senderFullName = name
-            }
-            if let error = error {
-                print("error fetching sender information \(error)")
+            .onAppear() {
+                if currentUser.uid != notification.senderNotificationUserId {
+                    friendUserID = notification.senderNotificationUserId
+                } else {
+                    friendUserID = notification.recipientId
+                }
+                userModel.fetchUserInfo(userID: friendUserID) { (url, name, error) in
+                    if let error = error {
+                        print("error fetching imageURL \(error)")
+                    }
+                    if let name = name {
+                        fullName = name
+                    }
+                }
             }
         }
     }
 }
 
+
 struct SenderProfileView : View {
     @EnvironmentObject var userModel : UserModel
-    @Binding var imageURL : String
+    var userId: String
+    @State var imageURL = ""
     
     
     var body: some View {
-            AsyncImage(url: URL(string: imageURL),
-                       content:  { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                
-            },
-                       placeholder: {ProgressView()}
-            )
-            .aspectRatio(contentMode: .fill)
-            .frame(width: 40, height: 40)
-            .clipShape(Circle())
-            .onAppear() {
-                
-            }
+        AsyncImage(url: URL(string: imageURL),
+                   content:  { image in
+            image
+                .resizable()
+                .scaledToFit()
             
-        
+        },
+                   placeholder: {ProgressView()}
+        )
+        .aspectRatio(contentMode: .fill)
+        .frame(width: 40, height: 40)
+        .clipShape(Circle())
+        .onAppear() {
+            fetchCreaterProfileImage(userId: userId)
+        }
     }
     
-    func fetchSenderProfile (friendRequest : FriendRequest) {
-       // userModel.fetchUserInfo(userID: friendRequest.senderId) {
+    func fetchCreaterProfileImage (userId: String) {
+        
+        userModel.fetchUserInfo(userID: userId) { (url, name, error) in
+            if let error = error {
+                print("error fetching imageURL \(error)")
+            }
+            if let url = url {
+                imageURL = url
+            }
+        }
+    }
+}
+
+struct SmallProfileImageTest : View {
+    @EnvironmentObject var userModel : UserModel
+    let place : Place
+    @State private var imageURL = ""
+    
+    var body: some View {
+        
+        AsyncImage(url: URL(string: imageURL),
+                   content:  { image in
+            image
+                .resizable()
+                .scaledToFit()
             
-        //}
+        },
+                   placeholder: {ProgressView()}
+        )
+        .aspectRatio(contentMode: .fill)
+        .frame(width: 50, height: 50)
+        .clipShape(Circle())
+        .onAppear() {
+            fetchCreaterProfileImage(place: place)
+        }
+    }
+    
+    func fetchCreaterProfileImage (place: Place) {
+        let id = place.createrUID
+        userModel.fetchUserInfo(userID: id) { (url, name, error) in
+            if let error = error {
+                print("error fetching imageURL \(error)")
+            }
+            if let url = url {
+                imageURL = url
+            }
+        }
     }
 }
 

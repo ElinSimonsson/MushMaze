@@ -44,6 +44,7 @@
 		3FBF8B852990FA3B002C744F /* ActionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBF8B842990FA3B002C744F /* ActionSheet.swift */; };
 		3FD4CECF299E5F7900205DED /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD4CECE299E5F7900205DED /* Notification.swift */; };
 		3FD4CED1299EBA8C00205DED /* Friends.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD4CED0299EBA8C00205DED /* Friends.swift */; };
+		3FD4CED3299FDDC300205DED /* FriendTaggingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD4CED2299FDDC300205DED /* FriendTaggingSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -99,6 +100,7 @@
 		3FBF8B842990FA3B002C744F /* ActionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSheet.swift; sourceTree = "<group>"; };
 		3FD4CECE299E5F7900205DED /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
 		3FD4CED0299EBA8C00205DED /* Friends.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Friends.swift; sourceTree = "<group>"; };
+		3FD4CED2299FDDC300205DED /* FriendTaggingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendTaggingSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -213,6 +215,7 @@
 				3F0305532994EE1700D0724B /* ProfileSearchView.swift */,
 				3F03055929953C6F00D0724B /* NotificationView.swift */,
 				3F2DC4BD299A3989008A511B /* FriendListView.swift */,
+				3FD4CED2299FDDC300205DED /* FriendTaggingSheet.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -394,6 +397,7 @@
 				3F42EA19298BCC3E00477F61 /* UserModel.swift in Sources */,
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
 				3F2DC4BE299A3989008A511B /* FriendListView.swift in Sources */,
+				3FD4CED3299FDDC300205DED /* FriendTaggingSheet.swift in Sources */,
 				3F03055829951ACE00D0724B /* FriendRequest.swift in Sources */,
 				3FD4CECF299E5F7900205DED /* Notification.swift in Sources */,
 				3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */,

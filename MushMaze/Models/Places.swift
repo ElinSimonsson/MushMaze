@@ -17,11 +17,9 @@ class Places : ObservableObject {
     @Published var newDataFetched = false
     @Published var place: Place?
     @Published var placeDeleted = false
-    //let userModel : UserModel
     let friends : Friends
     
     init(friends: Friends) {
-       // self.userModel = userModel
         self.friends = friends
     }
    private var db = Firestore.firestore()
@@ -77,7 +75,6 @@ class Places : ObservableObject {
                 }
             }
         }
-        
     }
     
     func listenToFirestore () {

@@ -14,12 +14,63 @@ class Friends : ObservableObject {
     let db = Firestore.firestore()
     @Published var friendRequests = [FriendRequest]()
     @Published var friends = [Friend]()
+    @Published var taggedFriends = [Friend]()
     @Published var allFriendsAreFetched = false
+    @Published var successSendTagging = false
     var friendRequestAddedToFriendCollection = true
     var listenerFriends: ListenerRegistration?
     var listenerFriendRequests: ListenerRegistration?
     var listenerMyFriendRequests: ListenerRegistration?
     var friendListeners = [ListenerRegistration]()
+    
+    
+    func sendTagNotification (placeId : String) {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        let dispatchGroup = DispatchGroup()
+        
+        dispatchGroup.enter()
+        for friend in taggedFriends {
+            guard let friendId = friend.id else {return}
+            let newNotification = Notification(senderNotificationUserId: currentUser.uid, recipientId: friendId, placeID: placeId, type: .tag)
+            
+            do {
+                _ = try
+                db.collection("users").document(friendId).collection("notifications").addDocument(from: newNotification)
+            } catch {
+                print("error send notification to friend")
+            }
+        }
+        dispatchGroup.leave()
+        
+        dispatchGroup.notify(queue: .main) {
+            self.successSendTagging = true
+            self.taggedFriends.removeAll()
+        }
+        
+    }
+    
+    func updateTaggedFriendsList (friend: Friend) {
+        if taggedFriends.contains(where: { $0.id == friend.id }) {
+            if let index = taggedFriends.firstIndex(where: { $0.id == friend.id }) {
+                taggedFriends.remove(at: index)
+            }
+        } else {
+            taggedFriends.append(friend)
+        }
+    }
+    
+    func sendNotificationForFriendRequest (to friendId: String, friendRequestId : String) {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        
+        let newNotification = Notification(senderNotificationUserId: currentUser.uid, recipientId: friendId, friendRequestID: friendRequestId, type: .friendRequest)
+        
+        do {
+            _ = try
+            db.collection("users").document(friendId).collection("notifications").addDocument(from: newNotification)
+        } catch {
+            print("error send notification to friend")
+        }
+    }
     
     func declineFriendRequest(friendRequest : FriendRequest) {
         guard let friendRequestID = friendRequest.id else {return}
@@ -30,7 +81,7 @@ class Friends : ObservableObject {
             .collection("friendRequest")
             .document(friendRequestID)
             .delete()
-        }
+    }
     
     func acceptFriendRequest (friendRequest : FriendRequest) {
         guard let friendRequestID = friendRequest.id else {return}
@@ -41,6 +92,8 @@ class Friends : ObservableObject {
             .collection("friendRequest")
             .document(friendRequestID)
             .updateData(["status" : "accepted"])
+        
+        sendNotificationForFriendRequest(to: friendRequest.senderId, friendRequestId: friendRequestID)
     }
     
     func startListenFriends () {
@@ -116,6 +169,7 @@ class Friends : ObservableObject {
                         print("Error adding document :\(err)")
                     } else {
                         self.friendRequestAddedToFriendCollection = true
+                        self.sendNotificationForFriendRequest(to: recipientId, friendRequestId: ref!.documentID)
                     }
                 }
             }
@@ -137,7 +191,6 @@ class Friends : ObservableObject {
                     }
                     switch result {
                     case .success(let friendRequest) :
-                        guard let currentUser = Auth.auth().currentUser else {return}
                         self.friendRequests.append(friendRequest)
                         
                         if friendRequest.status == .accepted {
@@ -170,18 +223,18 @@ class Friends : ObservableObject {
                             let result = Result {
                                 try document.data(as: FriendRequest.self)
                             }
-
+                            
                             switch result {
                             case .success(let friendRequest):
                                 friendRequestExists = true
-                                 self.updateMyFriendRequest(friendRequest: friendRequest)
+                                self.updateMyFriendRequest(friendRequest: friendRequest)
                             case .failure(let error):
                                 print("Error decoding friendRequest: \(error)")
                             }
                         }
-
+                        
                         self.friendListeners.append(listener!)
-
+                        
                         if !friendRequestExists && self.friendRequestAddedToFriendCollection {
                             print("friend request i min vän lista finns inte")
                             self.db.collection("users").document(currentUser.uid)
@@ -191,16 +244,14 @@ class Friends : ObservableObject {
                                     } else {
                                         print("Friend request successfully removed!")
                                     }
-                            }
+                                }
                         }
                     }
             }
         }
     }
-
-
+    
     func updateMyFriendRequest (friendRequest : FriendRequest) {
-        print("update My friend request körs")
         guard let friendRequestID = friendRequest.id else {return}
         guard let currentUser = Auth.auth().currentUser else {return}
         
@@ -229,13 +280,13 @@ class Friends : ObservableObject {
         listenerFriends = nil
         listenerFriendRequests = nil
         listenerMyFriendRequests = nil
-        
-        friendRequests.removeAll()
-        friends.removeAll()
+//
+//        friendRequests.removeAll()
+//        friends.removeAll()
     }
     
     func clearAllFriendList () {
-       // friendRequests.removeAll()
-       // friends.removeAll()
+        friendRequests.removeAll()
+         friends.removeAll()
     }
 }

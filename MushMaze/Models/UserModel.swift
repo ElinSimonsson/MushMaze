@@ -16,10 +16,38 @@ class UserModel : ObservableObject {
     let db = Firestore.firestore()
     let storage = Storage.storage()
     @Published var user : User?
+    @Published var notifications = [Notification]()
     @Published var signedIn = false
     @Published var signedOut = false
-
+    var listener : ListenerRegistration?
     
+    
+    func listenNotificationsFromFirestore () {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        
+       listener = db.collection("users").document(currentUser.uid).collection("notifications").addSnapshotListener { snapshot, err in
+            guard let snapshot = snapshot else {return}
+            if let err = err {
+                print("error getting notifications from firestore \(err)")
+            } else {
+                self.notifications.removeAll()
+                for document in snapshot.documents {
+                    let result = Result {
+                        try document.data(as: Notification.self)
+                    }
+                    switch result {
+                    case .success(let notification) :
+                        self.notifications.append(notification)
+                        print("successfully decoding notification")
+                    case . failure(let error) :
+                        print("Error decoding notification: \(error)")
+                    }
+                }
+            }
+        }
+        
+    }
+
     func fetchUserInfo(userID: String, completion: @escaping (_ imageURL: String?, _ name: String?, _ error: Error?) -> Void) {
         let userRef = db.collection("users").document(userID)
         userRef.getDocument { (document, error) in
@@ -40,6 +68,10 @@ class UserModel : ObservableObject {
             signedOut = true
             signedIn = false
             user = nil
+            listener?.remove()
+            listener = nil
+            notifications.removeAll()
+            
         } catch let signOutError as NSError {
             print("Error signing out: %@", signOutError)
         }

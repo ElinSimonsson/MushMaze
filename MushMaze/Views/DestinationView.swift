@@ -40,9 +40,8 @@ struct DestinationView: View {
                 }
             })
             .onAppear() {
-                //userModel.startListenFriends()
                 userModel.loadUserInformation()
-               // userModel.listenFriendRequestFirestore()
+                userModel.listenNotificationsFromFirestore()
                 friends.startListenFriends()
                 friends.listenFriendRequestFirestore()
                 places.listenToFirestore()

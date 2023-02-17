@@ -12,6 +12,7 @@ struct Notification : Codable, Identifiable {
     @DocumentID var id : String?
     var date : Date = Date()
     var senderNotificationUserId : String
+    var recipientId : String
     var friendRequestID : String?
     var placeID : String?
     var type : NotificationType

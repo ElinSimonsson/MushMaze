@@ -12,6 +12,7 @@ import SwiftUI
 struct PlaceDetailsView: View {
     
     var place : Place
+    @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var userModel : UserModel
     @EnvironmentObject var places : Places
     @State var createrFullName = ""
@@ -24,12 +25,12 @@ struct PlaceDetailsView: View {
     @State var newMushroomName = ""
     @State var isAddingMushroom = false
     @State var showErrorMushroom = false
+    @State var showFriendTaggingSheet = false
+    @State var showIsSentPopUp = false
     @Binding var isHeaderVisible : Bool
-    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         ZStack {
-           
             ScrollView {
                     CreaterRowView(place: place, fullName: $createrFullName, imageURL: $createrImageURL)
                     PlaceName(placeName: place.name, isEditing: isEditing, editingPlaceName: $editingPlaceName)
@@ -71,8 +72,16 @@ struct PlaceDetailsView: View {
                 }
             }
             .padding()
+            
+            if showIsSentPopUp {
+                SuccessSentPopUp()
+                    .onAppear() {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    showIsSentPopUp = false
+                                }
+                    }
+            }
         }
-        
         .onTapGesture {
             dismissKeyBoard()
             if isEditing {
@@ -113,11 +122,19 @@ struct PlaceDetailsView: View {
                     }
                 }
             } else {
-                ToolbarItem (placement: .navigationBarTrailing) {
-                    Button(action: {
-                        print("want to send place to friends")
-                    }) {
-                        Image(systemName: "paperplane")
+                if let user = userModel.user {
+                    if user.userId == place.createrUID {
+                        ToolbarItem (placement: .navigationBarTrailing) {
+                            Button(action: {
+                                showFriendTaggingSheet = true
+                            }) {
+                                Image(systemName: "paperplane")
+                            }
+                            .sheet(isPresented: $showFriendTaggingSheet) {
+                                FriendTaggingSheet(showIsSentPopUp: $showIsSentPopUp, place: place)
+                                    .presentationDetents([.fraction(0.8), .large])
+                            }
+                        }
                     }
                 }
             }
@@ -163,6 +180,25 @@ struct PlaceDetailsView: View {
                 createrFullName = name
             }
         }
+    }
+}
+
+struct SuccessSentPopUp : View {
+    @Environment(\.colorScheme) var colorScheme
+    var body: some View {
+        HStack {
+          Text("Sent")
+                .bold()
+        }
+        .frame(width: 100, height: 50)
+        .background(colorScheme == .light ? .white : .black)
+        .cornerRadius(10)
+        .shadow(
+            color: Color.gray.opacity(0.7),
+            radius: 8,
+            x: 0,
+            y: 0
+        )
     }
 }
 
