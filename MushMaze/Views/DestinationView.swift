@@ -12,6 +12,7 @@ struct DestinationView: View {
     @State var destinations = Destination.map
     @EnvironmentObject var userModel : UserModel
     @EnvironmentObject var places : Places
+    @EnvironmentObject var friends : Friends
     
     
     enum Destination {
@@ -32,16 +33,18 @@ struct DestinationView: View {
                     ToggleButtonsView(destinations: $destinations)
                 }
             }
-            .onChange(of: userModel.allFriendsAreFetched, perform: { tag in
-                if userModel.allFriendsAreFetched {
+            .onChange(of: friends.allFriendsAreFetched, perform: { tag in
+                if friends.allFriendsAreFetched {
                     places.listenFriendsSharedPlaces()
-                    userModel.allFriendsAreFetched = false
+                    friends.allFriendsAreFetched = false
                 }
             })
             .onAppear() {
-                userModel.startListenFriends()
+                //userModel.startListenFriends()
                 userModel.loadUserInformation()
-                userModel.listenFriendRequestFirestore()
+               // userModel.listenFriendRequestFirestore()
+                friends.startListenFriends()
+                friends.listenFriendRequestFirestore()
                 places.listenToFirestore()
                 places.listenToFavoritePlacesFirestore()
             }

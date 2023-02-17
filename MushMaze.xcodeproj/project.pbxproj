@@ -43,6 +43,7 @@
 		3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D358A2983CB4800DCBCBF /* ImageMod.swift */; };
 		3FBF8B852990FA3B002C744F /* ActionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBF8B842990FA3B002C744F /* ActionSheet.swift */; };
 		3FD4CECF299E5F7900205DED /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD4CECE299E5F7900205DED /* Notification.swift */; };
+		3FD4CED1299EBA8C00205DED /* Friends.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD4CED0299EBA8C00205DED /* Friends.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +98,7 @@
 		3F8D358A2983CB4800DCBCBF /* ImageMod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMod.swift; sourceTree = "<group>"; };
 		3FBF8B842990FA3B002C744F /* ActionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSheet.swift; sourceTree = "<group>"; };
 		3FD4CECE299E5F7900205DED /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
+		3FD4CED0299EBA8C00205DED /* Friends.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Friends.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -229,6 +231,7 @@
 				3F030555299516A900D0724B /* Friend.swift */,
 				3F03055729951ACE00D0724B /* FriendRequest.swift */,
 				3FD4CECE299E5F7900205DED /* Notification.swift */,
+				3FD4CED0299EBA8C00205DED /* Friends.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -378,6 +381,7 @@
 				3F136789297FF0CC005B8666 /* Places.swift in Sources */,
 				3FBF8B852990FA3B002C744F /* ActionSheet.swift in Sources */,
 				3F80E35F29812359002877FD /* CreatingAccountView.swift in Sources */,
+				3FD4CED1299EBA8C00205DED /* Friends.swift in Sources */,
 				3F8D35892983CA8700DCBCBF /* ImagePicker.swift in Sources */,
 				3F03055A29953C6F00D0724B /* NotificationView.swift in Sources */,
 				3F8D357E2982767300DCBCBF /* ProfileView.swift in Sources */,

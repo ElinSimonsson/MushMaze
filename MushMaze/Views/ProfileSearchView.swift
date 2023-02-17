@@ -9,7 +9,8 @@ import SwiftUI
 import FirebaseAuth
 
 struct ProfileSearchView: View {
-    @EnvironmentObject var userModel : UserModel
+    //@EnvironmentObject var userModel : UserModel
+    @EnvironmentObject var friends : Friends
     @StateObject var usersLookup = UsersLookupModel()
     @State var keyword : String = ""
     
@@ -38,7 +39,7 @@ struct ProfileSearchView: View {
                 }
                     .padding(.top, 30)
             }
-            
+
         }
         .padding()
         .navigationBarHidden(true)
@@ -70,6 +71,7 @@ struct SearchBarView : View {
 
 struct ProfileBarView : View {
     @EnvironmentObject var userModel : UserModel
+    @EnvironmentObject var friends : Friends
     var user : User
     
     var body: some View {
@@ -79,22 +81,22 @@ struct ProfileBarView : View {
                     ProfileImageView(imageURL: user.imageURL)
                     Text(user.fullName)
                     Spacer()
-                    
-                    let pendingRequest = userModel.friendRequests.first(where: {
+
+                    let pendingRequest = friends.friendRequests.first(where: {
                         ($0.senderId == currentUser.userId && $0.recipientId == user.userId) ||
                         ($0.recipientId == currentUser.userId && $0.senderId == user.userId)
                     })
-                    
+
                     if let pendingRequest = pendingRequest {
                         if pendingRequest.senderId != currentUser.userId && pendingRequest.status == .pending {
-                        
+
                             Button(action: {
-                                userModel.declineFriendRequest(friendRequest: pendingRequest)
+                                friends.declineFriendRequest(friendRequest: pendingRequest)
                             }) {
                                 DeclineButtonContent()
                             }
                             Button(action: {
-                                userModel.acceptFriendRequest(friendRequest: pendingRequest)
+                                friends.acceptFriendRequest(friendRequest: pendingRequest)
                             }) {
                                 AcceptButtonContent()
                             }
@@ -105,7 +107,7 @@ struct ProfileBarView : View {
                         }
                     } else {
                         Button(action: {
-                            userModel.sendRequestToFriend(recipientId: user.userId) //
+                            friends.sendRequestToFriend(recipientId: user.userId) //
                         }) {
                             RequestButtonContent()
                         }

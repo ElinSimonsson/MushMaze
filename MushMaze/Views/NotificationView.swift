@@ -9,13 +9,14 @@ import SwiftUI
 
 struct NotificationView: View {
     @EnvironmentObject var userModel : UserModel
+    @EnvironmentObject var friends : Friends
     @State var senderImageURL = ""
     @State var senderFullName = ""
     
     var body: some View {
         NavigationView {
             List {
-                ForEach (userModel.friendRequests) { friendRequest in
+                ForEach (friends.friendRequests) { friendRequest in
                     if let user = userModel.user {
                         if friendRequest.senderId != user.userId {
                             HStack {
@@ -23,7 +24,7 @@ struct NotificationView: View {
                                 Text("\(senderFullName) has requested to be friends with you")
                                 if friendRequest.status == .pending {
                                     Button(action: {
-                                        userModel.acceptFriendRequest(friendRequest: friendRequest)
+                                        friends.acceptFriendRequest(friendRequest: friendRequest)
                                     }) {
                                         Text("Accept")
                                     }
@@ -96,8 +97,8 @@ struct SenderProfileView : View {
     }
 }
 
-struct NotificationView_Previews: PreviewProvider {
-    static var previews: some View {
-        NotificationView()
-    }
-}
+//struct NotificationView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        NotificationView()
+//    }
+//}

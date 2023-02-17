@@ -34,7 +34,7 @@ struct SigningInView: View {
             }) {
                 Text("Not registered yet? Sign up here")
             }
-            .sheet(isPresented: $showCreatingAccountView, content: {
+            .fullScreenCover(isPresented: $showCreatingAccountView, content: {
                 CreatingAccountView()
             })
             Spacer()

@@ -17,6 +17,6 @@ struct Notification : Codable, Identifiable {
     var type : NotificationType
     
     enum NotificationType: String, Codable {
-        case notification, friendRequest
+        case tag, friendRequest
     }
 }

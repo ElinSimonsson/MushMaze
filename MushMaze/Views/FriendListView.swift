@@ -10,6 +10,7 @@ import SwiftUI
 struct FriendListView: View {
     @EnvironmentObject var userModel : UserModel
     @EnvironmentObject var places : Places
+    @EnvironmentObject var friends : Friends
     @State var showProfileSearchView = false
     @State var showProfile = false
     
@@ -30,12 +31,12 @@ struct FriendListView: View {
                     YourFriendsTitle()
                 }
                 Spacer()
-                if userModel.friends.isEmpty {
+                if friends.friends.isEmpty {
                     Text("No friends")
                     Spacer()
                 } else {
                     List {
-                        ForEach (userModel.friends) { friend in
+                        ForEach (friends.friends) { friend in
                             HStack {
                                 SmallProfileImageView(imageURL: friend.imageURL)
                                 Spacer()
