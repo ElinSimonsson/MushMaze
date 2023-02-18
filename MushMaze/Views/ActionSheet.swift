@@ -12,7 +12,7 @@ struct ActionSheet : View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var showChoicePopUp : Bool
     @Binding var isEditing : Bool
-    @Binding var isHeaderVisible : Bool
+    @Binding var isHeaderVisible : Bool 
     var place : Place
     
     var body: some View {
@@ -65,7 +65,9 @@ struct ActionSheet : View {
                     .onChange(of: places.placeDeleted) { newValue in
                         if places.placeDeleted {
                             // so header in ListOfPlacesView be displayed at the same time when the view becomes visible
-                            isHeaderVisible = true
+                            
+                            isHeaderVisible = true // Cannot assign to value: 'isHeaderVisible' is a 'let' constant
+                            
                             places.placeDeleted = false
                             presentationMode.wrappedValue.dismiss()
                         }

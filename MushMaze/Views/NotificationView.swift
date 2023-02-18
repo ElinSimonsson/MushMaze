@@ -11,11 +11,28 @@ import FirebaseAuth
 struct NotificationView: View {
     @EnvironmentObject var userModel : UserModel
     @EnvironmentObject var friends : Friends
+    @EnvironmentObject var places : Places
     @State var senderImageURL = ""
     @State var senderFullName = ""
+    @State var isHeaderVisbible = true
+    @State var showAlert = false
+    @State var showProfileView = false
     
     
     var body: some View {
+        if isHeaderVisbible {
+            HStack {
+                Spacer()
+                Button(action: {
+                    showProfileView.toggle()
+                }) {
+                    SmallUserImage()
+                }.fullScreenCover(isPresented: $showProfileView, content: {
+                    ProfileView()
+                })
+            }
+            NotificationTitle()
+        }
         NavigationView {
             List {
                 ForEach(userModel.notifications) { notification in
@@ -27,12 +44,74 @@ struct NotificationView: View {
                             }
                         }
                     case .tag:
-                        // lägg till vy för tag-notiser här
-                        Text("Tag notification")
+                        if let matchingPlace = places.allSavedPlaces.first(where: {$0.id == notification.placeID }) {
+                            NavigationLink(destination: PlaceDetailsView(place: matchingPlace, isHeaderVisible: $isHeaderVisbible)) {
+                                TagNotificationRowView(notification: notification)
+                            }
+                        } else {
+                            TagNotificationRowView(notification: notification)
+                                .alert(isPresented: $showAlert) {
+                                    Alert(title: Text("Error"), message: Text("It seems like the user has deleted the mushroom place"), dismissButton: .default(Text("Ok")))
+                                }
+                                .onTapGesture {
+                                    showAlert = true
+                                }
+                        }
                     }
                 }
+                
             }
-            .navigationTitle("Notifications")
+            .shadow(
+                color: Color.gray.opacity(0.7),
+                radius: 8,
+                x: 0,
+                y: 0
+            )
+            .scrollContentBackground(.hidden)
+        }
+    }
+}
+
+struct TagNotificationRowView : View {
+    let notification : Notification
+    @EnvironmentObject var places : Places
+    @EnvironmentObject var userModel : UserModel
+    @State var friendFullName = ""
+    
+    
+    var body: some View {
+        VStack {
+            HStack {
+                SenderProfileView(userId: notification.senderNotificationUserId)
+                Text("**\(friendFullName)** notified you")
+            }
+            HStack {
+                Text("tap to see the mushroom place")
+            }
+        }
+        .onAppear() {
+            userModel.fetchUserInfo(userID: notification.senderNotificationUserId) { (url, name, error) in
+                if let error = error {
+                    print("error fetching imageURL \(error)")
+                }
+                if let name = name {
+                    friendFullName = name
+                }
+            }
+        }
+    }
+    
+}
+struct NotificationTitle : View {
+    var body: some View {
+        HStack {
+            Spacer().frame(maxWidth: 10)
+            Text("Notifications")
+                .font(.largeTitle)
+                .background(.clear)
+                .fontWeight(.bold)
+                .padding(.bottom)
+            Spacer()
         }
     }
 }

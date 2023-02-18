@@ -46,7 +46,6 @@ struct FriendListView: View {
                         }
                         .listRowBackground(Color(.systemGray6))
                     }
-                    .navigationTitle("Your friends")
                     .shadow(
                         color: Color.gray.opacity(0.7),
                         radius: 8,
@@ -65,7 +64,6 @@ struct FriendListView: View {
                 }
                 Spacer().frame(maxHeight: 18)
             }
-           // .navigationTitle("Your friends")
         }
     }
 }

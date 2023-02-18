@@ -19,6 +19,7 @@ class UserModel : ObservableObject {
     @Published var notifications = [Notification]()
     @Published var signedIn = false
     @Published var signedOut = false
+    
     var listener : ListenerRegistration?
     
     

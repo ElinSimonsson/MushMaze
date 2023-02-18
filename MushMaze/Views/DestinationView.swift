@@ -111,7 +111,7 @@ struct ToggleButtonsView : View {
 }
 
 
-//struct TabbedView_Previews: PreviewProvider {
+//struct DestinationView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        TabbedView()
 //    }
