@@ -27,7 +27,7 @@ struct DestinationView: View {
     var body: some View {
         if destinations == .map {
             ZStack { // mapView needs to cover the entire screen for convertPointToCoordinate to be able to convert to the correct coordinate
-                    MapView(locationManager: locationManager)
+                MapView(locationManager: locationManager)
                 VStack {
                     Spacer()
                     ToggleButtonsView(destinations: $destinations)
@@ -55,6 +55,12 @@ struct DestinationView: View {
                     FriendListView()
                 } else if destinations == .notification {
                     NotificationView()
+                        .onChange(of: userModel.hasNewNotifications, perform:  { tag in
+                            print("test \(tag)")
+                        })
+                        .onAppear() {
+                            userModel.updateReadNotification()
+                        }
                 }
                 Spacer()
                 ToggleButtonsView(destinations: $destinations)
@@ -67,46 +73,65 @@ struct DestinationView: View {
 struct ToggleButtonsView : View {
     @Binding var destinations : DestinationView.Destination
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var userModel : UserModel
     
     var body: some View {
-            HStack (spacing: 0) {
-                Spacer()
-                Button(action: {
-                    destinations = .map
-                }){
-                    Image(systemName: destinations == .map ? "map.fill" : "map")
-                        .foregroundColor(colorScheme == .light ? .black : .white)
-                        .font(.system(size: 30))
-                }
-                Spacer()
-                Button(action: {
-                    destinations = .list
-                }) {
-                    Image(systemName: destinations == .list ? "list.clipboard.fill" : "list.bullet.clipboard")
-                        .foregroundColor(colorScheme == .light ? .black : .white)
-                        .font(.system(size: 30))
-                }
-                Spacer()
-                Button(action: {
-                    destinations = .friendList
-                }) {
-                    Image(systemName: destinations == .friendList ? "person.2.fill" : "person.2")
-                        .foregroundColor(colorScheme == .light ? . black : .white)
-                        .font(.system(size: 30))
-                }
-                Spacer()
-                Button(action: {
-                    destinations = .notification
-                }) {
+        HStack (spacing: 0) {
+            Spacer()
+            Button(action: {
+                destinations = .map
+            }){
+                Image(systemName: destinations == .map ? "map.fill" : "map")
+                    .foregroundColor(colorScheme == .light ? .black : .white)
+                    .font(.system(size: 30))
+            }
+            Spacer()
+            Button(action: {
+                destinations = .list
+            }) {
+                Image(systemName: destinations == .list ? "list.clipboard.fill" : "list.bullet.clipboard")
+                    .foregroundColor(colorScheme == .light ? .black : .white)
+                    .font(.system(size: 30))
+            }
+            Spacer()
+            Button(action: {
+                destinations = .friendList
+            }) {
+                Image(systemName: destinations == .friendList ? "person.2.fill" : "person.2")
+                    .foregroundColor(colorScheme == .light ? . black : .white)
+                    .font(.system(size: 30))
+            }
+            Spacer()
+            Button(action: {
+                destinations = .notification
+            }) {
+                ZStack {
                     Image(systemName: destinations == .notification ? "bell.fill" : "bell")
                         .foregroundColor(colorScheme == .light ? . black : .white)
                         .font(.system(size: 30))
+                    
+                    if userModel.notificationNewCount > 0 {
+                        Text("\(userModel.notificationNewCount)")
+                            .font(.system(size: 14))
+                            .foregroundColor(.white)
+                            .padding(5)
+                            .background(Color.red)
+                            .clipShape(Circle())
+                            .offset(x: 10, y: -10)
+                    }
                 }
-                Spacer()
             }
-
-            .edgesIgnoringSafeArea(.top)
-            .background(Color(.systemGray6))
+            Spacer()
+        }
+        .onChange(of: userModel.hasNewNotifications, perform:  { tag in
+            if userModel.hasNewNotifications, destinations == .notification, userModel.notificationNewCount > 0 {
+                userModel.updateReadNotification()
+            }
+            userModel.hasNewNotifications = false
+        })
+        
+        .edgesIgnoringSafeArea(.top)
+        .background(Color(.systemGray6))
     }
 }
 

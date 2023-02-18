@@ -31,7 +31,7 @@ class Friends : ObservableObject {
         dispatchGroup.enter()
         for friend in taggedFriends {
             guard let friendId = friend.id else {return}
-            let newNotification = Notification(senderNotificationUserId: currentUser.uid, recipientId: friendId, placeID: placeId, type: .tag)
+            let newNotification = Notification(senderNotificationUserId: currentUser.uid, recipientId: friendId, placeID: placeId, read: false , type: .tag)
             
             do {
                 _ = try
@@ -62,7 +62,8 @@ class Friends : ObservableObject {
     func sendNotificationForFriendRequest (to friendId: String, friendRequestId : String) {
         guard let currentUser = Auth.auth().currentUser else {return}
         
-        let newNotification = Notification(senderNotificationUserId: currentUser.uid, recipientId: friendId, friendRequestID: friendRequestId, type: .friendRequest)
+        let newNotification = Notification(senderNotificationUserId: currentUser.uid, recipientId: friendId, friendRequestID: friendRequestId,
+                                           read: false, type: .friendRequest)
         
         do {
             _ = try

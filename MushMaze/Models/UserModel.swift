@@ -19,19 +19,36 @@ class UserModel : ObservableObject {
     @Published var notifications = [Notification]()
     @Published var signedIn = false
     @Published var signedOut = false
+    @Published var notificationNewCount = 0
+    @Published var hasNewNotifications = false
     
     var listener : ListenerRegistration?
     
+    func updateReadNotification () {
+        guard let currentUser = Auth.auth().currentUser else {return}
+        for notification in notifications {
+            if !notification.read {
+                if let notificationID = notification.id {
+                    db.collection("users")
+                        .document(currentUser.uid)
+                        .collection("notifications")
+                        .document(notificationID)
+                        .updateData(["read" : true])
+                }
+            }
+        }
+    }
     
     func listenNotificationsFromFirestore () {
         guard let currentUser = Auth.auth().currentUser else {return}
         
-       listener = db.collection("users").document(currentUser.uid).collection("notifications").addSnapshotListener { snapshot, err in
+        listener = db.collection("users").document(currentUser.uid).collection("notifications").addSnapshotListener { snapshot, err in
             guard let snapshot = snapshot else {return}
             if let err = err {
                 print("error getting notifications from firestore \(err)")
             } else {
                 self.notifications.removeAll()
+                self.notificationNewCount = 0
                 for document in snapshot.documents {
                     let result = Result {
                         try document.data(as: Notification.self)
@@ -39,14 +56,17 @@ class UserModel : ObservableObject {
                     switch result {
                     case .success(let notification) :
                         self.notifications.append(notification)
-                        print("successfully decoding notification")
+                        if !notification.read {
+                            self.notificationNewCount += 1
+                        }
                     case . failure(let error) :
                         print("Error decoding notification: \(error)")
                     }
                 }
+                self.hasNewNotifications = true
+                self.notifications = self.notifications.sorted (by:{ $0.date > $1.date })
             }
         }
-        
     }
 
     func fetchUserInfo(userID: String, completion: @escaping (_ imageURL: String?, _ name: String?, _ error: Error?) -> Void) {

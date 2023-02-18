@@ -15,6 +15,7 @@ struct Notification : Codable, Identifiable {
     var recipientId : String
     var friendRequestID : String?
     var placeID : String?
+    var read : Bool
     var type : NotificationType
     
     enum NotificationType: String, Codable {
