@@ -45,6 +45,7 @@
 		3FD4CECF299E5F7900205DED /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD4CECE299E5F7900205DED /* Notification.swift */; };
 		3FD4CED1299EBA8C00205DED /* Friends.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD4CED0299EBA8C00205DED /* Friends.swift */; };
 		3FD4CED3299FDDC300205DED /* FriendTaggingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD4CED2299FDDC300205DED /* FriendTaggingSheet.swift */; };
+		3FF4126929A3E721007BF2E6 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FF4126829A3E721007BF2E6 /* SplashView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +102,7 @@
 		3FD4CECE299E5F7900205DED /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
 		3FD4CED0299EBA8C00205DED /* Friends.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Friends.swift; sourceTree = "<group>"; };
 		3FD4CED2299FDDC300205DED /* FriendTaggingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendTaggingSheet.swift; sourceTree = "<group>"; };
+		3FF4126829A3E721007BF2E6 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -216,6 +218,7 @@
 				3F03055929953C6F00D0724B /* NotificationView.swift */,
 				3F2DC4BD299A3989008A511B /* FriendListView.swift */,
 				3FD4CED2299FDDC300205DED /* FriendTaggingSheet.swift */,
+				3FF4126829A3E721007BF2E6 /* SplashView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -394,6 +397,7 @@
 				3F0305522994E5E400D0724B /* UsersLookupModel.swift in Sources */,
 				3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */,
 				3F0DC4BB2989670A00C0BCBC /* DestinationView.swift in Sources */,
+				3FF4126929A3E721007BF2E6 /* SplashView.swift in Sources */,
 				3F42EA19298BCC3E00477F61 /* UserModel.swift in Sources */,
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
 				3F2DC4BE299A3989008A511B /* FriendListView.swift in Sources */,

@@ -10,11 +10,11 @@ import SwiftUI
 struct ContentView: View {
 
     @EnvironmentObject var userModel : UserModel
+    @State var isActive = false
     
     
     var body: some View {
-
-        //Test()
+       
         if !userModel.signedOut && userModel.signedIn {
             DestinationView()
         } else {
