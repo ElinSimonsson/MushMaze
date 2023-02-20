@@ -42,7 +42,6 @@ struct CreatingAccountView: View {
             .frame(alignment: .leading)
             SignUpText()
                 .padding(.top, 30)
-            //Spacer()
             InputTextField(hintText: "First Name", inputText: $firstName, showError: $showErrorFirstName)
                 .padding(.top, 30)
             InputTextField(hintText: "Last Name", inputText: $lastName, showError: $showErrorLastName)
@@ -59,6 +58,22 @@ struct CreatingAccountView: View {
             Spacer()
         }
         .padding()
+        .simultaneousGesture(
+            DragGesture().onChanged({ gesture in
+                if (gesture.location.y < gesture.predictedEndLocation.y){
+                    dismissKeyBoard()
+                }
+            }))
+    }
+    
+    func dismissKeyBoard () {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .filter({$0.activationState == .foregroundActive})
+            .map({$0 as? UIWindowScene})
+            .compactMap({$0})
+            .first?.windows
+            .filter({$0.isKeyWindow}).first
+        keyWindow!.endEditing(true)
     }
     
     func createAccount() {

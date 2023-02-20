@@ -354,7 +354,6 @@ struct PlaceName : View {
     let placeName : String
     var isEditing : Bool
     @Binding var editingPlaceName : String
-    //@FocusState var focus: PlaceDetailsView.FocusedField?
     
     var body: some View {
         HStack {

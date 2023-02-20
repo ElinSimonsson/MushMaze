@@ -42,8 +42,6 @@ struct ListOfPlacesView: View {
         }
     }
     
-    
-    
     var body: some View {
                 if isHeaderVisible {
                     HeaderView(searchText: $searchText, showProfile: $showProfile, selectedPlaceFilter: $selectedPlaceFilter)
@@ -131,9 +129,26 @@ struct ListOfPlacesView: View {
                     x: 0,
                     y: 0
                 )
+                .simultaneousGesture(
+                    DragGesture().onChanged({ gesture in
+                        if (gesture.location.y < gesture.predictedEndLocation.y){
+                            dismissKeyBoard()
+                        }
+                    }))
+                
                 .scrollContentBackground(.hidden)
             }
         }
+    }
+    
+    func dismissKeyBoard () {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .filter({$0.activationState == .foregroundActive})
+            .map({$0 as? UIWindowScene})
+            .compactMap({$0})
+            .first?.windows
+            .filter({$0.isKeyWindow}).first
+        keyWindow!.endEditing(true)
     }
 }
 
@@ -264,14 +279,6 @@ struct SmallProfileImage : View {
     
     func fetchCreaterProfileImage (place: Place) {
         let id = place.createrUID
-//        userModel.fetchUserInfo(userID: id) { (url, name, error) in
-//            if let error = error {
-//                print("error fetching imageURL \(error)")
-//            }
-//            if let url = url {
-//                imageURL = url
-//            }
-//        }
         userModel.fetchUserInfo(userID: id) { (url, firstName, lastName, error ) in
             if let error = error {
                 print("error fetching imageURL \(error)")

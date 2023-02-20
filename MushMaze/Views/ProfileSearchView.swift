@@ -9,7 +9,6 @@ import SwiftUI
 import FirebaseAuth
 
 struct ProfileSearchView: View {
-    //@EnvironmentObject var userModel : UserModel
     @EnvironmentObject var friends : Friends
     @StateObject var usersLookup = UsersLookupModel()
     @State var keyword : String = ""

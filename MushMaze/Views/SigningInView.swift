@@ -46,10 +46,27 @@ struct SigningInView: View {
             }
             Spacer()
         }
+        .padding()
         .onAppear() {
             checkIfUserIsLoggedIn()
         }
-        .padding()
+        .simultaneousGesture(
+            DragGesture().onChanged({ gesture in
+                if (gesture.location.y < gesture.predictedEndLocation.y){
+                    dismissKeyBoard()
+                }
+            }))
+        
+    }
+    
+    func dismissKeyBoard () {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .filter({$0.activationState == .foregroundActive})
+            .map({$0 as? UIWindowScene})
+            .compactMap({$0})
+            .first?.windows
+            .filter({$0.isKeyWindow}).first
+        keyWindow!.endEditing(true)
     }
     
     func logIn () {

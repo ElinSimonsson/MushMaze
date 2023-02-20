@@ -120,6 +120,14 @@ struct ProfileView: View {
         .padding()
         .padding(.bottom, keyboardHeight)
         .edgesIgnoringSafeArea(.bottom)
+        
+        .simultaneousGesture(
+            DragGesture().onChanged({ gesture in
+                if (gesture.location.y < gesture.predictedEndLocation.y){
+                    dismissKeyBoard()
+                }
+            }))
+        
         .onAppear {
             NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
                 let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect ?? .zero
@@ -133,7 +141,17 @@ struct ProfileView: View {
             NotificationCenter.default.removeObserver(self)
         }
     }
-
+    
+    func dismissKeyBoard () {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .filter({$0.activationState == .foregroundActive})
+            .map({$0 as? UIWindowScene})
+            .compactMap({$0})
+            .first?.windows
+            .filter({$0.isKeyWindow}).first
+        keyWindow!.endEditing(true)
+    }
+    
     func saveToFirestore () {
         if userModel.user?.imageURL == "" && selectedImage != nil {
             userModel.uploadPhotoAndSaveToFirestore(selectedImage: selectedImage, firstName: $firstName.wrappedValue, lastName: $lastName.wrappedValue)
