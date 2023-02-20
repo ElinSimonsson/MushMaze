@@ -132,10 +132,11 @@ class Friends : ObservableObject {
             if !self.friends.contains(where: {$0.id == friendId}) {
                 self.db.collection("users").document(friendId).getDocument { (document, error) in
                     if let document = document, let data = document.data() {
-                        let fullName = data["fullName"] as? String ?? ""
+                        let firstName = data["firstName"] as? String ?? ""
+                        let lastName = data["lastName"] as? String ?? ""
                         let imageURL = data["imageURL"] as? String ?? ""
                         
-                        let newFriend = Friend(id: friendId, fullName: fullName, imageURL: imageURL)
+                        let newFriend = Friend(id: friendId, firstName: firstName, lastName: lastName, imageURL: imageURL)
                         
                         do {
                             let newFriendRef = friendRef.document(friendId)
@@ -195,6 +196,7 @@ class Friends : ObservableObject {
                         self.friendRequests.append(friendRequest)
                         
                         if friendRequest.status == .accepted {
+                            //self.createFriend(friendRequest: friendRequest)
                             self.createFriend(friendRequest: friendRequest)
                         }
                     case .failure(let error) :

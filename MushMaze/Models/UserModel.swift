@@ -21,6 +21,7 @@ class UserModel : ObservableObject {
     @Published var signedOut = false
     @Published var notificationNewCount = 0
     @Published var hasNewNotifications = false
+    @Published var successSavedData = false
     
     var listener : ListenerRegistration?
     
@@ -68,16 +69,18 @@ class UserModel : ObservableObject {
             }
         }
     }
-
-    func fetchUserInfo(userID: String, completion: @escaping (_ imageURL: String?, _ name: String?, _ error: Error?) -> Void) {
+    
+    func fetchUserInfo(userID: String, completion: @escaping (_ imageURL: String?, _ firstName: String?, _ lastName: String?, _ error: Error?) -> Void) {
         let userRef = db.collection("users").document(userID)
         userRef.getDocument { (document, error) in
             if let error = error {
-                completion(nil, nil, error)
+                completion(nil, nil, nil, error)
             } else if let document = document, let data = document.data() {
                 let imageURL = data["imageURL"] as? String
-                let name = data["fullName"] as? String
-                completion(imageURL, name, nil)
+                let firstName = data["firstName"] as? String
+                let lastName = data["lastName"] as? String
+                
+                completion(imageURL, firstName, lastName, nil)
             }
         }
     }
@@ -111,22 +114,24 @@ class UserModel : ObservableObject {
         }
     }
     
-    func updateUserDataToFirestore (imageURL: String, fullName: String) {
+    func updateUserDataToFirestore (imageURL: String, firstName: String, lastName: String) {
         guard let currentUser = Auth.auth().currentUser else {return}
-        let user = User(fullName: fullName, userId: currentUser.uid, imageURL: imageURL)
+        let user = User(firstName: firstName, lastName: lastName, userId: currentUser.uid, imageURL: imageURL)
         
         do {
             let document = db.collection("users").document(currentUser.uid)
             try document.setData(from: user)
             document.updateData(["keywordsForLookup" : user.keywordsForLookup])
+            successSavedData = true
         } catch {
             print("Error updating: \(error)")
         }
     }
     
-    func saveUserDataToFirestore (fullName: String) {
+    func saveUserDataToFirestore (firstName: String, lastName: String) {
         guard let userUID = Auth.auth().currentUser?.uid else {return}
-        let user = User(fullName: fullName, userId: userUID, imageURL: "")
+        
+        let user = User(firstName: firstName, lastName: lastName, userId: userUID, imageURL: "")
         do {
             
             let document = db.collection("users").document(userUID) // ny rad
@@ -142,13 +147,13 @@ class UserModel : ObservableObject {
         }
     }
     
-    func createUserAndSaveToFirestore (fullName: String, emailAddress: String, password: String) {
+    func createUserAndSaveToFirestore (firstName: String, lastName: String,  emailAddress: String, password: String) {
         Auth.auth().createUser(withEmail: emailAddress, password: password) { authResult, error in
             if let error = error {
                 print("error signing up \(error.localizedDescription)")
             } else {
                 print("account created successfully")
-                self.saveUserDataToFirestore(fullName: fullName)
+                self.saveUserDataToFirestore(firstName: firstName, lastName: lastName)
             }
         }
     }
@@ -164,14 +169,15 @@ class UserModel : ObservableObject {
             }
             let data = document.data()
             if let data = data {
-                let fullName = data["fullName"] as? String ?? ""
+                let firstName = data["firstName"] as? String ?? ""
+                let lastName = data["lastName"] as? String ?? ""
                 let imageURL = document.get("imageURL") as? String ?? ""
-                self.user = User(fullName: fullName, userId: user.uid, imageURL: imageURL)
+                self.user = User(firstName: firstName, lastName: lastName, userId: user.uid, imageURL: imageURL)
             }
         }
     }
     
-    func uploadPhotoAndSaveToFirestore (selectedImage : UIImage?, fullName: String) {
+    func uploadPhotoAndSaveToFirestore (selectedImage : UIImage?, firstName: String, lastName : String) {
         let fileName = "\(UUID().uuidString).jpg"
         let ref = Storage.storage().reference(withPath: fileName)
         guard let imageData = selectedImage?.jpegData(compressionQuality: 0.5) else {return}
@@ -187,13 +193,13 @@ class UserModel : ObservableObject {
                 } else {
                     print("successfully stored image with url : \(url?.absoluteString ?? "")")
                     guard let imageURL = url?.absoluteString else {return}
-                    self.updateUserDataToFirestore(imageURL: imageURL, fullName: fullName)
+                    self.updateUserDataToFirestore(imageURL: imageURL, firstName: firstName, lastName: lastName)
                 }
             }
         }
     }
     
-    func deletePictureStorageAndSaveNewData(newImage: UIImage, fullName: String) {
+    func deletePictureStorageAndSaveNewData(newImage: UIImage, firstName: String, lastName: String) {
         if let user = user {
             let storageRef = storage.reference(forURL: user.imageURL)
             
@@ -203,7 +209,7 @@ class UserModel : ObservableObject {
                     print(error)
                 } else {
                     print("successfully deleted image")
-                    self.uploadPhotoAndSaveToFirestore(selectedImage: newImage, fullName: fullName)
+                    self.uploadPhotoAndSaveToFirestore(selectedImage: newImage, firstName: firstName, lastName: lastName)
                 }
             }
         }

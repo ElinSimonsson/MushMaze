@@ -10,7 +10,8 @@ import FirebaseFirestoreSwift
 
 struct Friend : Codable, Identifiable {
     @DocumentID var id : String?
-    var fullName: String
+    var firstName: String
+    var lastName: String
     var imageURL : String
     
 }

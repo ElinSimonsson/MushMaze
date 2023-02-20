@@ -10,11 +10,14 @@ import FirebaseFirestoreSwift
 
 struct User : Codable, Identifiable {
     @DocumentID var id : String?
-    var fullName : String
+    //var fullName : String
+    var firstName : String
+    var lastName : String
     var userId : String
     var imageURL : String
     var keywordsForLookup : [String] {
-        [self.fullName.generateStringSequence()].flatMap {$0}
+        [self.firstName.generateStringSequence(), self.lastName.generateStringSequence(), "\(self.firstName) \(self.lastName)".generateStringSequence()].flatMap{$0}
+
     }
 }
 

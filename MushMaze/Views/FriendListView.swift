@@ -40,7 +40,7 @@ struct FriendListView: View {
                             HStack {
                                 SmallProfileImageView(imageURL: friend.imageURL)
                                 Spacer()
-                                Text(friend.fullName)
+                                Text("\(friend.firstName) \(friend.lastName)")
                                 Spacer()
                             }
                         }

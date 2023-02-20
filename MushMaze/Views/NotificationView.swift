@@ -77,12 +77,13 @@ struct TagNotificationRowView : View {
     @EnvironmentObject var places : Places
     @EnvironmentObject var userModel : UserModel
     @State var friendFullName = ""
+    @State var imageURL = ""
     
     
     var body: some View {
         VStack {
             HStack {
-                SenderProfileView(userId: notification.senderNotificationUserId)
+                SenderProfileView(imageURL: $imageURL)
                 Text("**\(friendFullName)** notified you")
             }
             HStack {
@@ -90,12 +91,13 @@ struct TagNotificationRowView : View {
             }
         }
         .onAppear() {
-            userModel.fetchUserInfo(userID: notification.senderNotificationUserId) { (url, name, error) in
+            userModel.fetchUserInfo(userID: notification.senderNotificationUserId) { (url, firstName, lastName, error) in
                 if let error = error {
                     print("error fetching imageURL \(error)")
                 }
-                if let name = name {
-                    friendFullName = name
+                if let url = url, let firstName = firstName, let lastName = lastName {
+                    imageURL = url
+                    friendFullName = "\(firstName) \(lastName)"
                 }
             }
         }
@@ -123,11 +125,12 @@ struct FriendRequestRowView : View {
     let friendRequest : FriendRequest
     @State var fullName = ""
     @State var friendUserID = ""
+    @State var imageURL = ""
     
     var body: some View {
         if let currentUser = Auth.auth().currentUser {
             HStack {
-                SenderProfileView(userId: notification.senderNotificationUserId)
+                SenderProfileView(imageURL: $imageURL)
                 
                 if friendRequest.status == .accepted {
                     Text("You and **\(fullName)** are now connected as friends!")
@@ -161,12 +164,13 @@ struct FriendRequestRowView : View {
                 } else {
                     friendUserID = notification.recipientId
                 }
-                userModel.fetchUserInfo(userID: friendUserID) { (url, name, error) in
+                userModel.fetchUserInfo(userID: friendUserID) { (url, firstName, lastName, error) in
                     if let error = error {
                         print("error fetching imageURL \(error)")
                     }
-                    if let name = name {
-                        fullName = name
+                    if let url = url, let firstName = firstName, let lastName = lastName {
+                        imageURL = url
+                        fullName = "\(firstName) \(lastName)"
                     }
                 }
             }
@@ -177,8 +181,8 @@ struct FriendRequestRowView : View {
 
 struct SenderProfileView : View {
     @EnvironmentObject var userModel : UserModel
-    var userId: String
-    @State var imageURL = ""
+    //var userId: String
+    @Binding var imageURL: String
     
     
     var body: some View {
@@ -195,58 +199,21 @@ struct SenderProfileView : View {
         .frame(width: 40, height: 40)
         .clipShape(Circle())
         .onAppear() {
-            fetchCreaterProfileImage(userId: userId)
+           // fetchCreaterProfileImage(userId: userId)
         }
     }
     
-    func fetchCreaterProfileImage (userId: String) {
-        
-        userModel.fetchUserInfo(userID: userId) { (url, name, error) in
-            if let error = error {
-                print("error fetching imageURL \(error)")
-            }
-            if let url = url {
-                imageURL = url
-            }
-        }
-    }
-}
-
-struct SmallProfileImageTest : View {
-    @EnvironmentObject var userModel : UserModel
-    let place : Place
-    @State private var imageURL = ""
-    
-    var body: some View {
-        
-        AsyncImage(url: URL(string: imageURL),
-                   content:  { image in
-            image
-                .resizable()
-                .scaledToFit()
-            
-        },
-                   placeholder: {ProgressView()}
-        )
-        .aspectRatio(contentMode: .fill)
-        .frame(width: 50, height: 50)
-        .clipShape(Circle())
-        .onAppear() {
-            fetchCreaterProfileImage(place: place)
-        }
-    }
-    
-    func fetchCreaterProfileImage (place: Place) {
-        let id = place.createrUID
-        userModel.fetchUserInfo(userID: id) { (url, name, error) in
-            if let error = error {
-                print("error fetching imageURL \(error)")
-            }
-            if let url = url {
-                imageURL = url
-            }
-        }
-    }
+//    func fetchCreaterProfileImage (userId: String) {
+//
+//        userModel.fetchUserInfo(userID: userId) { (url, name, error) in
+//            if let error = error {
+//                print("error fetching imageURL \(error)")
+//            }
+//            if let url = url {
+//                imageURL = url
+//            }
+//        }
+//    }
 }
 
 //struct NotificationView_Previews: PreviewProvider {

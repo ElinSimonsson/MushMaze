@@ -30,7 +30,7 @@ struct FriendTaggingSheet: View {
                     Spacer().frame(maxWidth: 10)
                     SmallProfileImageView(imageURL: friend.imageURL)
                     Spacer().frame(maxWidth: 20)
-                    Text(friend.fullName)
+                    Text("\(friend.firstName) \(friend.lastName)")
                         .bold()
                     Spacer()
                     

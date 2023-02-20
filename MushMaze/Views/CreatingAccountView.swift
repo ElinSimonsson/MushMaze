@@ -15,12 +15,14 @@ struct CreatingAccountView: View {
     
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var userModel : UserModel
-    @State var fullName = ""
     @State var emailAddress = ""
     @State var password = ""
     @State var repeatPassword = ""
+    @State var firstName = ""
+    @State var lastName = ""
     @State var showError = false
-    @State var showErrorFullName = false
+    @State var showErrorFirstName = false
+    @State var showErrorLastName = false
     @State var showErrorEmailAddress = false
     @State var showErrorPassword = false
     @State var showErrorRepeatPassword = false
@@ -39,9 +41,11 @@ struct CreatingAccountView: View {
             .padding(.top, 1)
             .frame(alignment: .leading)
             SignUpText()
-                .padding(.top, 70)
-            Spacer()
-            InputTextField(hintText: "Full Name" , inputText: $fullName, showError: $showErrorFullName)
+                .padding(.top, 30)
+            //Spacer()
+            InputTextField(hintText: "First Name", inputText: $firstName, showError: $showErrorFirstName)
+                .padding(.top, 30)
+            InputTextField(hintText: "Last Name", inputText: $lastName, showError: $showErrorLastName)
             InputTextField(hintText: "Email Address", inputText: $emailAddress, showError: $showErrorEmailAddress)
             InputPasswordField(hintText: "Password", inputPassword: $password, showError: $showErrorPassword, showErrorPasswordsNotMatching: $passwordsDoNotMatch)
             InputPasswordField(hintText: "Repeat Password", inputPassword: $repeatPassword, showError: $showErrorRepeatPassword, showErrorPasswordsNotMatching: $passwordsDoNotMatch)
@@ -58,13 +62,16 @@ struct CreatingAccountView: View {
     }
     
     func createAccount() {
-        if fullName == "" && emailAddress == "" && password == "" && repeatPassword == "" {
-            showErrorFullName = true
+        if firstName == "", lastName == "", emailAddress == "", password == "", repeatPassword == "" {
+            showErrorFirstName = true
+            showErrorLastName = true
             showErrorEmailAddress = true
             showErrorPassword = true
             showErrorRepeatPassword = true
-        } else if fullName == "" {
-            showErrorFullName = true
+        } else if firstName == "" {
+            showErrorFirstName = true
+        } else if lastName == "" {
+            showErrorLastName = true
         } else if emailAddress == "" {
             showErrorEmailAddress = true
         } else if password == "" {
@@ -74,9 +81,10 @@ struct CreatingAccountView: View {
         } else if password != repeatPassword {
             passwordsDoNotMatch = true
         } else {
-            userModel.createUserAndSaveToFirestore(fullName: $fullName.wrappedValue,
-                                                   emailAddress: $emailAddress.wrappedValue,
-                                                   password: $password.wrappedValue)
+            userModel.createUserAndSaveToFirestore(firstName: $firstName.wrappedValue,
+                                                       lastName: $lastName.wrappedValue,
+                                                       emailAddress: $emailAddress.wrappedValue,
+                                                       password: $password.wrappedValue)
         }
     }
 }

@@ -169,15 +169,15 @@ struct PlaceDetailsView: View {
     func fetchCreaterInfo (place : Place) {
         let id = place.createrUID
         
-        userModel.fetchUserInfo(userID: id) {(url, name, error) in
+        userModel.fetchUserInfo(userID: id) {(url, firstName, lastName, error) in
             if let error = error {
                 print("error fetching creater info \(error)")
             }
             if let url = url {
                 createrImageURL = url
             }
-            if let name = name {
-                createrFullName = name
+            if let firstName = firstName, let lastName = lastName {
+                createrFullName = "\(firstName) \(lastName)"
             }
         }
     }

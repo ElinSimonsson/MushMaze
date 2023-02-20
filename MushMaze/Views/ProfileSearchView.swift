@@ -79,7 +79,7 @@ struct ProfileBarView : View {
             if currentUser.userId != user.userId {
                 HStack {
                     ProfileImageView(imageURL: user.imageURL)
-                    Text(user.fullName)
+                    Text("\(user.firstName) \(user.lastName)")
                     Spacer()
 
                     let pendingRequest = friends.friendRequests.first(where: {

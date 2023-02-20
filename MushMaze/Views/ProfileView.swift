@@ -15,26 +15,46 @@ struct ProfileView: View {
     @EnvironmentObject var userModel : UserModel
     @EnvironmentObject var places : Places
     @EnvironmentObject var friends : Friends
-    let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
     let db = Firestore.firestore()
     @State private var sourceType : UIImagePickerController.SourceType = .photoLibrary
     @Environment(\.presentationMode) var presentationMode
-    @State var fullName = ""
+    @State var firstName = ""
+    @State var lastName = ""
     @State var email = ""
     @State var imageURL = ""
     @State var showSourceAlert = false
     @State var openCameraRoll = false
     @State var selectedImage : UIImage? = nil
+    @State private var keyboardHeight: CGFloat = 0
+    @State var unSavedChanges = false
+    
+    var isButtonDisabled: Bool {
+        firstName == userModel.user?.firstName && lastName == userModel.user?.lastName && selectedImage == nil ||
+        firstName == "" || lastName == ""
+    }
     
     var body: some View {
         VStack {
-            HStack{
+            HStack {
                 Button(action: {
-                    presentationMode.wrappedValue.dismiss()
+                    if firstName != userModel.user?.firstName || lastName != userModel.user?.lastName || selectedImage != nil {
+                        unSavedChanges = true
+                    } else {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }) {
                     Image(systemName: "arrow.left")
                 }
+                .alert(isPresented: $unSavedChanges) {
+                    Alert(title: Text("Unsaved Changes"),
+                          message: Text("You have unsaved changes. Are you sure you want to leave?"),
+                          primaryButton: .cancel(),
+                          secondaryButton: .destructive(Text("Discard")) {
+                        presentationMode.wrappedValue.dismiss()
+                    })
+                }
                 Spacer()
+                
                 Button(action: {
                     userModel.logOut()
                     places.clearAllPlaces()
@@ -45,6 +65,13 @@ struct ProfileView: View {
                     Text("Sign out")
                 }
             }
+            .onChange(of: userModel.successSavedData, perform: { tag in
+                if userModel.successSavedData {
+                    selectedImage = nil
+                    userModel.successSavedData = false
+                }
+            })
+            
             YourProfileText()
             
             if let user = userModel.user {
@@ -72,158 +99,154 @@ struct ProfileView: View {
                     ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
                 }
                 
-                Button(action: {
-                    showSourceAlert = true
-                }) {
-                    Text("Edit")
-                }
-                .padding(.bottom, 60)
-                
-                HStack {
-                    Text("Full name:")
-                    Spacer()
-                }
-                FullNameTextField(fullName: $fullName, lightGreyColor: lightGreyColor)
+                NameTextField(hintText: "First Name", name: $firstName)
+                    .padding(.bottom, 20)
+                NameTextField(hintText: "Last Name", name: $lastName)
                     .onAppear() {
-                        fullName = user.fullName
+                        firstName = user.firstName
+                        lastName = user.lastName
                     }
+                Spacer()
+                Button(action: {
+                    saveToFirestore()
+                }) {
+                    SaveButtonContent(isButtonDisabled: isButtonDisabled)
+                }
+                .disabled(isButtonDisabled)
                 
                 Spacer()
-            Button(action: {
-                print("userName: \(fullName)")
-                saveToFirestore()
-            }) {
-                Text("Save")
             }
-                Spacer()
         }
-    }
         .padding()
-        .onAppear() {
-            userModel.loadUserInformation()
-    }
-}
-
-    func signOut () {
-        let firebaseAuth = Auth.auth()
-        do {
-            try firebaseAuth.signOut()
-            userModel.signedOut = true
-            userModel.signedIn = false
-            userModel.user = nil
-        } catch let signOutError as NSError {
-            print("Error signing out: %@", signOutError)
+        .padding(.bottom, keyboardHeight)
+        .edgesIgnoringSafeArea(.bottom)
+        .onAppear {
+            NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
+                let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect ?? .zero
+                self.keyboardHeight = keyboardFrame.height
+            }
+            NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (notification) in
+                self.keyboardHeight = 0
+            }
+        }
+        .onDisappear {
+            NotificationCenter.default.removeObserver(self)
         }
     }
-    
-   
+
     func saveToFirestore () {
         if userModel.user?.imageURL == "" && selectedImage != nil {
-            //uploadPhotoAndSaveToFirestore()
-            userModel.uploadPhotoAndSaveToFirestore(selectedImage: selectedImage, fullName: $fullName.wrappedValue)
+            userModel.uploadPhotoAndSaveToFirestore(selectedImage: selectedImage, firstName: $firstName.wrappedValue, lastName: $lastName.wrappedValue)
         } else if userModel.user?.imageURL != "" && selectedImage != nil {
             if let image = selectedImage {
-                userModel.deletePictureStorageAndSaveNewData(newImage: image, fullName: $fullName.wrappedValue)
-                //deleteImageFromStorageAndSaveNew()
+                userModel.deletePictureStorageAndSaveNewData(newImage: image, firstName: $firstName.wrappedValue, lastName: $lastName.wrappedValue)
             }
         } else if userModel.user?.imageURL != "" && selectedImage == nil {
             if let user = userModel.user {
-                userModel.updateUserDataToFirestore(imageURL: user.imageURL, fullName: $fullName.wrappedValue)
+                userModel.updateUserDataToFirestore(imageURL: user.imageURL, firstName: $firstName.wrappedValue, lastName: $lastName.wrappedValue)
             }
         }
     }
-    
-    func uploadPhotoAndSaveToFirestore() {
-      //  guard let user = userModel.user else {return}
-//        if selectedImage == nil && user.imageURL == "" {
-            let fileName = "\(UUID().uuidString).jpg"
-            let ref = Storage.storage().reference(withPath: fileName)
-            guard let imageData = selectedImage?.jpegData(compressionQuality: 0.5) else {return}
-            ref.putData(imageData ,metadata: nil) { metadata, err in
-                if let err = err {
-                    print("failed to push image to Storage\(err)")
-                    return
-                }
-                ref.downloadURL { url, err in
-                    if let err = err {
-                        print("failed to retrieve downloadURL \(err)")
-                        return
-                    } else {
-                        print("successfully stored image with url : \(url?.absoluteString ?? "")")
-                        guard let imageURL = url?.absoluteString else {return}
-                        userModel.updateUserDataToFirestore(imageURL: imageURL, fullName: $fullName.wrappedValue)
-                      
-                       // presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
-//        }
-    }
-    
-    func deleteImageFromStorageAndSaveNew () {
-        let storage = Storage.storage()
-        
-        if let user = userModel.user {
-            let storageRef = storage.reference(forURL: user.imageURL)
+}
 
-            //Removes image from storage
-            storageRef.delete { error in
-                if let error = error {
-                    print(error)
-                } else {
-                   print("successfully deleted image")
-                    uploadPhotoAndSaveToFirestore()
-                }
-            }
-            
-        }
+struct SaveButtonContent : View {
+    var isButtonDisabled : Bool
+    let darkTurquoise = Color(UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1))
+    let disabledGray = Color.gray.opacity(0.5)
+    var body: some View {
+        Text("Save")
+            .font(.title3)
+            .foregroundColor(.black)
+            .padding()
+            .frame(width: 220, height: 60)
+            .background(isButtonDisabled ? disabledGray : darkTurquoise)
+            .cornerRadius(15.0)
     }
 }
 
 struct SelectedImageView : View {
     let selectedImage : UIImage
     var body: some View {
-        Image(uiImage: selectedImage)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .scaledToFill()
-            .frame(width: 200, height: 200)
-            .clipShape(Circle())
-            //.cornerRadius(10)
-            .padding(.bottom, 20)
-            .padding(.top, 30)
+        ZStack {
+            Image(uiImage: selectedImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .scaledToFill()
+                .frame(width: 200, height: 200)
+                .clipShape(Circle())
+                .padding(.bottom, 40)
+                .padding(.top, 20)
+            
+            Image(systemName: "camera")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 30, height: 30)
+                .foregroundColor(.white)
+                .padding(10)
+                .background(Color.gray)
+                .clipShape(Circle())
+                .opacity(0.7)
+                .offset(x: 70, y: 70)
+        }
     }
 }
 
 struct ProfileImage : View {
-     var imageURL : String
+    var imageURL : String
     
     var body: some View {
-        AsyncImage(url: URL(string: imageURL),
-                   content:  { image in
-            image
+        ZStack {
+            AsyncImage(url: URL(string: imageURL),
+                       content:  { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+            },
+                       placeholder: {ProgressView()}
+            )
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 200, height: 200)
+            .clipShape(Circle())
+            .padding(.bottom, 40)
+            .padding(.top, 20)
+            
+            
+            Image(systemName: "camera")
                 .resizable()
-                .scaledToFit()
-        },
-                   placeholder: {ProgressView()}
-        )
-        .aspectRatio(contentMode: .fill)
-        .frame(width: 200, height: 200)
-        .clipShape(Circle())
-        .padding(.bottom, 20)
-        .padding(.top, 30)
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 30, height: 30)
+                .foregroundColor(.white)
+                .padding(10)
+                .background(Color.gray)
+                .clipShape(Circle())
+                .opacity(0.7)
+                .offset(x: 70, y: 70)
+        }
     }
 }
 
 struct DefaultProfilePicture : View {
     var body: some View {
-        Image(systemName: "person")
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 200, height: 200)
-            .clipShape(Circle())
-            .padding(.bottom, 20)
-            .padding(.top, 30)
+        ZStack {
+            Image(systemName: "person")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 200, height: 200)
+                .clipShape(Circle())
+                .padding(.bottom, 40)
+                .padding(.top, 20)
+            
+            Image(systemName: "camera")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 30, height: 30)
+                .foregroundColor(.white)
+                .padding(10)
+                .background(Color.gray)
+                .clipShape(Circle())
+                .opacity(0.7)
+                .offset(x: 70, y: 70)
+        }
     }
 }
 
@@ -232,38 +255,22 @@ struct YourProfileText : View {
         Text("Your Profile")
             .font(.largeTitle)
             .fontWeight(.semibold)
-            .padding(.top, 50)
+            .padding(.top, 30)
     }
 }
 
-struct FullNameTextField : View {
-    @Binding var fullName : String
-    let lightGreyColor : Color
+struct NameTextField : View {
+    let hintText : String
+    @Binding var name : String
     
     var body: some View {
-        TextField("", text: $fullName)
+        TextField(hintText, text: $name)
             .padding()
-            .background(lightGreyColor)
+            .background(Color(.systemGray6))
             .cornerRadius(5.0)
             .padding(.bottom, 20)
     }
 }
-
-struct UserImageView : View {
-    var body: some View {
-        Image(systemName: "person")
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 150, height: 150)
-            .clipped()
-            .cornerRadius(150)
-            .padding(.bottom, 75)
-            .padding(.top, 30)
-        
-    }
-}
-
-
 
 //struct ProfileView_Previews: PreviewProvider {
 //    static var previews: some View {
