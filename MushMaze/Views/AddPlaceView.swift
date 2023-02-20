@@ -21,7 +21,6 @@ struct AddPlaceView: View {
     
     @State var placeName = ""
     @State var description = ""
-    @State var isAddingNewMushroom = true
     @State var mushrooms : [String] = []
     @State var newMushroomName = ""
     @State private var sourceType : UIImagePickerController.SourceType = .photoLibrary
@@ -80,12 +79,9 @@ struct AddPlaceView: View {
                         deleteMushroom(mushroom)
                     }
                 }
-                if isAddingNewMushroom {
                     AddMushroomTextField(mushrooms: $mushrooms,
                                          newMushroomName: $newMushroomName,
-                                         mushroomsAreMissing: mushroomsAreMissing,
-                                         isAddingNewMushroom: $isAddingNewMushroom)
-                }
+                                         mushroomsAreMissing: mushroomsAreMissing)
             }
             .simultaneousGesture(
                    DragGesture().onChanged({ gesture in
@@ -117,9 +113,6 @@ struct AddPlaceView: View {
     
     func deleteMushroom(_ mushroom: String) {
         mushrooms.removeAll(where: { $0 == mushroom })
-        if mushrooms.isEmpty {
-            isAddingNewMushroom = true
-        }
     }
     
     func clearText () {
@@ -217,26 +210,29 @@ struct AddMushroomTextField : View {
     @Binding var mushrooms : [String]
     @Binding var newMushroomName : String
     var mushroomsAreMissing : Bool
-    @Binding var isAddingNewMushroom : Bool
+    @State var returButtonPressed = false
     
     var body: some View {
         HStack {
             ZStack {
                 TextField("Add mushroom species", text: $newMushroomName, onCommit: {
                     mushrooms.append(newMushroomName)
-                    self.isAddingNewMushroom = false
+                    returButtonPressed = true
                 })
+                .submitLabel(.go)
                 .simultaneousGesture(TapGesture().onEnded { _ in
                     // to onTapGesture not triggers on this view
                 })
-                .onAppear() {
-                    self.newMushroomName = ""
+                .onChange(of: returButtonPressed) { newvalue in
+                    if returButtonPressed {
+                        self.newMushroomName = ""
+                        returButtonPressed = false
+                    }
                 }
                 if mushroomsAreMissing {
                     RoundedRectangle(cornerRadius: 5)
                         .stroke(Color.red, lineWidth: 1)
                         .frame(width: UIScreen.main.bounds.width - 30, height: 50)
-                    
                 }
             }
             

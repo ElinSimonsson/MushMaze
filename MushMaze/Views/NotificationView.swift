@@ -88,6 +88,8 @@ struct TagNotificationRowView : View {
             }
             HStack {
                 Text("tap to see the mushroom place")
+                    .italic()
+                    .foregroundColor(Color(.systemGray2))
             }
         }
         .onAppear() {

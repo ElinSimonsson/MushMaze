@@ -23,7 +23,6 @@ struct PlaceDetailsView: View {
     @State var editingDescription = ""
     @State var editingPlaceName = ""
     @State var newMushroomName = ""
-    @State var isAddingMushroom = false
     @State var showErrorMushroom = false
     @State var showFriendTaggingSheet = false
     @State var showIsSentPopUp = false
@@ -62,8 +61,7 @@ struct PlaceDetailsView: View {
                             }
                             AddMushroomSpeciesTextField(mushrooms: $editingMushrooms,
                                                         newMushroomName: $newMushroomName,
-                                                        showErrorMushroom: $showErrorMushroom,
-                                                        isAddingNewMushroom: $isAddingMushroom)
+                                                        showErrorMushroom: $showErrorMushroom)
                         } else {
                             ForEach(mushrooms, id: \.self) { mushroom in
                                 MushroomSpeciesRowView(mushroom: mushroom)
@@ -84,9 +82,6 @@ struct PlaceDetailsView: View {
         }
         .onTapGesture {
             dismissKeyBoard()
-            if isEditing {
-                isAddingMushroom = true
-            }
         }
         .onAppear() {
             isHeaderVisible = false
@@ -206,7 +201,6 @@ struct AddMushroomSpeciesTextField : View {
     @Binding var mushrooms : [String]
     @Binding var newMushroomName : String
     @Binding var showErrorMushroom : Bool
-    @Binding var isAddingNewMushroom : Bool
     @State var returButtonPressed = false
     
     
@@ -214,7 +208,6 @@ struct AddMushroomSpeciesTextField : View {
         HStack {
             TextField(" Add mushroom species", text: $newMushroomName, onCommit: {
                 mushrooms.append(newMushroomName)
-                self.isAddingNewMushroom = false
                 newMushroomName = ""
                 returButtonPressed = true
             })
