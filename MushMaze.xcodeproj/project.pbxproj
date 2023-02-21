@@ -36,6 +36,7 @@
 		3F80B7742981617E00C39181 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80B7732981617E00C39181 /* User.swift */; };
 		3F80E35D2981220D002877FD /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3F80E35C2981220D002877FD /* FirebaseAuth */; };
 		3F80E35F29812359002877FD /* CreatingAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80E35E29812359002877FD /* CreatingAccountView.swift */; };
+		3F81F76329A4D57100C6DF02 /* MushroomPickerRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F81F76229A4D57100C6DF02 /* MushroomPickerRowView.swift */; };
 		3F8D357E2982767300DCBCBF /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D357D2982767300DCBCBF /* ProfileView.swift */; };
 		3F8D35812982A2B600DCBCBF /* AddPlaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8D35802982A2B600DCBCBF /* AddPlaceView.swift */; };
 		3F8D35832982C61900DCBCBF /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 3F8D35822982C61900DCBCBF /* FirebaseStorage */; };
@@ -94,6 +95,7 @@
 		3F80B7712981468F00C39181 /* SigningInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigningInView.swift; sourceTree = "<group>"; };
 		3F80B7732981617E00C39181 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		3F80E35E29812359002877FD /* CreatingAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingAccountView.swift; sourceTree = "<group>"; };
+		3F81F76229A4D57100C6DF02 /* MushroomPickerRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MushroomPickerRowView.swift; sourceTree = "<group>"; };
 		3F8D357D2982767300DCBCBF /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		3F8D35802982A2B600DCBCBF /* AddPlaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPlaceView.swift; sourceTree = "<group>"; };
 		3F8D35882983CA8600DCBCBF /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
@@ -219,6 +221,7 @@
 				3F2DC4BD299A3989008A511B /* FriendListView.swift */,
 				3FD4CED2299FDDC300205DED /* FriendTaggingSheet.swift */,
 				3FF4126829A3E721007BF2E6 /* SplashView.swift */,
+				3F81F76229A4D57100C6DF02 /* MushroomPickerRowView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -396,6 +399,7 @@
 				3F0DC4B92989618600C0BCBC /* PlaceDetailsView.swift in Sources */,
 				3F0305522994E5E400D0724B /* UsersLookupModel.swift in Sources */,
 				3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */,
+				3F81F76329A4D57100C6DF02 /* MushroomPickerRowView.swift in Sources */,
 				3F0DC4BB2989670A00C0BCBC /* DestinationView.swift in Sources */,
 				3FF4126929A3E721007BF2E6 /* SplashView.swift in Sources */,
 				3F42EA19298BCC3E00477F61 /* UserModel.swift in Sources */,

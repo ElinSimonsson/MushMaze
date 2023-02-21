@@ -50,7 +50,17 @@ struct PlaceDetailsView: View {
                                            isEditing: isEditing,
                                            editingDescription: $editingDescription)
                     }
-                    MushroomSubTitle()
+                if isEditing {
+                    HStack {
+                        Text("Edit mushroom types")
+                            .fontWeight(.semibold)
+                    }
+                    .padding(.bottom, 10)
+                    .padding(.top, 20)
+                    MushroomPickerRowView(selectedMushrooms: $editingMushrooms)
+                }
+                
+                    MushroomSubTitle(isEditing: isEditing)
                     
                     if let mushrooms = place.mushrooms {
                         if isEditing {
@@ -59,9 +69,9 @@ struct PlaceDetailsView: View {
                                     deleteMushroom(mushroom)
                                 }
                             }
-                            AddMushroomSpeciesTextField(mushrooms: $editingMushrooms,
-                                                        newMushroomName: $newMushroomName,
-                                                        showErrorMushroom: $showErrorMushroom)
+                            HStack {
+                            }
+                            .padding(.bottom, 100)
                         } else {
                             ForEach(mushrooms, id: \.self) { mushroom in
                                 MushroomSpeciesRowView(mushroom: mushroom)
@@ -197,40 +207,6 @@ struct SuccessSentPopUp : View {
     }
 }
 
-struct AddMushroomSpeciesTextField : View {
-    @Binding var mushrooms : [String]
-    @Binding var newMushroomName : String
-    @Binding var showErrorMushroom : Bool
-    @State var returButtonPressed = false
-    
-    
-    var body: some View {
-        HStack {
-            TextField(" Add mushroom species", text: $newMushroomName, onCommit: {
-                mushrooms.append(newMushroomName)
-                newMushroomName = ""
-                returButtonPressed = true
-            })
-            .submitLabel(.go)
-            .simultaneousGesture(TapGesture().onEnded { _ in
-                // tapGesture wont triggers in this view
-            })
-            .onChange(of: returButtonPressed) { newvalue in
-                if returButtonPressed {
-                    self.newMushroomName = ""
-                    returButtonPressed = false
-                }
-            }
-            .alert(isPresented: $showErrorMushroom) {
-                Alert(title: Text("you must have entered at least one mushroom species"), dismissButton: .default(Text("Ok")))
-            }
-            .onAppear() {
-                self.newMushroomName = ""
-            }
-        }
-    }
-}
-
 struct EditingMushroomRowView : View {
     var mushroom : String
     var closure : () -> Void
@@ -266,10 +242,12 @@ struct MushroomSpeciesRowView : View {
 }
 
 struct MushroomSubTitle : View {
+    var isEditing: Bool
+    
     var body: some View {
         HStack {
             Spacer().frame(maxWidth: 15)
-            Text("Mushroom founded here:")
+            Text(isEditing ? "Selected mushroom types" : "Mushroom founded here:")
                 .fontWeight(.bold)
             
             Spacer()
@@ -287,19 +265,23 @@ struct DescriptionContent : View {
     
     var body: some View {
         HStack {
-            Spacer().frame(maxWidth: 15)
             if isEditing {
-                TextField("description of the place", text: $editingDescription, axis: .vertical)
-                    .simultaneousGesture(TapGesture().onEnded { _ in
-                        // tapGesture wont triggers in this view
-                    })
+                    TextField("brief description of the location", text: $editingDescription, axis: .vertical)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(5.0)
+                        .padding(.bottom, 10)
+                        .simultaneousGesture(TapGesture().onEnded { _ in
+                            // to onTapGesture not triggers on this view
+                        })
                     .onAppear() {
                         editingDescription = description
                     }
             } else {
+                Spacer().frame(maxWidth: 15)
                 Text(description)
+                Spacer().frame(maxWidth: 15)
             }
-            Spacer().frame(maxWidth: 15)
         }
         .padding(.top, 20)
     }
@@ -324,23 +306,26 @@ struct EllipsisButton : View {
 
 struct PlaceImage : View {
     let imageURL : String
-    
+
     var body: some View {
+
         HStack {
             AsyncImage(url: URL(string: imageURL),
                        content:  { image in
                 image
                     .resizable()
-                    .scaledToFit()
+                    .scaledToFill()
+
             },
                        placeholder: {ProgressView()}
             )
-            .aspectRatio(contentMode: .fill)
-            .frame(width: 330, height: 260)
-            .cornerRadius(10) // 250
+            .aspectRatio(contentMode: .fit)
+            .frame(width: UIScreen.main.bounds.size.width - 40, height: .none) // 250
+            .cornerRadius(10)
         }
-        .padding(.top, 10)
+
     }
+
 }
 
 struct PlaceName : View {
@@ -352,14 +337,16 @@ struct PlaceName : View {
         HStack {
             if isEditing {
                 TextField("Place Name", text: $editingPlaceName)
-                    .simultaneousGesture(TapGesture().onEnded { _ in
-                        // tapGesture in other struct wont triggers in this view
-                    })
-                
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(5.0)
+                    .padding(.bottom, 10)
                     .font(.title)
                     .fontWeight(.semibold)
                     .multilineTextAlignment(.center)
-                
+                    .simultaneousGesture(TapGesture().onEnded { _ in
+                        // tapGesture in other struct wont triggers in this view
+                    })
                     .onAppear() {
                         editingPlaceName = placeName
                     }

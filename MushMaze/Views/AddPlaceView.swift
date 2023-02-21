@@ -32,6 +32,7 @@ struct AddPlaceView: View {
     @State var placeNameIsMissing = false
     @State var mushroomsAreMissing = false
     @State var showErrorImage = false
+    @State var lastElement = false
     
     enum PrivacySetting: String, CaseIterable {
         case privateSetting = "Keep it private"
@@ -71,24 +72,35 @@ struct AddPlaceView: View {
                 }
                 PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing)
                 PlaceDescriptionField(description: $description)
-                PickerView(selectedPrivacy: $selectedPrivacy)
-                MushroomSpeciesSubTitle()
+                PrivacySettingPickerView(selectedPrivacy: $selectedPrivacy)
                 
-                ForEach(mushrooms, id: \.self) { mushroom in
-                    MushroomRowView(mushroom: mushroom) {
-                        deleteMushroom(mushroom)
+                    Text("Add types you found at this place:")
+                        .fontWeight(.semibold)
+                        .padding(.bottom, 10)
+                    MushroomPickerRowView(selectedMushrooms: $mushrooms)
+                
+                if !mushrooms.isEmpty {
+                    MushroomSpeciesSubTitle()
+                    ForEach(mushrooms, id: \.self) { mushroom in
+                        MushroomRowView(mushroom: mushroom) {
+                            deleteMushroom(mushroom)
+                        }
                     }
                 }
-                    AddMushroomTextField(mushrooms: $mushrooms,
-                                         newMushroomName: $newMushroomName,
-                                         mushroomsAreMissing: mushroomsAreMissing)
+                
+                HStack { // to create empty space below the forEach
+                    Text("")
+                }
+                .padding(.bottom, 100)
+                
             }
+            
             .simultaneousGesture(
-                   DragGesture().onChanged({ gesture in
-                       if (gesture.location.y < gesture.predictedEndLocation.y){
-                                  dismissKeyBoard()
-                                 }
-                   }))
+                DragGesture().onChanged({ gesture in
+                    if (gesture.location.y < gesture.predictedEndLocation.y){
+                        dismissKeyBoard()
+                    }
+                }))
             
             .padding()
             .fullScreenCover(isPresented: $openCameraRoll) {
@@ -128,7 +140,7 @@ struct AddPlaceView: View {
         if selectedPrivacy == .sharedSetting {
             isSharedPlace = true
         }
-      
+        
         places.addPlaceWithMushrooms(latitude: coordinate.latitude,
                                      longitude: coordinate.longitude,
                                      name: $placeName.wrappedValue,
@@ -173,16 +185,16 @@ struct AddPlaceView: View {
     }
 }
 
-struct PickerView : View {
+struct PrivacySettingPickerView : View {
     @Binding var selectedPrivacy : AddPlaceView.PrivacySetting
     var body: some View {
         HStack {
-                Picker(selection: $selectedPrivacy, label: Text("Välj ett alternativ")) {
-                    ForEach(AddPlaceView.PrivacySetting.allCases, id: \.self) { privacy in
-                        Text(privacy.rawValue).tag(privacy)
-                    }
+            Picker(selection: $selectedPrivacy, label: Text("Välj ett alternativ")) {
+                ForEach(AddPlaceView.PrivacySetting.allCases, id: \.self) { privacy in
+                    Text(privacy.rawValue).tag(privacy)
                 }
-                .pickerStyle(SegmentedPickerStyle())
+            }
+            .pickerStyle(SegmentedPickerStyle())
         }
         .padding(.bottom, 20)
     }
@@ -203,40 +215,6 @@ struct FirestoreSavingCircularProgressIndicator : View {
         .background(Color.white)
         .cornerRadius(10)
         .shadow(radius: 10)
-    }
-}
-
-struct AddMushroomTextField : View {
-    @Binding var mushrooms : [String]
-    @Binding var newMushroomName : String
-    var mushroomsAreMissing : Bool
-    @State var returButtonPressed = false
-    
-    var body: some View {
-        HStack {
-            ZStack {
-                TextField("Add mushroom species", text: $newMushroomName, onCommit: {
-                    mushrooms.append(newMushroomName)
-                    returButtonPressed = true
-                })
-                .submitLabel(.go)
-                .simultaneousGesture(TapGesture().onEnded { _ in
-                    // to onTapGesture not triggers on this view
-                })
-                .onChange(of: returButtonPressed) { newvalue in
-                    if returButtonPressed {
-                        self.newMushroomName = ""
-                        returButtonPressed = false
-                    }
-                }
-                if mushroomsAreMissing {
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.red, lineWidth: 1)
-                        .frame(width: UIScreen.main.bounds.width - 30, height: 50)
-                }
-            }
-            
-        }
     }
 }
 
@@ -285,10 +263,9 @@ struct MushroomRowView : View {
 struct MushroomSpeciesSubTitle : View {
     var body : some View {
         HStack {
-            Text("Mushrooms found here:")
-                .font(.headline)
+            Text("Selected mushroom types: ")
                 .fontWeight(.semibold)
-                .padding(.bottom)
+                .padding(.bottom, 5)
             Spacer()
         }
     }
@@ -322,7 +299,6 @@ struct PlaceDescriptionField : View {
     @Binding var description : String
     
     var body: some View {
-        
         TextField("brief description of the location", text: $description, axis: .vertical)
             .padding()
             .background(Color(.systemGray6))
