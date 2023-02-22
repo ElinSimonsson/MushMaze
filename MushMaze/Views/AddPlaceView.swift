@@ -42,75 +42,78 @@ struct AddPlaceView: View {
     
     var body: some View {
         ZStack {
-            ScrollView {
+            VStack {
                 ToolBarView(showErrorImage: $showErrorImage, cancelAction: {
                     presentationMode.wrappedValue.dismiss()
                 }, saveAction: {
                     uploadPhotoAndSaveToFirestore()
                 })
-                Button(action: {
-                    showingAlert = true
-                }, label: {
-                    if let image = selectedImage {
-                        Image(uiImage: image)
-                            .imageMod()
-                    } else {
-                        Image(systemName: "photo")
-                            .imageMod()
-                            .foregroundColor(Color(.systemGray3))
+                ScrollView {
+                    Button(action: {
+                        showingAlert = true
+                    }, label: {
+                        if let image = selectedImage {
+                            Image(uiImage: image)
+                                .imageMod()
+                        } else {
+                            Image(systemName: "photo")
+                                .imageMod()
+                                .foregroundColor(Color(.systemGray3))
+                        }
+                    }).alert(isPresented: $showingAlert) {
+                        Alert(title: Text("Choose Source"),
+                              primaryButton: .default(Text("Camera")) {
+                            sourceType = .camera
+                            openCameraRoll = true
+                        }, secondaryButton: .default(Text("Photo")) {
+                            sourceType = .photoLibrary
+                            openCameraRoll = true
+                        })
                     }
-                }).alert(isPresented: $showingAlert) {
-                    Alert(title: Text("Choose Source"),
-                          primaryButton: .default(Text("Camera")) {
-                        sourceType = .camera
-                        openCameraRoll = true
-                    }, secondaryButton: .default(Text("Photo")) {
-                        sourceType = .photoLibrary
-                        openCameraRoll = true
-                    })
-                }
-                PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing)
-                PlaceDescriptionField(description: $description)
-                PrivacySettingPickerView(selectedPrivacy: $selectedPrivacy)
-                
+                    PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing)
+                    PlaceDescriptionField(description: $description)
+                    PrivacySettingPickerView(selectedPrivacy: $selectedPrivacy)
+                    
                     Text("Add types you found at this place:")
                         .fontWeight(.semibold)
                         .padding(.bottom, 10)
                     MushroomPickerRowView(selectedMushrooms: $mushrooms)
-                
-                if !mushrooms.isEmpty {
-                    MushroomSpeciesSubTitle()
-                    ForEach(mushrooms, id: \.self) { mushroom in
-                        MushroomRowView(mushroom: mushroom) {
-                            deleteMushroom(mushroom)
+                    
+                    if !mushrooms.isEmpty {
+                        MushroomSpeciesSubTitle()
+                        ForEach(mushrooms, id: \.self) { mushroom in
+                            MushroomRowView(mushroom: mushroom) {
+                                deleteMushroom(mushroom)
+                            }
                         }
                     }
-                }
-                
-                HStack { // to create empty space below the forEach
-                    Text("")
-                }
-                .padding(.bottom, 100)
-                
-            }
-            .onChange(of: places.placeSuccessfullySaved, perform: { tag in
-                if places.placeSuccessfullySaved {
-                    presentationMode.wrappedValue.dismiss()
-                    places.placeSuccessfullySaved = false
-                }
-            })
-            
-            .simultaneousGesture(
-                DragGesture().onChanged({ gesture in
-                    if (gesture.location.y < gesture.predictedEndLocation.y){
-                        dismissKeyBoard()
+                    
+                    HStack { // to create empty space below the forEach
+                        Text("")
                     }
-                }))
-            
-            .padding()
-            .fullScreenCover(isPresented: $openCameraRoll) {
-                ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
+                    .padding(.bottom, 100)
+                    
+                }
+                .onChange(of: places.placeSuccessfullySaved, perform: { tag in
+                    if places.placeSuccessfullySaved {
+                        presentationMode.wrappedValue.dismiss()
+                        places.placeSuccessfullySaved = false
+                    }
+                })
+                
+                .simultaneousGesture(
+                    DragGesture().onChanged({ gesture in
+                        if (gesture.location.y < gesture.predictedEndLocation.y){
+                            dismissKeyBoard()
+                        }
+                    }))
+                
+                //.padding()
+                .fullScreenCover(isPresented: $openCameraRoll) {
+                    ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
+                }
             }
+            .padding()
             
             if places.savingPlace {
                 FirestoreSavingCircularProgressIndicator()
