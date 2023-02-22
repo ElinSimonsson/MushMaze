@@ -246,7 +246,7 @@ struct MushroomRowView : View {
     var body: some View {
         HStack {
             Spacer().frame(maxWidth: 15)
-            Text("* \(mushroom)")
+            Text("✦ \(mushroom)")
             Spacer()
             Button(action: {
                 closure()

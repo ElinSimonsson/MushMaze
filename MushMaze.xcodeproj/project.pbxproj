@@ -32,6 +32,12 @@
 		3F136794298016D6005B8666 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 3F136793298016D6005B8666 /* FirebaseFunctions */; };
 		3F2DC4BE299A3989008A511B /* FriendListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2DC4BD299A3989008A511B /* FriendListView.swift */; };
 		3F42EA19298BCC3E00477F61 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F42EA18298BCC3E00477F61 /* UserModel.swift */; };
+		3F56D60729A60A09007B126B /* ProfileImageNavigationIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F56D60629A60A09007B126B /* ProfileImageNavigationIcon.swift */; };
+		3F56D60929A6164A007B126B /* ProfileImageWithDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F56D60829A6164A007B126B /* ProfileImageWithDefault.swift */; };
+		3F56D60B29A61F6C007B126B /* DefaultProfileImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F56D60A29A61F6C007B126B /* DefaultProfileImage.swift */; };
+		3F56D60D29A62192007B126B /* ProfileImageFromURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F56D60C29A62192007B126B /* ProfileImageFromURL.swift */; };
+		3F56D60F29A626AE007B126B /* DeclineButtonContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F56D60E29A626AE007B126B /* DeclineButtonContent.swift */; };
+		3F56D61129A626D4007B126B /* AcceptButtonContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F56D61029A626D4007B126B /* AcceptButtonContent.swift */; };
 		3F80B7722981468F00C39181 /* SigningInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80B7712981468F00C39181 /* SigningInView.swift */; };
 		3F80B7742981617E00C39181 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F80B7732981617E00C39181 /* User.swift */; };
 		3F80E35D2981220D002877FD /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3F80E35C2981220D002877FD /* FirebaseAuth */; };
@@ -92,6 +98,12 @@
 		3F13678C29801616005B8666 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3F2DC4BD299A3989008A511B /* FriendListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendListView.swift; sourceTree = "<group>"; };
 		3F42EA18298BCC3E00477F61 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
+		3F56D60629A60A09007B126B /* ProfileImageNavigationIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageNavigationIcon.swift; sourceTree = "<group>"; };
+		3F56D60829A6164A007B126B /* ProfileImageWithDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageWithDefault.swift; sourceTree = "<group>"; };
+		3F56D60A29A61F6C007B126B /* DefaultProfileImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultProfileImage.swift; sourceTree = "<group>"; };
+		3F56D60C29A62192007B126B /* ProfileImageFromURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageFromURL.swift; sourceTree = "<group>"; };
+		3F56D60E29A626AE007B126B /* DeclineButtonContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeclineButtonContent.swift; sourceTree = "<group>"; };
+		3F56D61029A626D4007B126B /* AcceptButtonContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcceptButtonContent.swift; sourceTree = "<group>"; };
 		3F80B7712981468F00C39181 /* SigningInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigningInView.swift; sourceTree = "<group>"; };
 		3F80B7732981617E00C39181 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		3F80E35E29812359002877FD /* CreatingAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingAccountView.swift; sourceTree = "<group>"; };
@@ -161,6 +173,7 @@
 		3F136755297FE6F3005B8666 /* MushMaze */ = {
 			isa = PBXGroup;
 			children = (
+				3F56D60529A60956007B126B /* SharedSubViews */,
 				3FB15A3A298C4A6B009B4A38 /* Models */,
 				3F8D357F2982768600DCBCBF /* Views */,
 				3F136756297FE6F3005B8666 /* MushMazeApp.swift */,
@@ -196,6 +209,20 @@
 			path = MushMazeUITests;
 			sourceTree = "<group>";
 		};
+		3F56D60529A60956007B126B /* SharedSubViews */ = {
+			isa = PBXGroup;
+			children = (
+				3F81F76229A4D57100C6DF02 /* MushroomPickerRowView.swift */,
+				3F56D60629A60A09007B126B /* ProfileImageNavigationIcon.swift */,
+				3F56D60829A6164A007B126B /* ProfileImageWithDefault.swift */,
+				3F56D60A29A61F6C007B126B /* DefaultProfileImage.swift */,
+				3F56D60C29A62192007B126B /* ProfileImageFromURL.swift */,
+				3F56D60E29A626AE007B126B /* DeclineButtonContent.swift */,
+				3F56D61029A626D4007B126B /* AcceptButtonContent.swift */,
+			);
+			path = SharedSubViews;
+			sourceTree = "<group>";
+		};
 		3F80E35B2981220D002877FD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -221,7 +248,6 @@
 				3F2DC4BD299A3989008A511B /* FriendListView.swift */,
 				3FD4CED2299FDDC300205DED /* FriendTaggingSheet.swift */,
 				3FF4126829A3E721007BF2E6 /* SplashView.swift */,
-				3F81F76229A4D57100C6DF02 /* MushroomPickerRowView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -388,8 +414,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F136789297FF0CC005B8666 /* Places.swift in Sources */,
+				3F56D60D29A62192007B126B /* ProfileImageFromURL.swift in Sources */,
 				3FBF8B852990FA3B002C744F /* ActionSheet.swift in Sources */,
 				3F80E35F29812359002877FD /* CreatingAccountView.swift in Sources */,
+				3F56D61129A626D4007B126B /* AcceptButtonContent.swift in Sources */,
 				3FD4CED1299EBA8C00205DED /* Friends.swift in Sources */,
 				3F8D35892983CA8700DCBCBF /* ImagePicker.swift in Sources */,
 				3F03055A29953C6F00D0724B /* NotificationView.swift in Sources */,
@@ -400,14 +428,18 @@
 				3F0305522994E5E400D0724B /* UsersLookupModel.swift in Sources */,
 				3F8D358B2983CB4800DCBCBF /* ImageMod.swift in Sources */,
 				3F81F76329A4D57100C6DF02 /* MushroomPickerRowView.swift in Sources */,
+				3F56D60B29A61F6C007B126B /* DefaultProfileImage.swift in Sources */,
+				3F56D60729A60A09007B126B /* ProfileImageNavigationIcon.swift in Sources */,
 				3F0DC4BB2989670A00C0BCBC /* DestinationView.swift in Sources */,
 				3FF4126929A3E721007BF2E6 /* SplashView.swift in Sources */,
 				3F42EA19298BCC3E00477F61 /* UserModel.swift in Sources */,
 				3F136759297FE6F3005B8666 /* ContentView.swift in Sources */,
+				3F56D60F29A626AE007B126B /* DeclineButtonContent.swift in Sources */,
 				3F2DC4BE299A3989008A511B /* FriendListView.swift in Sources */,
 				3FD4CED3299FDDC300205DED /* FriendTaggingSheet.swift in Sources */,
 				3F03055829951ACE00D0724B /* FriendRequest.swift in Sources */,
 				3FD4CECF299E5F7900205DED /* Notification.swift in Sources */,
+				3F56D60929A6164A007B126B /* ProfileImageWithDefault.swift in Sources */,
 				3F136757297FE6F3005B8666 /* MushMazeApp.swift in Sources */,
 				3F80B7742981617E00C39181 /* User.swift in Sources */,
 				3F030556299516AA00D0724B /* Friend.swift in Sources */,

@@ -22,7 +22,7 @@ struct FriendListView: View {
                     Button(action: {
                         showProfile.toggle()
                     }) {
-                        SmallUserImage()
+                        ProfileImageNavigationIcon()
                     }.fullScreenCover(isPresented: $showProfile, content: {
                         ProfileView()
                     })
@@ -30,21 +30,24 @@ struct FriendListView: View {
                 HStack {
                     YourFriendsTitle()
                 }
-                Spacer()
                 if friends.friends.isEmpty {
-                    Text("No friends")
+                    Spacer()
+                    Text("No friends found")
                     Spacer()
                 } else {
                     List {
                         ForEach (friends.friends) { friend in
                             HStack {
-                                SmallProfileImageView(imageURL: friend.imageURL)
+                                if friend.imageURL != "" {
+                                    ProfileImageFromURL(imageURL: friend.imageURL)
+                                } else {
+                                    DefaultProfileImage()
+                                }
                                 Spacer()
                                 Text("\(friend.firstName) \(friend.lastName)")
                                 Spacer()
                             }
                         }
-                        .listRowBackground(Color(.systemGray6))
                     }
                     .shadow(
                         color: Color.gray.opacity(0.7),
@@ -68,25 +71,24 @@ struct FriendListView: View {
     }
 }
 
-struct SmallProfileImageView : View {
-    var imageURL : String
-    
-    var body: some View {
-        
-        AsyncImage(url: URL(string: imageURL),
-                   content:  { image in
-            image
-                .resizable()
-                .scaledToFit()
-            
-        },
-                   placeholder: {ProgressView()}
-        )
-        .aspectRatio(contentMode: .fill)
-        .frame(width: 45, height: 45)
-        .clipShape(Circle())
-    }
-}
+//struct SmallProfileImageView : View {
+//    var imageURL : String
+//
+//    var body: some View {
+//        AsyncImage(url: URL(string: imageURL),
+//                   content:  { image in
+//            image
+//                .resizable()
+//                .scaledToFit()
+//
+//        },
+//                   placeholder: {ProgressView()}
+//        )
+//        .aspectRatio(contentMode: .fill)
+//        .frame(width: 45, height: 45)
+//        .clipShape(Circle())
+//    }
+//}
 
 struct YourFriendsTitle : View {
     var body: some View {
@@ -103,7 +105,7 @@ struct YourFriendsTitle : View {
 }
 
 struct AddFriendButton : View {
-    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    let forestGreen = Color(red: 86/255, green: 158/255, blue: 105/255)
     @Binding var showProfileSearchView : Bool
     
     var body : some View {
@@ -117,7 +119,7 @@ struct AddFriendButton : View {
                     .font(.system(size: 30))
             }
             .frame(width: 60, height: 60)
-            .background(Color(darkTurquoise))
+            .background(forestGreen)
             .clipShape(Circle())
             .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
         }

@@ -35,14 +35,16 @@ struct DestinationView: View {
             }
             .onChange(of: friends.allFriendsAreFetched, perform: { tag in
                 if friends.allFriendsAreFetched {
-                    places.listenFriendsSharedPlaces()
-                    friends.allFriendsAreFetched = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        places.listenFriendsSharedPlaces()
+                        friends.allFriendsAreFetched = false
+                    }
                 }
             })
             .onAppear() {
                 userModel.loadUserInformation()
                 userModel.listenNotificationsFromFirestore()
-                friends.startListenFriends()
+                //friends.startListenFriends()
                 friends.listenFriendRequestFirestore()
                 places.listenToFirestore()
                 places.listenToFavoritePlacesFirestore()
@@ -55,15 +57,20 @@ struct DestinationView: View {
                     FriendListView()
                 } else if destinations == .notification {
                     NotificationView()
-                        .onChange(of: userModel.hasNewNotifications, perform:  { tag in
-                            print("test \(tag)")
-                        })
                         .onAppear() {
                             userModel.updateReadNotification()
                         }
                 }
                 Spacer()
                 ToggleButtonsView(destinations: $destinations)
+                    .onChange(of: friends.allFriendsAreFetched, perform: { tag in
+                        if friends.allFriendsAreFetched {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                places.listenFriendsSharedPlaces()
+                                friends.allFriendsAreFetched = false
+                            }
+                        }
+                    })
             }
             .ignoresSafeArea(.keyboard)
         }
@@ -74,6 +81,7 @@ struct ToggleButtonsView : View {
     @Binding var destinations : DestinationView.Destination
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var userModel : UserModel
+    @EnvironmentObject var places : Places
     
     var body: some View {
         HStack (spacing: 0) {
@@ -98,7 +106,7 @@ struct ToggleButtonsView : View {
                 destinations = .friendList
             }) {
                 Image(systemName: destinations == .friendList ? "person.2.fill" : "person.2")
-                    .foregroundColor(colorScheme == .light ? . black : .white)
+                    .foregroundColor(colorScheme == .light ? .black : .white)
                     .font(.system(size: 30))
             }
             Spacer()
@@ -107,7 +115,7 @@ struct ToggleButtonsView : View {
             }) {
                 ZStack {
                     Image(systemName: destinations == .notification ? "bell.fill" : "bell")
-                        .foregroundColor(colorScheme == .light ? . black : .white)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                         .font(.system(size: 30))
                     
                     if userModel.notificationNewCount > 0 {
@@ -129,7 +137,6 @@ struct ToggleButtonsView : View {
             }
             userModel.hasNewNotifications = false
         })
-        
         .edgesIgnoringSafeArea(.top)
         .background(Color(.systemGray6))
     }

@@ -17,6 +17,7 @@ class Places : ObservableObject {
     @Published var newDataFetched = false
     @Published var place: Place?
     @Published var placeDeleted = false
+    var friendListeners = [ListenerRegistration]()
     let friends : Friends
     
     init(friends: Friends) {
@@ -133,6 +134,7 @@ class Places : ObservableObject {
     
     func listenFriendsSharedPlaces() {
         for friend in friends.friends {
+            print("friend: \(friend.firstName) \(friend.lastName) körs")
             if let friendID = friend.id {
                 db.collection("users").document(friendID).collection("places").whereField("sharedPlace", isEqualTo: true).addSnapshotListener { snapshot, error in
                     guard let snapshot = snapshot else { return }
@@ -149,6 +151,7 @@ class Places : ObservableObject {
                             switch result {
                             case.success(let friendPlace) :
                                     friendPlaces.append(friendPlace)
+                                print("place append körs: \(friendPlace.name)")
                                 
                             case .failure(let error) :
                                 print("failed decoding friend place : \(error)")

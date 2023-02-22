@@ -9,7 +9,9 @@ import SwiftUI
 import FirebaseAuth
 
 struct ProfileSearchView: View {
+    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var friends : Friends
+    @EnvironmentObject var places : Places
     @StateObject var usersLookup = UsersLookupModel()
     @State var keyword : String = ""
     
@@ -24,26 +26,40 @@ struct ProfileSearchView: View {
                 usersLookup.fetchUsers(from: keyword)
             }
         )
-        VStack {
-            SearchBarView(keyword: keywordBinding)
-            Spacer()
+        ZStack {
+            if colorScheme == .dark {
+                Color.black
+                    .ignoresSafeArea()
+            }
+            VStack {
+                SearchBarView(keyword: keywordBinding)
+                    .onChange(of: friends.newFriendCreated, perform: { tag in
+                        if friends.newFriendCreated {
+                            print("funktionen körs i ProfileSearchView")
+                            
+                            places.listenFriendsSharedPlaces()
+                            friends.newFriendCreated = false
+                        }
+                    })
+                Spacer()
                 if keyword != "" && usersLookup.queriedUsers.isEmpty {
                     Text("There were no results for \"\(keyword)\". Try a new search")
                     Spacer()
                 } else {
                     ScrollView {
-                    ForEach(usersLookup.queriedUsers, id: \.id) { user in
-                        ProfileBarView(user: user)
+                        ForEach(usersLookup.queriedUsers, id: \.id) { user in
+                            ProfileBarView(user: user)
+                        }
                     }
-                }
                     .padding(.top, 30)
+                }
+                
             }
-
+            .padding()
+            .navigationBarHidden(true)
+            .navigationBarTitleDisplayMode(.inline)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding()
-        .navigationBarHidden(true)
-        .navigationBarTitleDisplayMode(.inline)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -77,7 +93,12 @@ struct ProfileBarView : View {
         if let currentUser = userModel.user {
             if currentUser.userId != user.userId {
                 HStack {
-                    ProfileImageView(imageURL: user.imageURL)
+                    if user.imageURL != "" {
+                        ProfileImageFromURL(imageURL: user.imageURL)
+                    } else {
+                        DefaultProfileImage()
+                    }
+                    
                     Text("\(user.firstName) \(user.lastName)")
                     Spacer()
 
@@ -127,36 +148,14 @@ struct DefaultButtonContent : View {
     }
 }
 
-struct DeclineButtonContent : View {
-    var body: some View {
-        Text("Decline")
-            .frame(width: 90, height: 30)
-            .foregroundColor(.black)
-            .background(Color(.systemGray6))
-            .cornerRadius(15)
-    }
-}
-
 struct RequestButtonContent : View {
-    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    let fernGreen =  Color(red: 113/255, green: 188/255, blue: 120/255)
     var body: some View {
         Text("Request")
             .frame(width: 100, height: 30)
             .foregroundColor(.black)
-            .background(Color.init(uiColor: darkTurquoise))
+            .background(Color.green)
             .cornerRadius(15)
-    }
-}
-
-struct AcceptButtonContent : View {
-    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
-    var body: some View {
-        Text("Accept")
-            .frame(width: 90, height: 30)
-            .foregroundColor(.black)
-            .background(Color.init(uiColor: darkTurquoise))
-            .cornerRadius(15)
-            .font(.headline)
     }
 }
 
@@ -166,29 +165,6 @@ struct FriendTextContent : View {
             .frame(width: 100, height: 30)
             .background(Color(.systemGray6))
             .cornerRadius(15)
-    }
-}
-
-struct ProfileImageView : View {
-    var imageURL : String
-    
-    var body: some View {
-        if imageURL != "" {
-            AsyncImage(url: URL(string: imageURL),
-                       content:  { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                
-            },
-                       placeholder: {ProgressView()}
-            )
-            .aspectRatio(contentMode: .fill)
-            .frame(width: 40, height: 40)
-            .clipShape(Circle())
-        } else {
-            SmallUserImage()
-        }
     }
 }
 

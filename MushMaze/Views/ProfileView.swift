@@ -169,15 +169,15 @@ struct ProfileView: View {
 
 struct SaveButtonContent : View {
     var isButtonDisabled : Bool
-    let darkTurquoise = Color(UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1))
+    let fernGreen = Color(red: 113/255, green: 188/255, blue: 120/255)
     let disabledGray = Color.gray.opacity(0.5)
     var body: some View {
         Text("Save")
             .font(.title3)
-            .foregroundColor(.black)
+            .foregroundColor(.white)
             .padding()
             .frame(width: 220, height: 60)
-            .background(isButtonDisabled ? disabledGray : darkTurquoise)
+            .background(isButtonDisabled ? disabledGray : fernGreen)
             .cornerRadius(15.0)
     }
 }

@@ -17,6 +17,7 @@ class Friends : ObservableObject {
     @Published var taggedFriends = [Friend]()
     @Published var allFriendsAreFetched = false
     @Published var successSendTagging = false
+    @Published var newFriendCreated = false
     var friendRequestAddedToFriendCollection = true
     var listenerFriends: ListenerRegistration?
     var listenerFriendRequests: ListenerRegistration?
@@ -141,6 +142,7 @@ class Friends : ObservableObject {
                         do {
                             let newFriendRef = friendRef.document(friendId)
                             try newFriendRef.setData(from: newFriend)
+                            self.newFriendCreated = true
                         } catch {
                             print("Error setting data: \(error)")
                         }
@@ -204,6 +206,7 @@ class Friends : ObservableObject {
                     }
                 }
                 self.listenMyFriendsFriendRequest()
+                self.startListenFriends()
             }
         }
     }
@@ -283,9 +286,6 @@ class Friends : ObservableObject {
         listenerFriends = nil
         listenerFriendRequests = nil
         listenerMyFriendRequests = nil
-//
-//        friendRequests.removeAll()
-//        friends.removeAll()
     }
     
     func clearAllFriendList () {

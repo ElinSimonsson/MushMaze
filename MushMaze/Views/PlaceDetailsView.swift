@@ -37,7 +37,7 @@ struct PlaceDetailsView: View {
                     PlaceImage(imageURL: place.imageURL)
                     if let user = userModel.user {
                         if user.userId == place.createrUID {
-                            EllipsisButton(showChoicePopUp: $showChoicePopUp)
+                            EllipsisButton(showChoicePopUp: $showChoicePopUp, place: place)
                                 .sheet(isPresented: $showChoicePopUp) {
                                     ActionSheet(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
                                         .presentationDetents([.fraction(0.35), .fraction(0.36)])
@@ -214,7 +214,7 @@ struct EditingMushroomRowView : View {
     var body : some View {
         HStack {
             Spacer().frame(maxWidth: 15)
-            Text("* \(mushroom)")
+            Text("✦ \(mushroom)")
             Spacer()
             Button(action: {
                 closure()
@@ -234,7 +234,7 @@ struct MushroomSpeciesRowView : View {
     var body: some View {
         HStack {
             Spacer().frame(maxWidth: 15)
-            Text("* \(mushroom)")
+            Text("✦ \(mushroom)")
                 .padding(.bottom, 5)
             Spacer()
         }
@@ -289,9 +289,12 @@ struct DescriptionContent : View {
 
 struct EllipsisButton : View {
     @Binding var showChoicePopUp: Bool
+    let place : Place
     
     var body: some View {
         HStack {
+            Spacer().frame(maxWidth: 15)
+            Image(systemName: place.sharedPlace ? "person.2" : "person.2.slash")
             Spacer()
             Button(action: {
                 showChoicePopUp = true
@@ -323,9 +326,7 @@ struct PlaceImage : View {
             .frame(width: UIScreen.main.bounds.size.width - 40, height: .none) // 250
             .cornerRadius(10)
         }
-
     }
-
 }
 
 struct PlaceName : View {
@@ -365,19 +366,22 @@ struct SmallCreaterImage : View {
     @Binding var imageURL : String
     
     var body: some View {
-        
-        AsyncImage(url: URL(string: imageURL),
-                   content:  { image in
-            image
-                .resizable()
-                .scaledToFit()
-            
-        },
-                   placeholder: {ProgressView()}
-        )
-        .aspectRatio(contentMode: .fill)
-        .frame(width: 50, height: 50)
-        .clipShape(Circle())
+        if imageURL != "" {
+            AsyncImage(url: URL(string: imageURL),
+                       content:  { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                
+            },
+                       placeholder: {ProgressView()}
+            )
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 50, height: 50)
+            .clipShape(Circle())
+        } else {
+            DefaultProfileImage()
+        }
     }
 }
 

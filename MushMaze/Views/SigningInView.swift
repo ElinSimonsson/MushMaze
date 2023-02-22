@@ -201,14 +201,15 @@ struct UserImage : View {
 }
 
 struct LogInButtonContent : View {
-  let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    let fernGreen = Color(red: 113/255, green: 188/255, blue: 120/255)
+    
     var body: some View {
         Text("Log in")
             .font(.title3)
-            .foregroundColor(.black)
+            .foregroundColor(.white)
             .padding()
             .frame(width: 220, height: 60)
-            .background(Color(darkTurquoise))
+            .background(fernGreen)
             .cornerRadius(15.0)
     }
 }

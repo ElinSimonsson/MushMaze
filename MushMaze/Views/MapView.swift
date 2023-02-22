@@ -98,7 +98,7 @@ struct MapView: View {
                         Button(action: {
                             showProfile = true
                         }) {
-                            SmallUserImage()
+                            ProfileImageNavigationIcon()
                         }.fullScreenCover(isPresented: $showProfile, content: {
                             ProfileView()
                         })
@@ -210,22 +210,8 @@ struct MapPinMarker : View {
     }
 }
 
-struct SmallUserImage : View {
-    let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
-    var body: some View {
-        Image(systemName: "person")
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .background(lightGreyColor)
-            .frame(width: 40, height: 40)
-            .clipped()
-            .cornerRadius(150)
-            .padding(.trailing, 5)
-    }
-}
-
 struct MapUserTrackingModeButton : View {
-    let darkTurquoise = Color(UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1))
+    let forestGreen = Color(red: 86/255, green: 158/255, blue: 105/255)
     @Binding var userTrackingModeValue: MapUserTrackingMode
 
     var body: some View {
@@ -239,8 +225,7 @@ struct MapUserTrackingModeButton : View {
                 }
             }) {
                 Image(systemName: userTrackingModeValue == . none ? "paperplane" : "paperplane.fill")
-                    .foregroundColor(darkTurquoise
-                )
+                    .foregroundColor(forestGreen)
                     .font(.system(size: 20))
             }
             .frame(width: 50, height: 50)
@@ -253,7 +238,7 @@ struct MapUserTrackingModeButton : View {
 }
 
 struct AddPlaceButton : View {
-    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    let forestGreen = Color(red: 86/255, green: 158/255, blue: 105/255)
     @Binding var showAddPlaceView : Bool
     @Binding var coordinate : CLLocationCoordinate2D
     var closure : () -> Void
@@ -273,7 +258,7 @@ struct AddPlaceButton : View {
                 AddPlaceView(coordinate: coordinate)
             })
             .frame(width: 60, height: 60)
-            .background(Color(darkTurquoise))
+            .background(forestGreen)
             .clipShape(Circle())
             .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
         }

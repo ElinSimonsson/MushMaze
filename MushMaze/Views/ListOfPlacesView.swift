@@ -58,7 +58,6 @@ struct ListOfPlacesView: View {
                                     RowView(place: place)
                                 }
                             }
-                            .listRowBackground(Color(.systemGray6))
                         } else if selectedPlaceFilter == .myPlaces {
                             ForEach(places.allSavedPlaces) { place in
                                 if let user = userModel.user {
@@ -69,7 +68,6 @@ struct ListOfPlacesView: View {
                                     }
                                 }
                             }
-                            .listRowBackground(Color(.systemGray6))
                         } else if selectedPlaceFilter == .friendsPlace {
                             ForEach(places.allSavedPlaces) { place in
                                 if let user = userModel.user {
@@ -81,14 +79,12 @@ struct ListOfPlacesView: View {
                                     }
                                 }
                             }
-                            .listRowBackground(Color(.systemGray6))
                         } else if selectedPlaceFilter == .all {
                             ForEach(places.allSavedPlaces) { place in
                                 NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                     RowView(place: place)
                                 }
                             }
-                            .listRowBackground(Color(.systemGray6))
                         }
                     } else {
                         if selectedPlaceFilter == .myPlaces {
@@ -112,14 +108,12 @@ struct ListOfPlacesView: View {
                                     }
                                 }
                             }
-                            .listRowBackground(Color(.systemGray6))
                         } else {
                             ForEach(filteredPlaces) { place in
                                 NavigationLink(destination: PlaceDetailsView(place: place, isHeaderVisible: $isHeaderVisible)) {
                                     FilteredRowView(text: $searchText, place: place)
                                 }
                             }
-                            .listRowBackground(Color(.systemGray6))
                         }
                     }
                 }
@@ -154,6 +148,8 @@ struct ListOfPlacesView: View {
 
 struct FilteredRowView : View {
     @EnvironmentObject var places : Places
+    @EnvironmentObject var friends : Friends
+    @EnvironmentObject var userModel : UserModel
     @Environment(\.colorScheme) var colorScheme
     @Binding var text : String
     var place : Place
@@ -161,7 +157,7 @@ struct FilteredRowView : View {
     var body: some View {
         Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
             HStack {
-                SmallProfileImage(place: place)
+                ProfileImageWithDefault(userID: place.createrUID)
                 VStack {
                     HStack {
                         Text(place.name)
@@ -181,8 +177,12 @@ struct FilteredRowView : View {
                 }) {
                     if places.favoritePlaces.contains(where: {$0.id == place.id}) {
                         Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                            .font(.title2)
                     } else {
                         Image(systemName: "star")
+                            .foregroundColor(.yellow)
+                            .font(.title2)
                     }
                 }
             }
@@ -192,6 +192,8 @@ struct FilteredRowView : View {
 
 struct RowView : View {
     @EnvironmentObject var places : Places
+    @EnvironmentObject var friends : Friends
+    @EnvironmentObject var userModel : UserModel
     @Environment(\.colorScheme) var colorScheme
     var place: Place
     
@@ -199,7 +201,7 @@ struct RowView : View {
     var body: some View {
         Button(action : {}) { // to avoid navigationLink to be triggered when star is pressed
             HStack {
-                SmallProfileImage(place: place)
+                ProfileImageWithDefault(userID: place.createrUID)
                 Text(place.name)
                     .foregroundColor(colorScheme == .light ? .black : .white)
                     .font(.headline)
@@ -210,8 +212,12 @@ struct RowView : View {
                 }) {
                     if places.favoritePlaces.contains(where: {$0.id == place.id}) {
                         Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                            .font(.title2)
                     } else {
                         Image(systemName: "star")
+                            .foregroundColor(.yellow)
+                            .font(.title2)
                     }
                 }
             }
@@ -253,42 +259,25 @@ struct MushroomTitle : View {
     }
 }
 
-struct SmallProfileImage : View {
-    @EnvironmentObject var userModel : UserModel
-    let place : Place
-    @State private var imageURL = ""
-    
-    var body: some View {
-        
-        AsyncImage(url: URL(string: imageURL),
-                   content:  { image in
-            image
-                .resizable()
-                .scaledToFit()
-            
-        },
-                   placeholder: {ProgressView()}
-        )
-        .aspectRatio(contentMode: .fill)
-        .frame(width: 50, height: 50)
-        .clipShape(Circle())
-        .onAppear() {
-            fetchCreaterProfileImage(place: place)
-        }
-    }
-    
-    func fetchCreaterProfileImage (place: Place) {
-        let id = place.createrUID
-        userModel.fetchUserInfo(userID: id) { (url, firstName, lastName, error ) in
-            if let error = error {
-                print("error fetching imageURL \(error)")
-            }
-            if let url = url {
-                imageURL = url
-            }
-        }
-    }
-}
+//struct SmallProfileImage : View {
+//    let imageURL : String
+//
+//    var body: some View {
+//
+//        AsyncImage(url: URL(string: imageURL),
+//                   content:  { image in
+//            image
+//                .resizable()
+//                .scaledToFit()
+//
+//        },
+//                   placeholder: {ProgressView()}
+//        )
+//        .aspectRatio(contentMode: .fill)
+//        .frame(width: 50, height: 50)
+//        .clipShape(Circle())
+//    }
+//}
 
 struct HeaderView: View {
     @Binding var searchText: String
@@ -305,7 +294,7 @@ struct HeaderView: View {
                         Button(action: {
                             showProfile = true
                         }) {
-                            SmallUserImage()
+                            ProfileImageNavigationIcon()
                         }.fullScreenCover(isPresented: $showProfile, content: {
                             ProfileView()
                         })

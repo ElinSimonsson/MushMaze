@@ -13,6 +13,10 @@ struct FriendTaggingSheet: View {
     @Binding var showIsSentPopUp : Bool
     var place : Place
     
+    var isButtonDisabled: Bool {
+        friends.taggedFriends.isEmpty
+    }
+    
     var body: some View {
         HStack {
             Text("Notify your friends")
@@ -28,7 +32,12 @@ struct FriendTaggingSheet: View {
             ForEach (friends.friends) { friend in
                 HStack {
                     Spacer().frame(maxWidth: 10)
-                    SmallProfileImageView(imageURL: friend.imageURL)
+                    if friend.imageURL != "" {
+                        ProfileImageFromURL(imageURL: friend.imageURL)
+                    } else {
+                        DefaultProfileImage()
+                    }
+                    
                     Spacer().frame(maxWidth: 20)
                     Text("\(friend.firstName) \(friend.lastName)")
                         .bold()
@@ -62,8 +71,9 @@ struct FriendTaggingSheet: View {
                 guard let placeId = place.id else {return}
                 friends.sendTagNotification(placeId: placeId)
             }) {
-                SendButtonContent()
+                SendButtonContent(isButtonDisabled: isButtonDisabled)
             }
+            .disabled(isButtonDisabled)
             .onChange(of: friends.successSendTagging) { newVule in
                 if friends.successSendTagging == true {
                     showIsSentPopUp = true
@@ -77,14 +87,16 @@ struct FriendTaggingSheet: View {
 }
 
 struct SendButtonContent : View {
-    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    let fernGreen = Color(red: 113/255, green: 188/255, blue: 120/255)
+    let disabledGray = Color.gray.opacity(0.5)
+    let isButtonDisabled : Bool
     var body: some View {
         Text("Send")
             .font(.title3)
             .foregroundColor(.black)
             .padding()
             .frame(width: 220, height: 60)
-            .background(Color(darkTurquoise))
+            .background(isButtonDisabled ? disabledGray : fernGreen)
             .cornerRadius(15.0)
     }
 }

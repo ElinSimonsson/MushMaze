@@ -26,7 +26,7 @@ struct NotificationView: View {
                 Button(action: {
                     showProfileView.toggle()
                 }) {
-                    SmallUserImage()
+                   ProfileImageNavigationIcon()
                 }.fullScreenCover(isPresented: $showProfileView, content: {
                     ProfileView()
                 })
@@ -77,13 +77,16 @@ struct TagNotificationRowView : View {
     @EnvironmentObject var places : Places
     @EnvironmentObject var userModel : UserModel
     @State var friendFullName = ""
-    @State var imageURL = ""
-    
-    
+    @State var imageURL = " "
+        
     var body: some View {
         VStack {
             HStack {
-                SenderProfileView(imageURL: $imageURL)
+                if imageURL != "" {
+                    ProfileImageFromURL(imageURL: imageURL)
+                } else {
+                    DefaultProfileImage()
+                }
                 Text("**\(friendFullName)** notified you")
             }
             HStack {
@@ -123,25 +126,36 @@ struct NotificationTitle : View {
 struct FriendRequestRowView : View {
     @EnvironmentObject var friends : Friends
     @EnvironmentObject var userModel: UserModel
+    @EnvironmentObject var places : Places
+    @Environment(\.colorScheme) var colorScheme
     let notification : Notification
     let friendRequest : FriendRequest
     @State var fullName = ""
     @State var friendUserID = ""
-    @State var imageURL = ""
+    @State var imageURL = " "
     
     var body: some View {
         if let currentUser = Auth.auth().currentUser {
             HStack {
-                SenderProfileView(imageURL: $imageURL)
-                
-                if friendRequest.status == .accepted {
-                    Text("You and **\(fullName)** are now connected as friends!")
-                        .foregroundColor(.black)
-                    
-                } else if currentUser.uid != notification.senderNotificationUserId {
-                    
-                    Text("**\(fullName)** has requested to be friends with you")
-                        .foregroundColor(.black)
+                if imageURL != "" {
+                    ProfileImageFromURL(imageURL: imageURL)
+                } else {
+                    DefaultProfileImage()
+                }
+
+                Spacer().frame(maxWidth: 10)
+                HStack {
+                    if friendRequest.status == .accepted {
+                        Text("You and **\(fullName)** are now connected as friends!")
+                            .foregroundColor(.black)
+                        
+                    } else if currentUser.uid != notification.senderNotificationUserId {
+                        
+                        Text("**\(fullName)** has requested to be friends with you")
+                            .foregroundColor(colorScheme == .light ? .black : .white)
+                    }
+                }
+                    Spacer()
                     
                     if friendRequest.status == .pending {
                         VStack {
@@ -150,15 +164,18 @@ struct FriendRequestRowView : View {
                             }) {
                                 AcceptButtonContent()
                             }
+                            .padding(.trailing, 1)
                             
                             Button(action: {
                                 friends.declineFriendRequest(friendRequest: friendRequest)
                             }) {
                                 DeclineButtonContent()
                             }
+                            .padding(.trailing, 1)
                         }
+                        Spacer().frame(maxWidth: 1)
                     }
-                }
+                
             }
             .onAppear() {
                 if currentUser.uid != notification.senderNotificationUserId {
@@ -178,44 +195,6 @@ struct FriendRequestRowView : View {
             }
         }
     }
-}
-
-
-struct SenderProfileView : View {
-    @EnvironmentObject var userModel : UserModel
-    //var userId: String
-    @Binding var imageURL: String
-    
-    
-    var body: some View {
-        AsyncImage(url: URL(string: imageURL),
-                   content:  { image in
-            image
-                .resizable()
-                .scaledToFit()
-            
-        },
-                   placeholder: {ProgressView()}
-        )
-        .aspectRatio(contentMode: .fill)
-        .frame(width: 40, height: 40)
-        .clipShape(Circle())
-        .onAppear() {
-           // fetchCreaterProfileImage(userId: userId)
-        }
-    }
-    
-//    func fetchCreaterProfileImage (userId: String) {
-//
-//        userModel.fetchUserInfo(userID: userId) { (url, name, error) in
-//            if let error = error {
-//                print("error fetching imageURL \(error)")
-//            }
-//            if let url = url {
-//                imageURL = url
-//            }
-//        }
-//    }
 }
 
 //struct NotificationView_Previews: PreviewProvider {

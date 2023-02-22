@@ -10,7 +10,6 @@ import Firebase
 import FirebaseAuth
 
 struct CreatingAccountView: View {
-    let lightGreyColor = Color(red: 239.0/255.0, green: 243.0/255.0, blue: 244.0/255.0, opacity: 1.0)
     let db = Firestore.firestore()
     
     @Environment(\.presentationMode) var presentationMode
@@ -165,14 +164,14 @@ struct SignUpText : View {
 }
 
 struct CreateAccountButtonContent : View {
-    let darkTurquoise = UIColor(red: 64/255, green: 224/255, blue: 208/255, alpha: 1)
+    let fernGreen = Color(red: 113/255, green: 188/255, blue: 120/255)
     var body: some View {
         Text("Create Account")
             .font(.title3)
-            .foregroundColor(.black)
+            .foregroundColor(.white)
             .padding()
             .frame(width: 220, height: 60)
-            .background(Color(darkTurquoise))
+            .background(fernGreen)
             .cornerRadius(15.0)
     }
 }
