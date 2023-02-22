@@ -37,16 +37,7 @@ struct FriendListView: View {
                 } else {
                     List {
                         ForEach (friends.friends) { friend in
-                            HStack {
-                                if friend.imageURL != "" {
-                                    ProfileImageFromURL(imageURL: friend.imageURL)
-                                } else {
-                                    DefaultProfileImage()
-                                }
-                                Spacer()
-                                Text("\(friend.firstName) \(friend.lastName)")
-                                Spacer()
-                            }
+                            FriendRowView(friend: friend)
                         }
                     }
                     .shadow(
@@ -71,24 +62,22 @@ struct FriendListView: View {
     }
 }
 
-//struct SmallProfileImageView : View {
-//    var imageURL : String
-//
-//    var body: some View {
-//        AsyncImage(url: URL(string: imageURL),
-//                   content:  { image in
-//            image
-//                .resizable()
-//                .scaledToFit()
-//
-//        },
-//                   placeholder: {ProgressView()}
-//        )
-//        .aspectRatio(contentMode: .fill)
-//        .frame(width: 45, height: 45)
-//        .clipShape(Circle())
-//    }
-//}
+struct FriendRowView : View {
+    let friend : Friend
+    
+    var body: some View {
+        HStack {
+            if friend.imageURL != "" {
+                ProfileImageFromURL(imageURL: friend.imageURL)
+            } else {
+                DefaultProfileImage()
+            }
+            Spacer().frame(maxWidth: 15)
+            Text("\(friend.firstName) \(friend.lastName)")
+            Spacer()
+        }
+    }
+}
 
 struct YourFriendsTitle : View {
     var body: some View {

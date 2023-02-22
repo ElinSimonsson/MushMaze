@@ -45,7 +45,9 @@ struct ListOfPlacesView: View {
                     HeaderView(searchText: $searchText, showProfile: $showProfile, selectedPlaceFilter: $selectedPlaceFilter)
                 }
         NavigationView  {
-            if searchText != "" && filteredPlaces.isEmpty {
+            if places.allSavedPlaces.isEmpty {
+                Text("No mushroom place found")
+            } else if searchText != "" && filteredPlaces.isEmpty {
                 Text("There were no results for \"\(searchText)\". Try a new search")
             } else {
                 List () {
@@ -121,16 +123,23 @@ struct ListOfPlacesView: View {
                     x: 0,
                     y: 0
                 )
-                .simultaneousGesture(
-                    DragGesture().onChanged({ gesture in
-                        if (gesture.location.y < gesture.predictedEndLocation.y){
-                            dismissKeyBoard()
-                        }
-                    }))
+//                .simultaneousGesture(
+//                    DragGesture().onChanged({ gesture in
+//                        if (gesture.location.y < gesture.predictedEndLocation.y){
+//                            dismissKeyBoard()
+//                        }
+//                    }))
                 
                 .scrollContentBackground(.hidden)
             }
+              
         }
+        .simultaneousGesture(
+            DragGesture().onChanged({ gesture in
+                if (gesture.location.y < gesture.predictedEndLocation.y){
+                    dismissKeyBoard()
+                }
+            }))
     }
     
     func dismissKeyBoard () {
