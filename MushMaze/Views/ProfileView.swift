@@ -60,6 +60,8 @@ struct ProfileView: View {
                     places.clearAllPlaces()
                     friends.clearAllFriendList()
                     friends.stopListening()
+                    places.stopListening()
+                    userModel.stopListening()
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("Sign out")

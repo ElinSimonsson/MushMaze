@@ -27,7 +27,6 @@ struct AddPlaceView: View {
     @State var openCameraRoll = false
     @State var selectedImage : UIImage? = nil
     @State var showingAlert = false
-    @State var textIsCleared = false
     @State var isSaving = false
     @State var placeNameIsMissing = false
     @State var mushroomsAreMissing = false
@@ -94,6 +93,12 @@ struct AddPlaceView: View {
                 .padding(.bottom, 100)
                 
             }
+            .onChange(of: places.placeSuccessfullySaved, perform: { tag in
+                if places.placeSuccessfullySaved {
+                    presentationMode.wrappedValue.dismiss()
+                    places.placeSuccessfullySaved = false
+                }
+            })
             
             .simultaneousGesture(
                 DragGesture().onChanged({ gesture in
@@ -107,7 +112,7 @@ struct AddPlaceView: View {
                 ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
             }
             
-            if isSaving {
+            if places.savingPlace {
                 FirestoreSavingCircularProgressIndicator()
             }
         }
@@ -127,29 +132,6 @@ struct AddPlaceView: View {
         mushrooms.removeAll(where: { $0 == mushroom })
     }
     
-    func clearText () {
-        if !textIsCleared {
-            description = ""
-            print("funktionen clearText körs")
-            textIsCleared = true
-        }
-    }
-    
-    func savePlaceToFirestore(imageURL : String) {
-        var isSharedPlace = false
-        if selectedPrivacy == .sharedSetting {
-            isSharedPlace = true
-        }
-        
-        places.addPlaceWithMushrooms(latitude: coordinate.latitude,
-                                     longitude: coordinate.longitude,
-                                     name: $placeName.wrappedValue,
-                                     description: $description.wrappedValue,
-                                     mushrooms: mushrooms,
-                                     imageURL: imageURL,
-                                     sharedPlace: isSharedPlace)
-    }
-    
     func uploadPhotoAndSaveToFirestore() {
         if selectedImage == nil {
             showErrorImage = true
@@ -159,28 +141,17 @@ struct AddPlaceView: View {
         } else if mushrooms.count == 0 {
             mushroomsAreMissing = true
         } else {
-            isSaving = true
-            let fileName = "\(UUID().uuidString).jpg"
-            let ref = Storage.storage().reference(withPath: fileName)
-            guard let imageData = selectedImage?.jpegData(compressionQuality: 0.5) else {return}
-            ref.putData(imageData ,metadata: nil) { metadata, err in
-                if let err = err {
-                    print("failed to push image to Storage\(err)")
-                    return
-                }
-                ref.downloadURL { url, err in
-                    if let err = err {
-                        print("failed to retrieve downloadURL \(err)")
-                        return
-                    } else {
-                        print("successfully stored image with url : \(url?.absoluteString ?? "")")
-                        guard let imageURL = url?.absoluteString else {return}
-                        savePlaceToFirestore(imageURL: imageURL)
-                        isSaving = false
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
+            var isSharedPlace = false
+            if selectedPrivacy == .sharedSetting {
+                isSharedPlace = true
             }
+            places.uploadImageAndSaveToFirestore(selectedImage: selectedImage,
+                                                 latitude: coordinate.latitude,
+                                                 longitude: coordinate.longitude,
+                                                 name: $placeName.wrappedValue,
+                                                 description: $description.wrappedValue,
+                                                 mushrooms: mushrooms,
+                                                 isShared: isSharedPlace)
         }
     }
 }

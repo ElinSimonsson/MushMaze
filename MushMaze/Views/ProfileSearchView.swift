@@ -35,8 +35,6 @@ struct ProfileSearchView: View {
                 SearchBarView(keyword: keywordBinding)
                     .onChange(of: friends.newFriendCreated, perform: { tag in
                         if friends.newFriendCreated {
-                            print("funktionen körs i ProfileSearchView")
-                            
                             places.listenFriendsSharedPlaces()
                             friends.newFriendCreated = false
                         }

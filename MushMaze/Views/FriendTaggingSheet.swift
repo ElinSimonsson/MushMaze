@@ -24,7 +24,6 @@ struct FriendTaggingSheet: View {
                 .bold()
         }
         .onDisappear() {
-            print("disappear körs")
             friends.taggedFriends.removeAll()
         }
         .padding(.top, 30)
@@ -67,7 +66,6 @@ struct FriendTaggingSheet: View {
         .scrollContentBackground(.hidden)
         HStack {
             Button(action: {
-                print("knapp trycktes")
                 guard let placeId = place.id else {return}
                 friends.sendTagNotification(placeId: placeId)
             }) {

@@ -1,4 +1,5 @@
 //
+//
 //  UserModel.swift
 //  MushMaze
 //
@@ -22,8 +23,12 @@ class UserModel : ObservableObject {
     @Published var notificationNewCount = 0
     @Published var hasNewNotifications = false
     @Published var successSavedData = false
+    var listenerNotifications: ListenerRegistration?
     
-    var listener : ListenerRegistration?
+    func stopListening () {
+        listenerNotifications?.remove()
+        listenerNotifications = nil
+    }
     
     func updateReadNotification () {
         guard let currentUser = Auth.auth().currentUser else {return}
@@ -43,7 +48,8 @@ class UserModel : ObservableObject {
     func listenNotificationsFromFirestore () {
         guard let currentUser = Auth.auth().currentUser else {return}
         
-        listener = db.collection("users").document(currentUser.uid).collection("notifications").addSnapshotListener { snapshot, err in
+        
+        listenerNotifications = db.collection("users").document(currentUser.uid).collection("notifications").addSnapshotListener { snapshot, err in
             guard let snapshot = snapshot else {return}
             if let err = err {
                 print("error getting notifications from firestore \(err)")
@@ -92,8 +98,6 @@ class UserModel : ObservableObject {
             signedOut = true
             signedIn = false
             user = nil
-            listener?.remove()
-            listener = nil
             notifications.removeAll()
             
         } catch let signOutError as NSError {
@@ -138,8 +142,6 @@ class UserModel : ObservableObject {
             _ = try
             document.setData(from: user)
             document.updateData(["keywordsForLookup" : user.keywordsForLookup])
-            
-            print("successed to save")
             signedIn = true
             signedOut = false
         } catch {
@@ -152,7 +154,6 @@ class UserModel : ObservableObject {
             if let error = error {
                 print("error signing up \(error.localizedDescription)")
             } else {
-                print("account created successfully")
                 self.saveUserDataToFirestore(firstName: firstName, lastName: lastName)
             }
         }

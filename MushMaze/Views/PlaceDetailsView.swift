@@ -15,6 +15,7 @@ struct PlaceDetailsView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var userModel : UserModel
     @EnvironmentObject var places : Places
+    @EnvironmentObject var friends : Friends
     @State var createrFullName = ""
     @State var createrImageURL = ""
     @State var showChoicePopUp = false
@@ -26,6 +27,7 @@ struct PlaceDetailsView: View {
     @State var showErrorMushroom = false
     @State var showFriendTaggingSheet = false
     @State var showIsSentPopUp = false
+    @State var showAlertNoFriends = false
     @Binding var isHeaderVisible : Bool
 
     var body: some View {
@@ -37,7 +39,7 @@ struct PlaceDetailsView: View {
                     PlaceImage(imageURL: place.imageURL)
                     if let user = userModel.user {
                         if user.userId == place.createrUID {
-                            EllipsisButton(showChoicePopUp: $showChoicePopUp, place: place)
+                            PlaceOptionsButton(showChoicePopUp: $showChoicePopUp, place: place)
                                 .sheet(isPresented: $showChoicePopUp) {
                                     ActionSheet(showChoicePopUp: $showChoicePopUp, isEditing: $isEditing, isHeaderVisible: $isHeaderVisible, place: place)
                                         .presentationDetents([.fraction(0.35), .fraction(0.36)])
@@ -45,11 +47,10 @@ struct PlaceDetailsView: View {
                         }
                     }
                     
-                    if let description = place.description {
-                        DescriptionContent(description: description,
+                DescriptionContent(description: place.description,
                                            isEditing: isEditing,
                                            editingDescription: $editingDescription)
-                    }
+                
                 if isEditing {
                     HStack {
                         Text("Edit mushroom types")
@@ -61,8 +62,7 @@ struct PlaceDetailsView: View {
                 }
                 
                     MushroomSubTitle(isEditing: isEditing)
-                    
-                    if let mushrooms = place.mushrooms {
+            
                         if isEditing {
                             ForEach(editingMushrooms, id: \.self) { mushroom in
                                 EditingMushroomRowView(mushroom: mushroom) {
@@ -73,11 +73,10 @@ struct PlaceDetailsView: View {
                             }
                             .padding(.bottom, 100)
                         } else {
-                            ForEach(mushrooms, id: \.self) { mushroom in
+                            ForEach(place.mushrooms, id: \.self) { mushroom in
                                 MushroomSpeciesRowView(mushroom: mushroom)
                             }
                         }
-                }
             }
             .padding()
             
@@ -96,9 +95,7 @@ struct PlaceDetailsView: View {
         .onAppear() {
             isHeaderVisible = false
             fetchCreaterInfo(place: place)
-            if let mushrooms = place.mushrooms {
-                editingMushrooms = mushrooms
-            }
+            editingMushrooms = place.mushrooms
         }
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -131,13 +128,22 @@ struct PlaceDetailsView: View {
                     if user.userId == place.createrUID {
                         ToolbarItem (placement: .navigationBarTrailing) {
                             Button(action: {
-                                showFriendTaggingSheet = true
+                                if friends.friends.isEmpty {
+                                    showAlertNoFriends = true
+                                } else {
+                                    showFriendTaggingSheet = true
+                                }
                             }) {
                                 Image(systemName: "paperplane")
                             }
                             .sheet(isPresented: $showFriendTaggingSheet) {
                                 FriendTaggingSheet(showIsSentPopUp: $showIsSentPopUp, place: place)
                                     .presentationDetents([.fraction(0.8), .large])
+                            }
+                            .alert(isPresented: $showAlertNoFriends) {
+                                Alert(title: Text("You don´t have any friends"),
+                                      message: Text("To send notifications, you need to have friends first"),
+                                      dismissButton: .default(Text("Ok")))
                             }
                         }
                     }
@@ -287,7 +293,7 @@ struct DescriptionContent : View {
     }
 }
 
-struct EllipsisButton : View {
+struct PlaceOptionsButton : View {
     @Binding var showChoicePopUp: Bool
     let place : Place
     

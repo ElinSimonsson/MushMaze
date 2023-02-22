@@ -9,15 +9,17 @@ import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 import FirebaseStorage
+import UIKit
 
 class Places : ObservableObject {
     @Published var allSavedPlaces = [Place]()
     @Published var favoritePlaces = [Place]()
-    @Published var placeIsSaved = false
+    @Published var savingPlace = false
+    @Published var placeSuccessfullySaved = false
     @Published var newDataFetched = false
     @Published var place: Place?
     @Published var placeDeleted = false
-    var friendListeners = [ListenerRegistration]()
+    var placesListeners = [ListenerRegistration]()
     let friends : Friends
     
     init(friends: Friends) {
@@ -47,14 +49,14 @@ class Places : ObservableObject {
         do {
             _ = try
             db.collection("users").document(user.uid).collection("places").addDocument(from: place)
-            print("saved successfully")
+            self.placeSuccessfullySaved = true
+            self.savingPlace = false
         } catch {
             print("error saving to firebase")
         }
     }
     
     func listenToFavoritePlacesFirestore () {
-        print("listen favorit körs")
         guard let currentUser = Auth.auth().currentUser else {return}
         
         db.collection("users").document(currentUser.uid).collection("favoritePlaces").addSnapshotListener { snapshot, err in
@@ -81,8 +83,10 @@ class Places : ObservableObject {
     func listenToFirestore () {
         
         guard let user = Auth.auth().currentUser else {return}
-
-        db.collection("users")
+        
+        var listener : ListenerRegistration?
+        
+          listener = db.collection("users")
             .document(user.uid)
             .collection("places")
             .order(by: "date")
@@ -100,11 +104,13 @@ class Places : ObservableObject {
                     switch result {
                     case .success(let place) :
                         myPlaces.append(place)
-                        print("myPlace append: \(place.name)")
                         self.newDataFetched = true
                     case .failure(let error) :
                         print("Error decoding place : \(error.localizedDescription)")
                     }
+                }
+                if let listener = listener {
+                    self.placesListeners.append(listener)
                 }
                 
                 // find existing places in the list that match the user ID
@@ -134,9 +140,11 @@ class Places : ObservableObject {
     
     func listenFriendsSharedPlaces() {
         for friend in friends.friends {
-            print("friend: \(friend.firstName) \(friend.lastName) körs")
             if let friendID = friend.id {
-                db.collection("users").document(friendID).collection("places").whereField("sharedPlace", isEqualTo: true).addSnapshotListener { snapshot, error in
+                
+                var listener : ListenerRegistration?
+                
+                listener = db.collection("users").document(friendID).collection("places").whereField("sharedPlace", isEqualTo: true).addSnapshotListener { snapshot, error in
                     guard let snapshot = snapshot else { return }
                     
                     if let error = error {
@@ -151,12 +159,16 @@ class Places : ObservableObject {
                             switch result {
                             case.success(let friendPlace) :
                                     friendPlaces.append(friendPlace)
-                                print("place append körs: \(friendPlace.name)")
                                 
                             case .failure(let error) :
                                 print("failed decoding friend place : \(error)")
                             }
                         }
+                        
+                        if let listener = listener {
+                            self.placesListeners.append(listener)
+                        }
+                        
                         // find existing places in the list that match the friend ID
                         let existingPlaces = self.allSavedPlaces.filter { $0.createrUID == friendID }
                         
@@ -290,9 +302,41 @@ class Places : ObservableObject {
             }
         }
     }
+    func uploadImageAndSaveToFirestore (selectedImage : UIImage?, latitude : Double, longitude: Double, name : String, description : String, mushrooms: [String], isShared : Bool) {
+        
+        savingPlace = true
+        let fileName = "\(UUID().uuidString).jpg"
+        let ref = Storage.storage().reference(withPath: fileName)
+        guard let imageData = selectedImage?.jpegData(compressionQuality: 0.5) else {return}
+        ref.putData(imageData ,metadata: nil) { metadata, err in
+            if let err = err {
+                print("failed to push image to Storage\(err)")
+                return
+            }
+            ref.downloadURL { url, err in
+                if let err = err {
+                    print("failed to retrieve downloadURL \(err)")
+                    return
+                } else {
+                    print("successfully stored image with url : \(url?.absoluteString ?? "")")
+                    guard let imageURL = url?.absoluteString else {return}
+                    self.addPlaceWithMushrooms(latitude: latitude, longitude: longitude, name: name, description: description, mushrooms: mushrooms, imageURL: imageURL, sharedPlace: isShared)
+                    //self.savingPlace = false
+                }
+            }
+        }
+    }
     
     func clearAllPlaces () {
         allSavedPlaces.removeAll()
         favoritePlaces.removeAll()
+    }
+    
+    func stopListening() {
+        for listener in placesListeners {
+                    listener.remove()
+                }
+        
+                placesListeners = []
     }
 }

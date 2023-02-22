@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MushroomPickerRowView: View {
-    let mushrooms = ["Chanterelle", "Funnel chanterelle" , "Champignons", "Porcini", "Penny bun", "Hedgehog Mushroom", "Bay Bolete"]
+    let mushrooms = ["Chanterelle", "Funnel chanterelle" , "Champignons", "black trumpet", "Porcini", "Hedgehog Mushroom", "Bay Bolete"]
     let forestGreen = Color(red: 86/255, green: 158/255, blue: 105/255)
     @Binding var selectedMushrooms : [String]
     @State var selection = "Mushroom"

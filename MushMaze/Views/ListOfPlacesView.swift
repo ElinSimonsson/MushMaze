@@ -31,13 +31,11 @@ struct ListOfPlacesView: View {
     var filteredPlaces: [Place] {
         if selectedPlaceFilter == .favorite {
             return places.favoritePlaces.filter { place in
-                guard let mushrooms = place.mushrooms else { return false }
-                return mushrooms.contains(where: {$0.lowercased().contains(searchText.lowercased())})
+                return place.mushrooms.contains(where: {$0.lowercased().contains(searchText.lowercased())})
             }
         } else {
             return places.allSavedPlaces.filter { place in
-                guard let mushrooms = place.mushrooms else { return false }
-                return mushrooms.contains(where: {$0.lowercased().contains(searchText.lowercased())})
+                return place.mushrooms.contains(where: {$0.lowercased().contains(searchText.lowercased())})
             }
         }
     }
@@ -165,7 +163,7 @@ struct FilteredRowView : View {
                         Spacer()
                     }
                     HStack {
-                        Text("\(place.mushrooms?.first(where: { $0.lowercased().contains(self.text.lowercased())}) ?? "") have been found here")
+                        Text("\(place.mushrooms.first(where: { $0.lowercased().contains(self.text.lowercased())}) ?? "") have been found here")
                             .font(.custom("Arial", size: 12))
                             .foregroundColor(colorScheme == .light ? .black : .white)
                         Spacer()
@@ -259,26 +257,6 @@ struct MushroomTitle : View {
     }
 }
 
-//struct SmallProfileImage : View {
-//    let imageURL : String
-//
-//    var body: some View {
-//
-//        AsyncImage(url: URL(string: imageURL),
-//                   content:  { image in
-//            image
-//                .resizable()
-//                .scaledToFit()
-//
-//        },
-//                   placeholder: {ProgressView()}
-//        )
-//        .aspectRatio(contentMode: .fill)
-//        .frame(width: 50, height: 50)
-//        .clipShape(Circle())
-//    }
-//}
-
 struct HeaderView: View {
     @Binding var searchText: String
     @Binding var showProfile: Bool
@@ -305,9 +283,6 @@ struct HeaderView: View {
                                 Text(selected.rawValue).tag(selected)
                             }
                         }
-                        .onChange(of: selectedPlaceFilter, perform:  { tag in
-                            print("test \(tag)")
-                        })
                     }
                 }
             }

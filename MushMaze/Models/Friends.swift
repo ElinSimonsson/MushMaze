@@ -101,7 +101,8 @@ class Friends : ObservableObject {
     func startListenFriends () {
         guard let currentUser = Auth.auth().currentUser else {return}
         
-        listenerFriends = db.collection("users").document(currentUser.uid).collection("friends").addSnapshotListener { snapshot, err in
+        var listener : ListenerRegistration?
+        listener = db.collection("users").document(currentUser.uid).collection("friends").addSnapshotListener { snapshot, err in
             guard let snapshot = snapshot else {return}
             if let err = err {
                 print("failed getting friends document \(err)")
@@ -118,8 +119,11 @@ class Friends : ObservableObject {
                         print("Error decoding friend \(error)")
                     }
                 }
+                if let listener = listener {
+                    self.friendListeners.append(listener)
+                }
+                self.allFriendsAreFetched = true
             }
-            self.allFriendsAreFetched = true
         }
     }
     
@@ -153,7 +157,6 @@ class Friends : ObservableObject {
     }
     
     func sendRequestToFriend (recipientId : String) {
-        friendRequestAddedToFriendCollection = false
         guard let currentUser = Auth.auth().currentUser else {return}
         
         let data : [String : Any] = [
@@ -163,16 +166,16 @@ class Friends : ObservableObject {
             "status" : "pending"]
         
         var ref: DocumentReference? = nil
-        ref = db.collection("users").document(currentUser.uid).collection("friendRequest").addDocument(data: data) { err in
+        ref = db.collection("users").document(recipientId).collection("friendRequest").addDocument(data: data) { err in
             if let err = err {
                 print("Error adding document: \(err)")
             } else {
                 // send the friendRequest to friend with the same friendRequest documentId
-                self.db.collection("users").document(recipientId).collection("friendRequest").document(ref!.documentID).setData(data) { err in
+                self.db.collection("users").document(currentUser.uid).collection("friendRequest").document(ref!.documentID).setData(data) { err in
                     if let err = err {
                         print("Error adding document :\(err)")
                     } else {
-                        self.friendRequestAddedToFriendCollection = true
+                        //self.friendRequestAddedToFriendCollection = true
                         self.sendNotificationForFriendRequest(to: recipientId, friendRequestId: ref!.documentID)
                     }
                 }
@@ -198,7 +201,6 @@ class Friends : ObservableObject {
                         self.friendRequests.append(friendRequest)
                         
                         if friendRequest.status == .accepted {
-                            //self.createFriend(friendRequest: friendRequest)
                             self.createFriend(friendRequest: friendRequest)
                         }
                     case .failure(let error) :
@@ -238,11 +240,10 @@ class Friends : ObservableObject {
                                 print("Error decoding friendRequest: \(error)")
                             }
                         }
-                        
-                        self.friendListeners.append(listener!)
-                        
-                        if !friendRequestExists && self.friendRequestAddedToFriendCollection {
-                            print("friend request i min vän lista finns inte")
+                        if let listener = listener {
+                            self.friendListeners.append(listener)
+                        }
+                        if !friendRequestExists  { // && self.friendRequestAddedToFriendCollection
                             self.db.collection("users").document(currentUser.uid)
                                 .collection("friendRequest").document(friendRequestID).delete() { error in
                                     if let error = error {
@@ -262,8 +263,6 @@ class Friends : ObservableObject {
         guard let currentUser = Auth.auth().currentUser else {return}
         
         if friendRequest.status == .accepted {
-            print("update My friend request körs, status är accepted")
-            print("accepted")
             db.collection("users")
                 .document(currentUser.uid)
                 .collection("friendRequest")

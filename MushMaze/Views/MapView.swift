@@ -51,9 +51,7 @@ struct MapView: View {
                                     if showMapAnnonation {
                                         MapAnnotationDetailView(place: place, closure: calculateDistance)
                                             .onAppear() {
-                                                print("onAppear")
                                                 calculateDistance()
-                                                
                                             }
                                     }
                                 }
@@ -115,7 +113,6 @@ struct MapView: View {
     
     func addPin () -> CLLocationCoordinate2D? {
         if let location = locationManager.location {
-            print("addPin, location inte nil")
             return CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
         }
         return nil

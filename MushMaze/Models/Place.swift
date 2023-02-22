@@ -14,8 +14,8 @@ struct Place : Identifiable, Codable, Equatable {
     var date : Date = Date()
     var createrUID : String
     var name : String
-    var description : String?
-    var mushrooms : [String]?
+    var description : String
+    var mushrooms : [String]
     var imageURL : String
     var latitude : Double
     var longitude : Double
