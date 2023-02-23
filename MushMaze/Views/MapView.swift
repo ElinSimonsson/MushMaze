@@ -244,7 +244,6 @@ struct AddPlaceButton : View {
     var body : some View {
         HStack {
             Spacer()
-            
             Button(action: {
                 self.closure()
             }) {

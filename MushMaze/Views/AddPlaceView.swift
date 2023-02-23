@@ -178,6 +178,8 @@ struct PrivacySettingPickerView : View {
 }
 
 struct FirestoreSavingCircularProgressIndicator : View {
+    @Environment (\.colorScheme) var colorScheme
+    
     var body: some View {
         VStack {
             ProgressView()
@@ -189,7 +191,7 @@ struct FirestoreSavingCircularProgressIndicator : View {
         }
         .frame(width: 150, height: 150)
         .padding()
-        .background(Color.white)
+        .background(colorScheme == . light ? Color.white : Color.black)
         .cornerRadius(10)
         .shadow(radius: 10)
     }
