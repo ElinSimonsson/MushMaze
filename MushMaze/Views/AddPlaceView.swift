@@ -32,6 +32,8 @@ struct AddPlaceView: View {
     @State var mushroomsAreMissing = false
     @State var showErrorImage = false
     @State var lastElement = false
+    @State var disabledButton = false
+
     
     enum PrivacySetting: String, CaseIterable {
         case privateSetting = "Keep it private"
@@ -43,7 +45,7 @@ struct AddPlaceView: View {
     var body: some View {
         ZStack {
             VStack {
-                ToolBarView(showErrorImage: $showErrorImage, cancelAction: {
+                ToolBarView(showErrorImage: $showErrorImage, showErrorMushrooms: $mushroomsAreMissing, disabledButton: disabledButton, cancelAction: {
                     presentationMode.wrappedValue.dismiss()
                 }, saveAction: {
                     uploadPhotoAndSaveToFirestore()
@@ -107,8 +109,6 @@ struct AddPlaceView: View {
                             dismissKeyBoard()
                         }
                     }))
-                
-                //.padding()
                 .fullScreenCover(isPresented: $openCameraRoll) {
                     ImagePicker(selectedImage: $selectedImage, sourceType: sourceType)
                 }
@@ -144,6 +144,7 @@ struct AddPlaceView: View {
         } else if mushrooms.count == 0 {
             mushroomsAreMissing = true
         } else {
+            disabledButton = true
             var isSharedPlace = false
             if selectedPrivacy == .sharedSetting {
                 isSharedPlace = true
@@ -194,6 +195,8 @@ struct FirestoreSavingCircularProgressIndicator : View {
 
 struct ToolBarView : View {
     @Binding var showErrorImage : Bool
+    @Binding var showErrorMushrooms : Bool
+    let disabledButton : Bool
     var cancelAction : () -> Void
     var saveAction : () -> Void
     
@@ -206,8 +209,14 @@ struct ToolBarView : View {
             Button(action: saveAction) {
                 Text("Save")
             }
+            .disabled(disabledButton)
             .alert(isPresented: $showErrorImage) {
                 Alert(title: Text("Image is missing"), dismissButton: .default(Text("Ok")))
+            }
+            .alert(isPresented: $showErrorMushrooms) {
+                Alert(title: Text("The list of mushrooms is empty"),
+                      message: Text("To save this place, you need to add some mushroom you found at this place"),
+                      dismissButton: .default(Text("Ok")))
             }
         }
     }

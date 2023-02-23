@@ -28,6 +28,7 @@ struct PlaceDetailsView: View {
     @State var showFriendTaggingSheet = false
     @State var showIsSentPopUp = false
     @State var showAlertNoFriends = false
+    @State var showAlertNoSharedPlace = false
     @Binding var isHeaderVisible : Bool
 
     var body: some View {
@@ -78,8 +79,7 @@ struct PlaceDetailsView: View {
                             }
                         }
             }
-            .padding()
-            
+          
             if showIsSentPopUp {
                 SuccessSentPopUp()
                     .onAppear() {
@@ -89,6 +89,7 @@ struct PlaceDetailsView: View {
                     }
             }
         }
+        .padding()
         .onTapGesture {
             dismissKeyBoard()
         }
@@ -122,6 +123,11 @@ struct PlaceDetailsView: View {
                     }) {
                         Text("Save")
                     }
+                    .alert(isPresented: $showErrorMushroom) {
+                        Alert(title: Text("The list of mushrooms is empty"),
+                              message: Text("To update information, the list of mushroom must not be empty"),
+                              dismissButton: .default(Text("Ok")))
+                    }
                 }
             } else {
                 if let user = userModel.user {
@@ -130,6 +136,8 @@ struct PlaceDetailsView: View {
                             Button(action: {
                                 if friends.friends.isEmpty {
                                     showAlertNoFriends = true
+                                } else if place.sharedPlace == false {
+                                    showAlertNoSharedPlace = true
                                 } else {
                                     showFriendTaggingSheet = true
                                 }
@@ -143,6 +151,11 @@ struct PlaceDetailsView: View {
                             .alert(isPresented: $showAlertNoFriends) {
                                 Alert(title: Text("You don´t have any friends"),
                                       message: Text("To send notifications, you need to have friends first"),
+                                      dismissButton: .default(Text("Ok")))
+                            }
+                            .alert(isPresented: $showAlertNoSharedPlace) {
+                                Alert(title: Text("Access Restricted "),
+                                      message: Text("To send notifications, you need to share the place with your friends"),
                                       dismissButton: .default(Text("Ok")))
                             }
                         }
