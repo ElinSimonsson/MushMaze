@@ -29,31 +29,7 @@ struct FriendTaggingSheet: View {
         .padding(.top, 30)
         List {
             ForEach (friends.friends) { friend in
-                HStack {
-                    Spacer().frame(maxWidth: 10)
-                    if friend.imageURL != "" {
-                        ProfileImageFromURL(imageURL: friend.imageURL)
-                    } else {
-                        DefaultProfileImage()
-                    }
-                    
-                    Spacer().frame(maxWidth: 20)
-                    Text("\(friend.firstName) \(friend.lastName)")
-                        .bold()
-                    Spacer()
-                    
-                    if friends.taggedFriends.contains(where: { $0.id == friend.id }) {
-                        Image(systemName: "checkmark.circle")
-                            .onTapGesture() {
-                                friends.updateTaggedFriendsList(friend: friend)
-                            }
-                    } else {
-                        Image(systemName: "circle")
-                            .onTapGesture() {
-                                friends.updateTaggedFriendsList(friend: friend)
-                            }
-                    }
-                }
+                FriendTaggingRowView(friend: friend)
             }
             .listRowBackground(Color(.systemGray6))
         }
@@ -81,6 +57,39 @@ struct FriendTaggingSheet: View {
             }
         }
         .padding(.bottom, 30)
+    }
+}
+
+struct FriendTaggingRowView : View {
+    @EnvironmentObject var friends : Friends
+    let friend : Friend
+    
+    var body: some View {
+        HStack {
+            Spacer().frame(maxWidth: 10)
+            if friend.imageURL != "" {
+                ProfileImageFromURL(imageURL: friend.imageURL)
+            } else {
+                DefaultProfileImage()
+            }
+            
+            Spacer().frame(maxWidth: 20)
+            Text("\(friend.firstName) \(friend.lastName)")
+                .bold()
+            Spacer()
+            
+            if friends.taggedFriends.contains(where: { $0.id == friend.id }) {
+                Image(systemName: "checkmark.circle")
+                    .onTapGesture() {
+                        friends.updateTaggedFriendsList(friend: friend)
+                    }
+            } else {
+                Image(systemName: "circle")
+                    .onTapGesture() {
+                        friends.updateTaggedFriendsList(friend: friend)
+                    }
+            }
+        }
     }
 }
 

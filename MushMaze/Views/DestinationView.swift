@@ -21,7 +21,6 @@ struct DestinationView: View {
     
     init() {
         locationManager.startLocationUpdate()
-        
     }
     
     var body: some View {
@@ -30,7 +29,7 @@ struct DestinationView: View {
                 MapView(locationManager: locationManager)
                 VStack {
                     Spacer()
-                    ToggleButtonsView(destinations: $destinations)
+                    TabButtonsView(destinations: $destinations)
                 }
             }
             .onChange(of: friends.allFriendsAreFetched, perform: { tag in
@@ -44,7 +43,6 @@ struct DestinationView: View {
             .onAppear() {
                 userModel.loadUserInformation()
                 userModel.listenNotificationsFromFirestore()
-                //friends.startListenFriends()
                 friends.listenFriendRequestFirestore()
                 places.listenToFirestore()
                 places.listenToFavoritePlacesFirestore()
@@ -62,7 +60,7 @@ struct DestinationView: View {
                         }
                 }
                 Spacer()
-                ToggleButtonsView(destinations: $destinations)
+                TabButtonsView(destinations: $destinations)
                     .onChange(of: friends.allFriendsAreFetched, perform: { tag in
                         if friends.allFriendsAreFetched {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -77,7 +75,7 @@ struct DestinationView: View {
     }
 }
 
-struct ToggleButtonsView : View {
+struct TabButtonsView : View {
     @Binding var destinations : DestinationView.Destination
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var userModel : UserModel
@@ -141,10 +139,3 @@ struct ToggleButtonsView : View {
         .background(Color(.systemGray6))
     }
 }
-
-
-//struct DestinationView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        TabbedView()
-//    }
-//}

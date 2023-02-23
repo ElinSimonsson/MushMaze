@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ActionSheet : View {
     @EnvironmentObject var places : Places
+    @Environment (\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentationMode
     @Binding var showChoicePopUp : Bool
     @Binding var isEditing : Bool
@@ -17,65 +18,111 @@ struct ActionSheet : View {
     
     var body: some View {
             List {
-                HStack {
-                    Button {
-                        isEditing = true
-                        showChoicePopUp = false
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
-                            .foregroundColor(.black)
-                    }
-                }
-                .listRowBackground(Color(.systemGray6))
+                EditButton(editAction: {
+                    isEditing = true
+                    showChoicePopUp = false
+                })
                 
-                HStack {
-                    Button {
-                        places.updateFavorites(place: place)
-                    } label: {
-                        if places.favoritePlaces.contains(where: {$0.id == place.id}) {
-                            Label("Remove from favorites", systemImage: "star.fill")
-                                .foregroundColor(.black)
-                        } else {
-                            Label("Add to favorites", systemImage: "star")
-                                .foregroundColor(.black)
-                        }
-                    }
+                EditFavoriteButton(place: place) {
+                    places.updateFavorites(place: place)
                 }
-                .listRowBackground(Color(.systemGray6))
                 
-                HStack {
-                    Button {
-                        places.updateSharedPlace(place: place)
-                    } label: {
-                        Label(place.sharedPlace ? "Make this to privacy" : "Share with friends",
-                              systemImage: place.sharedPlace ? "person.2.slash" : "person.2")
-                        .foregroundColor(.black)
-                        .padding(.bottom, 5)
+                EditSharedPlace(place: place) {
+                    places.updateSharedPlace(place: place)
+                }
+                
+                DeletePlaceButton() {
+                    places.deletePlace(place: place)
+                }
+                .onChange(of: places.placeDeleted) { newValue in
+                    if places.placeDeleted {
+                        // so header in ListOfPlacesView be displayed at the same time when the view becomes visible
                         
+                        isHeaderVisible = true
+                        places.placeDeleted = false
+                        presentationMode.wrappedValue.dismiss()
                     }
                 }
-                .listRowBackground(Color(.systemGray6))
-                HStack {
-                    Button {
-                        places.deletePlace(place: place)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                            .foregroundColor(.red)
-                    }
-                    .onChange(of: places.placeDeleted) { newValue in
-                        if places.placeDeleted {
-                            // so header in ListOfPlacesView be displayed at the same time when the view becomes visible
-                            
-                            isHeaderVisible = true // Cannot assign to value: 'isHeaderVisible' is a 'let' constant
-                            
-                            places.placeDeleted = false
-                            presentationMode.wrappedValue.dismiss()
-                        }
-                    }
-                }
-                .listRowBackground(Color(.systemGray6))
             }
             .scrollContentBackground(.hidden)
+    }
+}
+
+struct EditButton : View {
+    @Environment (\.colorScheme) var colorScheme
+    var editAction : () -> Void
+    
+    var body: some View {
+        HStack {
+            Button {
+               editAction()
+            } label: {
+                Label("Edit", systemImage: "pencil")
+                    .foregroundColor(colorScheme == .light ? .black : .white)
+            }
+        }
+        .listRowBackground(Color(.systemGray6))
+    }
+}
+
+struct EditFavoriteButton : View {
+    @EnvironmentObject var places : Places
+    @Environment (\.colorScheme) var colorScheme
+    let place : Place
+    let editFavoriteAction : () -> Void
+    
+    var body: some View {
+        HStack {
+            Button {
+               editFavoriteAction()
+            } label: {
+                if places.favoritePlaces.contains(where: {$0.id == place.id}) {
+                    Label("Remove from favorites", systemImage: "star.fill")
+                        .foregroundColor(colorScheme == .light ? .black : .white)
+                } else {
+                    Label("Add to favorites", systemImage: "star")
+                        .foregroundColor(colorScheme == .light ? .black : .white)
+                }
+            }
+        }
+        .listRowBackground(Color(.systemGray6))
+    }
+}
+
+struct EditSharedPlace : View {
+    @Environment (\.colorScheme) var colorScheme
+    let place: Place
+    let editSharedAction : () -> Void
+    
+    var body: some View {
+        HStack {
+            Button {
+               editSharedAction()
+            } label: {
+                Label(place.sharedPlace ? "Make this to privacy" : "Share with friends",
+                      systemImage: place.sharedPlace ? "person.2.slash" : "person.2")
+                .foregroundColor(colorScheme == .light ? .black : .white)
+                .padding(.bottom, 5)
+                
+            }
+        }
+        .listRowBackground(Color(.systemGray6))
+    }
+}
+
+struct DeletePlaceButton : View {
+    let deleteAction : () -> Void
+    
+    var body: some View {
+        HStack {
+            Button {
+                deleteAction()
+            } label: {
+                Label("Delete", systemImage: "trash")
+                    .foregroundColor(.red)
+            }
+        }
+        .listRowBackground(Color(.systemGray6))
     }
 }
 

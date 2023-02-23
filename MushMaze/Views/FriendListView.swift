@@ -49,15 +49,8 @@ struct FriendListView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
                     AddFriendButton(showProfileSearchView: $showProfileSearchView)
                         .sheet(isPresented: $showProfileSearchView, content: ProfileSearchView.init)
-                }
-                Spacer().frame(maxHeight: 18)
-            }
         }
     }
 }
@@ -98,23 +91,31 @@ struct AddFriendButton : View {
     @Binding var showProfileSearchView : Bool
     
     var body : some View {
-        HStack {
+        VStack {
             Spacer()
-            Button(action: {
-               showProfileSearchView = true
-            }) {
-                Image(systemName: "person.badge.plus")
-                    .foregroundColor(.white)
-                    .font(.system(size: 30))
+            HStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        showProfileSearchView = true
+                    }) {
+                        Image(systemName: "person.badge.plus")
+                            .foregroundColor(.white)
+                            .font(.system(size: 30))
+                    }
+                    .frame(width: 60, height: 60)
+                    .background(forestGreen)
+                    .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+                }
+                Spacer().frame(maxWidth: 15)
             }
-            .frame(width: 60, height: 60)
-            .background(forestGreen)
-            .clipShape(Circle())
-            .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+            Spacer().frame(maxHeight: 18)
         }
-        Spacer().frame(maxWidth: 15)
     }
 }
+
 
 //struct FriendListView_Previews: PreviewProvider {
 //    static var previews: some View {

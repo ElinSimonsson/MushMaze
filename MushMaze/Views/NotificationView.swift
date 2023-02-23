@@ -153,7 +153,7 @@ struct FriendRequestRowView : View {
                 HStack {
                     if friendRequest.status == .accepted {
                         Text("You and **\(fullName)** are now connected as friends!")
-                            .foregroundColor(.black)
+                            .foregroundColor(colorScheme == . light ? .black : .white)
                         
                     } else if currentUser.uid != notification.senderNotificationUserId {
                         

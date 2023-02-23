@@ -47,7 +47,6 @@ class Friends : ObservableObject {
             self.successSendTagging = true
             self.taggedFriends.removeAll()
         }
-        
     }
     
     func updateTaggedFriendsList (friend: Friend) {

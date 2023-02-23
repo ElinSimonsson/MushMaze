@@ -76,6 +76,7 @@ struct MapView: View {
                             })
                     .highPriorityGesture(DragGesture(minimumDistance: 10))
                     .colorScheme(colorScheme == .dark ? .dark : .light)
+                
                 VStack {
                     Spacer()
                     MapUserTrackingModeButton(userTrackingModeValue: $userTrackingModeValue)

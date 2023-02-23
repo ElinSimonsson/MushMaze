@@ -116,6 +116,7 @@ struct PlaceDetailsView: View {
                     }
                 }
             }
+            
             if isEditing {
                 ToolbarItem (placement: .navigationBarTrailing) {
                     Button(action: {

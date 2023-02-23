@@ -41,9 +41,9 @@ struct ListOfPlacesView: View {
     }
     
     var body: some View {
-                if isHeaderVisible {
-                    HeaderView(searchText: $searchText, showProfile: $showProfile, selectedPlaceFilter: $selectedPlaceFilter)
-                }
+        if isHeaderVisible {
+            HeaderView(searchText: $searchText, showProfile: $showProfile, selectedPlaceFilter: $selectedPlaceFilter)
+        }
         NavigationView  {
             if places.allSavedPlaces.isEmpty {
                 Text("No mushroom place found")
@@ -123,16 +123,9 @@ struct ListOfPlacesView: View {
                     x: 0,
                     y: 0
                 )
-//                .simultaneousGesture(
-//                    DragGesture().onChanged({ gesture in
-//                        if (gesture.location.y < gesture.predictedEndLocation.y){
-//                            dismissKeyBoard()
-//                        }
-//                    }))
-                
                 .scrollContentBackground(.hidden)
             }
-              
+            
         }
         .simultaneousGesture(
             DragGesture().onChanged({ gesture in

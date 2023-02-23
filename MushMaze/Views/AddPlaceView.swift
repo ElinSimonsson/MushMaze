@@ -50,6 +50,7 @@ struct AddPlaceView: View {
                 }, saveAction: {
                     uploadPhotoAndSaveToFirestore()
                 })
+                
                 ScrollView {
                     Button(action: {
                         showingAlert = true
@@ -72,6 +73,7 @@ struct AddPlaceView: View {
                             openCameraRoll = true
                         })
                     }
+                    
                     PlaceTextField(placeName: $placeName, placeNameMissing: $placeNameIsMissing)
                     PlaceDescriptionField(description: $description)
                     PrivacySettingPickerView(selectedPrivacy: $selectedPrivacy)
